@@ -1,0 +1,38 @@
+ol.breadcrumb
+    li
+        a(href="/packages/browse") Data
+    li.active Show "{{ data.dataPackage.title }}"
+
+.row
+    .col-md-12
+        .panel.panel-default
+            .panel-heading
+                h3.panel-title {{ data.dataPackage.title }}
+            .panel-body
+                .row
+                    .col-sm-8(btf-markdown="data.dataPackage.description")
+                    .col-sm-4
+                        p
+                            strong Contributor:
+                            br
+                            | {{ data.packageAuthor.name }}
+                hr
+                .row
+                    .col-sm-12
+                        .form-group
+                            label API URL (Use this in the #[a(href="/software") OSC Player])
+                            input.form-control(ng-model="data.dataURL", ng-click="onURLClick($event)")
+
+h3 View data
+
+.row
+    .col-md-12
+        .form-group
+            label.control-label Select channel
+            select.form-control(name="channelSelect", ng-model="data.currentChannel", ng-options="channel.id as channel.title for channel in data.dataChannels")
+        .form-group
+            label.control-label Select value group
+            select.form-control(name="groupSelect", ng-model="data.currentGroup", ng-options="group for group in data.streamGroups")
+.row(cg-busy="{promise:chartPromise,message:'Initializing...',templateUrl:'dist/html/partials/busy.html'}")
+    cjs-line.col-md-12#graph-viewer-full(ng-if="data.chartSetup.graphDataSet", dataset="data.chartSetup.graphDataSet", options="data.chartSetup.graphOptions")
+

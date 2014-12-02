@@ -1,0 +1,10 @@
+.panel.panel-primary
+    .panel-heading
+        h3.panel-title Upload motion capture data
+    .panel-body
+        form(role='form')
+            .form-group
+                p
+                    strong At the moment we only support the BVH file format.
+            .form-group
+                .well.well-lg.col-sm-12(role='button', ng-file-select='onFileSelect($files)', data-multiple='false') {{file ? file.name : 'Click to select MoCap data file'}}

@@ -1,0 +1,7 @@
+.panel.panel-primary
+    .panel-heading
+        h3.panel-title Upload OSC capture data
+    .panel-body
+        form(role='form')
+            .form-group
+                .well.well-lg.col-sm-12(role='button', ng-file-select='onFileSelect($files)', data-multiple='false') {{file ? file.name : 'Click to select JSON data file'}}

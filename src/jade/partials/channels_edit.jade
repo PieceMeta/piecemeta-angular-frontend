@@ -1,0 +1,26 @@
+ol.breadcrumb
+    li
+        a(href="/packages/browse") Data
+    li
+        a(ng-href="{{ '/packages/' + data.dataPackage.id + '/edit' }}") Edit "{{ data.dataPackage.title }}"
+    li.active {{ formTitle }}
+
+alert(ng-repeat='alert in alerts' type='{{alert.type}}' close='closeAlert($index)') {{alert.msg}}
+form(name='dataChannelForm', role='form', ng-submit='submit()')
+    .panel.panel-primary
+        .panel-heading
+            h3.panel-title {{ formTitle }}
+        .panel-body
+            .col-sm-6
+                .form-group
+                    label.control-label(for='name') Title
+                    input.input-lg.form-control(name='title', ng-model='data.dataChannel.title')
+        .panel-body
+            a.btn.btn-success.btn-sm.pull-right(ng-href="{{ '/channels/' + data.dataChannel.id + '/streams/create' }}") Add stream
+            h3 Data streams
+            ul.list-group(ng-if='data.dataStreams')
+                li.list-group-item(ng-repeat='stream in data.dataStreams')
+                    a.pull-right(ng-click="deleteStream(stream, $event)") Delete
+                    a(ng-href="{{ '/streams/' + stream.id + '/edit' }}") {{ stream.group + ' / ' + stream.title }}
+        .panel-footer.btn-group-lg.text-right
+            input.btn.btn-primary.btn-lg(type='submit', value='Save channel')

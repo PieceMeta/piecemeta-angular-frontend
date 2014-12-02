@@ -1,0 +1,70 @@
+form(name='channelImportForm', role='form', ng-submit='submit()')
+    .panel.panel-primary(ng-if='data.dataPackage')
+        .panel-heading
+            h3.panel-title Upload and parse text file
+        .panel-body
+            .row
+                .col-sm-12
+                    h2 Add a channel to Package "{{ data.dataPackage.title }}"
+                    .form-group(ng-if="!data.selectedChannel.title")
+                        label.control-label Create new Channel
+                        input.form-control(ng-model="data.channelTitle")
+                    .form-group(ng-if="data.channelTitle == ''")
+                        label.control-label Append to existing Channel
+                        select.form-control(ng-model='data.selectedChannel', ng-options='dataChannel as dataChannel.title for dataChannel in data.dataChannels')
+                            option(value="") Choose a channel...
+                    .form-group(ng-if='data.selectedChannel.title || data.channelTitle')
+                        .well.well-lg.col-sm-12(role='button', ng-file-select='onFileSelect($files)', data-multiple='false') {{file ? file.name : 'Click to select text file containing your data to add to Channel "' + (data.selectedChannel.title || data.channelTitle) + '"'}}
+
+            .row(ng-if="fileLines.length > 0")
+                .col-sm-12
+                    h3 Configure data format
+                    p
+                        | To parse the data structure you'll need to define a regular expression. You can also just use one of the presets and modify it to fit your needs.
+                        a(href='http://en.wikipedia.org/wiki/Regular_expression', target='_blank') (What?!)
+                    .form-group
+                        label.control-label Preset
+                        select.form-control(ng-model='data.regexString', ng-change='updateRegex(data.regexString)', ng-options='regexPreset.data as regexPreset.title for regexPreset in data.regexPresets')
+                            option(value="") Choose a preset...
+                    .form-group
+                        label.control-label Regular expression
+                        input.form-control(ng-model='data.regexString', ng-change='updateRegex(data.regexString)', placeholder='Enter a valid regular expression with numbered captures (without the slashes and modifiers)')
+
+            .row(ng-if="fileLines.length > 0")
+                .col-sm-8.table-responsive
+                    h3 Parsed data
+                    table.table.table-striped.table-bordered
+                        tbody
+                            tr
+                                td(ng-repeat="(i, title) in valLabel track by i")
+                                    input.form-control(ng-model="valLabel[i]", placeholder="Value title", required)
+                            tr
+                                td(ng-repeat="(i, title) in valLabel track by i")
+
+                            tr(ng-repeat="(idx, parts) in data.resultLines track by idx")
+                                td(ng-repeat="(vIdx, num) in parts track by vIdx")
+                                    pre
+                                        code {{ num }}
+                .col-sm-4
+                    h3 Raw data
+                    p
+                        strong Total frames: {{ frameCount }}
+                    p Showing a sample of 10 frames.
+                    pre
+                        code
+                            span(ng-repeat="(idx, line) in fileLines track by idx")
+                                | {{ line }}
+                                br
+                    .row
+                        h3 Channel setup
+                        .form-group(ng-if="!data.selectedChannel.title")
+                            label.control-label Channel title
+                            input.form-control(ng-model="data.channelTitle", required)
+                        .form-group(ng-if="!data.selectedChannel.title")
+                            label.control-label Frames per second
+                            input.form-control(ng-model="data.fps", required)
+                        .form-group(ng-if="valLength > 1")
+                            label.control-label Value group (for multi-value Channels, e.g. Position, Rotation, Frequencies...)
+                            input.form-control(ng-model="data.valueGroup")
+                        .form-group(ng-if="valLength > 0")
+                            input.btn.btn-primary.btn-lg(type='submit', value='Add channel')

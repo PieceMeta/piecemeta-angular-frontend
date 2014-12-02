@@ -1,0 +1,22 @@
+alert(ng-repeat='alert in alerts' type='{{alert.type}}' close='closeAlert($index)') {{alert.msg}}
+form(name='signupForm', role='form', ng-submit='submit()', ng-hide='signup_complete')
+    .panel.panel-primary
+        .panel-heading
+            h3.panel-title Create an account
+        .panel-body
+            .col-sm-6
+                .form-group
+                    label.control-label(for='name') Name
+                    input.input-lg.form-control(name='name', ng-model='user.name', required)
+                .form-group
+                    label.control-label(for='email') E-Mail
+                    input.input-lg.form-control(name='email', type='email', ng-model='user.email', required)
+            .col-sm-6
+                .form-group
+                    label.control-label(for='password') Password
+                    input.input-lg.form-control(name='password', type='password', ng-model='user.password', required)
+                .form-group
+                    label.control-label(for='password') Confirm password
+                    input.input-lg.form-control(name='password_confirm', type='password', ng-model='user.password_confirm', required)
+        .panel-footer.btn-group-lg.text-right
+            input.btn.btn-primary.btn-lg(type='submit', value='Create account')

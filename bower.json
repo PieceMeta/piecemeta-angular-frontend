@@ -1,0 +1,39 @@
+{
+  "name": "piecemeta-angular-frontend",
+  "version": "0.9.1",
+  "authors": [
+    "Anton Koch <anton.koch@gmail.com>"
+  ],
+  "description": "Angular-based web frontend for PieceMeta service",
+  "main": "piecemeta-web.full.min.js",
+  "license": "MIT",
+  "homepage": "http://www.piecemeta.com",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-route": "~1.2.22",
+    "angular-bootstrap": "~0.11.0",
+    "ng-file-upload": "~1.6.5",
+    "angular-busy": "~4.1.0",
+    "bvh": "https://github.com/hitsujiwool/bvh.git",
+    "async": "https://github.com/caolan/async.git#~0.9.0",
+    "Papa-Parse": "https://github.com/mholt/PapaParse.git#~3.1.2",
+    "modernizr": "~2.8.3",
+    "angular-markdown-directive": "~0.3.0",
+    "angular": "~1.3.0",
+    "angular-seo": "https://github.com/steeve/angular-seo.git",
+    "ng-chartjs": "https://github.com/dasantonym/angular-chartjs.git#ee5bada25379ca541b2793d7fc1f7fd32a38ef65",
+    "bootstrap": "~3.3.1",
+    "piecemeta-apiclient": "git@bitbucket.org:dasantonym/node-piecemeta-apiclient.git"
+  },
+  "resolutions": {
+    "angular": "~1.3.0",
+    "ng-chartjs": "ee5bada25379ca541b2793d7fc1f7fd32a38ef65"
+  }
+}

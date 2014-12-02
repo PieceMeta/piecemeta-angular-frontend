@@ -1,0 +1,80 @@
+doctype HTML5
+html(ng-app='piecemeta-web')
+  head
+    base(href='/')
+    meta(charset='utf8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    title= title
+    script(src="//use.typekit.net/tnk4jct.js")
+    script try{Typekit.load();}catch(e){}
+    script(src='dist/js/piecemeta-web-dep.min.js')
+    script(src='bower_components/angular-markdown-directive/markdown.js')
+    script(src='bower_components/bvh/dist/bvh.min.js')
+    script(src='bower_components/async/lib/async.js')
+    script(src='bower_components/piecemeta-apiclient/dist/piecemeta-apiclient.web.min.js')
+    script(src='dist/js/piecemeta-web.min.js')
+    script(src='configuration.js')
+    link(rel='stylesheet', href='dist/css/piecemeta-site.css')
+  body(data-status="{{ status }}")
+      .container(cg-busy="{promise:pagePromise,message:'Loading page...',templateUrl:'dist/html/partials/busy.html',minDuration:100}")
+          .navbar.navbar-inverse.navbar-fixed-top(name='mainNavigation', role='navigation', check-login)
+              .container
+                  .navbar-header
+                      button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse', ng-click='isCollapsed = !isCollapsed')
+                          span.sr-only Toggle navigation
+                          span.icon-bar
+                          span.icon-bar
+                          span.icon-bar
+                      a.navbar-brand(href='/') PieceMeta
+                  .collapse.navbar-collapse(collapse='isCollapsed')
+                      ul.nav.navbar-nav
+                          li.active
+                              a(href='/') Home
+                          li
+                              a(href='/about') About
+                          li
+                              a(href='/software') Software
+                          li.dropdown
+                              a.dropdown-toggle(data-toggle="dropdown")
+                                  | Dev
+                                  span.caret
+                              ul.dropdown-menu(role="menu")
+                                  li
+                                      a(href="http://doc.piecemeta.com", target="_blank") API Reference
+                                  li
+                                      a(href="https://github.com/PieceMeta", target="_blank") Source code
+                      ul.nav.navbar-nav.navbar-right
+                          li
+                              a(href='/packages/browse') Browse data
+                          li.dropdown(ng-if="userSession")
+                              a.dropdown-toggle(data-toggle="dropdown")
+                                | Add Data
+                                span.caret
+                              ul.dropdown-menu(role="menu")
+                                li
+                                  a(href="/packages/create") Create Package
+                          li.dropdown(ng-if="!userSession")
+                              a.dropdown-toggle(data-toggle="dropdown")
+                                | Account
+                                span.caret
+                              ul.dropdown-menu(role="menu")
+                                  li
+                                    a(href="/login") Login
+                                  li
+                                    a(href="/signup") Create account
+                          li.dropdown(ng-if="userSession")
+                              a.dropdown-toggle.clearfix.media(data-toggle="dropdown")
+                                  | {{userSession.name}}
+                                  span.caret
+                              ul.dropdown-menu(role="menu")
+                                  li
+                                      a(href="/me/account") Update account
+                                  li
+                                      a(href="/logout") Logout
+
+
+
+          .container
+              .main-content
+                  div(ng-view,cg-busy="{promise:promise,message:promiseString,templateUrl:'dist/html/partials/busy.html'}")

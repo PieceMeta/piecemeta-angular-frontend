@@ -1,0 +1,52 @@
+@import "../../bower_components/bootstrap/less/bootstrap.less";
+@import (less) "../../bower_components/angular-busy/angular-busy.css";
+@import "./variables.less";
+@import "./bootswatch.less";
+
+body {
+  padding-top: 50px;
+}
+.main-content {
+  padding: 40px 15px;
+}
+
+#spatial-viewer-full, #graph-viewer-full {
+  height: 320px;
+}
+
+#graph-viewer-full {
+  width:100%;
+  height:400px;
+
+  .cjs-legend {
+    ul {
+      list-style: none;
+      margin:0;
+      padding:0;
+    }
+    li {
+      display:block;
+      float:left;
+      margin: 10px 20px;
+      width: 140px;
+      font-size: @font-size-small;
+      line-height:22px;
+      span {
+        display:block;
+        float: left;
+        width: 20px;
+        height:20px;
+        margin: 0 5px 0 0;
+      }
+    }
+  }
+
+}
+
+.spacer-left {
+  margin-left:20px;
+}
+
+.spacer-right {
+  margin-right: 20px;
+}
