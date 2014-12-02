@@ -33,7 +33,7 @@
     "piecemeta-apiclient": "git@bitbucket.org:dasantonym/node-piecemeta-apiclient.git"
   },
   "resolutions": {
-    "angular": "~1.3.0",
+    "angular": "~1.3",
     "ng-chartjs": "ee5bada25379ca541b2793d7fc1f7fd32a38ef65"
   }
 }
