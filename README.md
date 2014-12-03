@@ -4,7 +4,7 @@ Web frontend based on [AngularJS](https://angularjs.org/) for the [PieceMeta](ht
 
 The app consists of static code only so you can just clone the repo, set the ``dist`` folder as the document root and it should work.
 
-See [PieceMeta Express](https://github.com/PieceMeta/piecemeta-express) for an example implementation.
+Since the app uses Angular in HTML5 mode, you need to make sure that every 404 not found error gets redirected to index.html. There's a bundled .htaccess so at least apache setup should be effortless.
 
 
 ## Development ##
