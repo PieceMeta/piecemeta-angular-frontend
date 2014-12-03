@@ -5,7 +5,7 @@ module.exports = function (grunt) {
         less: {
             dist: {
                 files: {
-                    'dist/css/piecemeta-site.css': [
+                    'dist/css/piecemeta-frontend.css': [
                         'src/less/site.less'
                     ]
                 },
@@ -24,86 +24,67 @@ module.exports = function (grunt) {
                 ext: '.html'
             }
         },
-        uglify: {
-            js_dependencies: {
-                options: {
-                    compress: {
-                        drop_console: false
-                    },
-                    banner: '/*! <%= pkg.name %> app dependencies - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %> */'
-                },
-                files: {
-                    'dist/js/piecemeta-web-dep.min.js': [
-                        'bower_components/ng-file-upload/angular-file-upload-html5-shim.js',
-                        'modernizr-custom.js',
-                        'bower_components/angularjs/angular.js',
-                        'bower_components/angular-sanitize/angular-sanitize.js',
-                        'bower_components/showdown/src/showdown.js',
-                        'bower_components/angular-bootstrap/ui-bootstrap.js',
-                        'bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
-                        'bower_components/angular-route/angular-route.js',
-                        'bower_components/angular-animate/angular-animate.js',
-                        'bower_components/angular-busy/angular-busy.js',
-                        'bower_components/ng-file-upload/angular-file-upload.js',
-                        'bower_components/Chart.js/Chart.js',
-                        'bower_components/ng-chartjs/src/js/main.js'
-                    ]
-                }
-            },
-            js_main_app: {
-                options: {
-                    compress: {
-                        drop_console: false
-                    },
-                    banner: '/*! <%= pkg.name %> main app - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %> */'
-                },
-                files: {
-                    'dist/js/piecemeta-web.min.js': [
-                        'src/js/**/*.js'
-                    ]
-                }
-            }
-        },
         modernizr: {
-
             dist: {
-                // [REQUIRED] Path to the build you're using for development.
                 "devFile": "bower_components/modernizr/modernizr.js",
-
-                // [REQUIRED] Path to save out the built file.
-                "outputFile": "modernizr-custom.js",
-
-                // Based on default settings on http://modernizr.com/download/
+                "outputFile": "lib-build/modernizr/modernizr-custom.min.js",
                 "extra": {
                     "shiv": false,
                     "load": false,
                     "cssclasses": false
                 },
-
-                // By default, source is uglified before saving
-                "uglify": false,
-
-                // Define any tests you want to implicitly include.
-                "tests": ['fontface','localstorage','canvas','hashchange'],
-
-                // By default, this task will crawl your project for references to Modernizr tests.
-                // Set to false to disable.
+                "uglify": true,
+                "tests": ['fontface', 'localstorage', 'canvas', 'hashchange'],
                 "parseFiles": true,
-
-                // When parseFiles = true, this task will crawl all *.js, *.css, *.scss files, except files that are in node_modules/.
-                // You can override this by defining a "files" array below.
-                // "files" : {
-                // "src": []
-                // },
-
-                // When parseFiles = true, matchCommunityTests = true will attempt to
-                // match user-contributed tests.
                 "matchCommunityTests": false,
-
-                // Have custom Modernizr tests? Add paths to their location here.
                 "customTests": []
             }
-
+        },
+        uglify: {
+            js_main_app: {
+                options: {
+                    compress: {
+                        drop_console: false
+                    },
+                    banner: '/*! <%= pkg.name %> main app - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n'
+                },
+                files: {
+                    'dist/js/piecemeta-angular-frontend.min.js': [
+                        'src/js/**/*.js'
+                    ]
+                }
+            }
+        },
+        concat: {
+            options: {
+                separator: '\n\n',
+                stripBanners: { block: true },
+                nonull: true,
+                banner: '/*! <%= pkg.name %> dependencies - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n'
+            },
+            dist: {
+                src: [
+                    'bower_components/ng-file-upload/angular-file-upload-html5-shim.min.js',
+                    'lib-build/modernizr/modernizr-custom.min.js',
+                    'bower_components/angular/angular.min.js',
+                    'bower_components/angular-sanitize/angular-sanitize.min.js',
+                    'bower_components/showdown/compressed/showdown.js',
+                    'bower_components/angular-bootstrap/ui-bootstrap.min.js',
+                    'bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js',
+                    'bower_components/angular-route/angular-route.min.js',
+                    'bower_components/angular-animate/angular-animate.min.js',
+                    'bower_components/angular-busy/angular-busy.js',
+                    'bower_components/ng-file-upload/angular-file-upload.min.js',
+                    'bower_components/Chart.js/Chart.min.js',
+                    'bower_components/ng-chartjs/src/js/main.js',
+                    'bower_components/angular-markdown-directive/markdown.js',
+                    'bower_components/async/lib/async.js',
+                    'bower_components/bvh/bvh.min.js',
+                    'bower_components/piecemeta-apiclient/dist/piecemeta-apiclient.web.min.js',
+                    'configuration.js'
+                ],
+                dest: 'dist/js/piecemeta-angular-dependencies.min.js'
+            }
         },
         watch: {
             js: {
@@ -132,9 +113,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jade');
     grunt.loadNpmTasks("grunt-modernizr");
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-concat');
 
     grunt.registerTask('dev', ['default', 'watch']);
 
-    grunt.registerTask('default', ['modernizr', 'less', 'jade', 'uglify']);
+    grunt.registerTask('default', ['modernizr', 'less', 'jade', 'uglify', 'concat']);
 
 };

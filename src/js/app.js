@@ -13,11 +13,13 @@
         'piecemeta-web.controllers.data-streams',
         'piecemeta-web.directives.helpers'
     ])
-    .config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
+    .config(['$routeProvider', '$locationProvider', '$logProvider', function ($routeProvider, $locationProvider, $logProvider) {
+
+        $logProvider.debugEnabled(true);
 
         $locationProvider.html5Mode(true).hashPrefix('!');
 
-        var partialsPath = '/js/piecemeta-web-js/dist/html/partials/';
+        var partialsPath = 'dist/html/partials/';
 
         $routeProvider.when('/', {templateUrl: partialsPath + 'welcome.html', controller: 'Site.Welcome'});
         $routeProvider.when('/about', {templateUrl: partialsPath + 'about.html', controller: 'Site.About'});
