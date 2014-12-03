@@ -33,6 +33,6 @@ h3 View data
         .form-group
             label.control-label Select value group
             select.form-control(name="groupSelect", ng-model="data.currentGroup", ng-options="group for group in data.streamGroups")
-.row(cg-busy="{promise:chartPromise,message:'Initializing...',templateUrl:'dist/html/partials/busy.html'}")
+.row(cg-busy="{promise:chartPromise,message:'Initializing...',templateUrl:'partials/busy.html'}")
     cjs-line.col-md-12#graph-viewer-full(ng-if="data.chartSetup.graphDataSet", dataset="data.chartSetup.graphDataSet", options="data.chartSetup.graphOptions")
 

@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-    angular.module('piecemeta-web', [
+    angular.module('piecemeta-frontend', [
         'ui.bootstrap',
         'ngRoute',
         'cgBusy',
@@ -19,7 +19,7 @@
 
         $locationProvider.html5Mode(true).hashPrefix('!');
 
-        var partialsPath = 'dist/html/partials/';
+        var partialsPath = 'partials/';
 
         $routeProvider.when('/', {templateUrl: partialsPath + 'welcome.html', controller: 'Site.Welcome'});
         $routeProvider.when('/about', {templateUrl: partialsPath + 'about.html', controller: 'Site.About'});
