@@ -3,4 +3,7 @@
 node_modules/
 bower_components/
 configuration.js
-lib-build/
+lib/
+build/
+cache/
+dist/nw/node_modules/

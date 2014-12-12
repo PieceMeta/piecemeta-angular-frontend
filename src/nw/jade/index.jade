@@ -1,0 +1,28 @@
+doctype HTML5
+html(ng-app='piecemeta-frontend')
+    head
+        meta(charset='utf8')
+        meta(http-equiv='X-UA-Compatible', content='IE=edge')
+        meta(name='viewport', content='width=device-width, initial-scale=1')
+        title= title
+        script(src='./js/piecemeta-angular-dependencies.min.js')
+        script(src='./js/piecemeta-angular-frontend.min.js')
+        link(rel='stylesheet', href='./css/piecemeta-frontend.css')
+    body(data-status="{{ status }}")
+        .container(cg-busy="{promise:pagePromise,message:'Loading page...',templateUrl:'./partials/busy.html',minDuration:100}")
+            .navbar.navbar-inverse.navbar-fixed-top(name='mainNavigation', role='navigation', check-login)
+                .container
+                    .navbar-header
+                        button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse', ng-click='isCollapsed = !isCollapsed')
+                            span.sr-only Toggle navigation
+                            span.icon-bar
+                            span.icon-bar
+                            span.icon-bar
+                        a.navbar-brand(href='/') PieceMeta
+                    .collapse.navbar-collapse(collapse='isCollapsed')
+                        ul.nav.navbar-nav
+                            li.active
+                                a(href='/') Home
+            .container
+                .main-content
+                    div(ng-view,cg-busy="{promise:promise,message:promiseString,templateUrl:'./partials/busy.html'}")

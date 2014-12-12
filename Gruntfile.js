@@ -3,10 +3,23 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         less: {
-            dist: {
+            web: {
                 files: {
-                    'dist/css/piecemeta-frontend.css': [
-                        'src/less/site.less'
+                    'dist/web/css/piecemeta-frontend.css': [
+                        'src/shared/less/site.less',
+                        'src/web/less/site.less'
+                    ]
+                },
+                options: {
+                    compress: true,
+                    sourceMap: false
+                }
+            },
+            nw: {
+                files: {
+                    'dist/nw/approot/css/piecemeta-frontend.css': [
+                        'src/shared/less/site.less',
+                        'src/nw/less/site.less'
                     ]
                 },
                 options: {
@@ -16,18 +29,39 @@ module.exports = function (grunt) {
             }
         },
         jade: {
-            compile: {
+            web_shared: {
                 expand: true,
-                cwd: 'src/jade/',
+                cwd: 'src/shared/jade/',
                 src: ['**/*.jade'],
-                dest: 'dist/',
+                dest: 'dist/web/',
+                ext: '.html'
+            },
+            web_main: {
+                expand: true,
+                cwd: 'src/web/jade/',
+                src: ['**/*.jade'],
+                dest: 'dist/web/',
+                ext: '.html'
+            },
+            nw_shared: {
+                expand: true,
+                cwd: 'src/shared/jade/',
+                src: ['**/*.jade'],
+                dest: 'dist/nw/approot/',
+                ext: '.html'
+            },
+            nw_main: {
+                expand: true,
+                cwd: 'src/nw/jade/',
+                src: ['**/*.jade'],
+                dest: 'dist/nw/approot/',
                 ext: '.html'
             }
         },
         modernizr: {
             dist: {
                 "devFile": "bower_components/modernizr/modernizr.js",
-                "outputFile": "lib-build/modernizr/modernizr-custom.min.js",
+                "outputFile": "lib/modernizr/modernizr-custom.min.js",
                 "extra": {
                     "shiv": false,
                     "load": false,
@@ -41,16 +75,31 @@ module.exports = function (grunt) {
             }
         },
         uglify: {
-            js_main_app: {
+            web: {
                 options: {
                     compress: {
                         drop_console: false
                     },
-                    banner: '/*! <%= pkg.name %> main app - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n'
+                    banner: '/*! <%= pkg.name %> main web app - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n'
                 },
                 files: {
-                    'dist/js/piecemeta-angular-frontend.min.js': [
-                        'src/js/**/*.js'
+                    'dist/web/js/piecemeta-angular-frontend.min.js': [
+                        'src/shared/js/**/*.js',
+                        'src/web/js/**/*.js'
+                    ]
+                }
+            },
+            nw: {
+                options: {
+                    compress: {
+                        drop_console: false
+                    },
+                    banner: '/*! <%= pkg.name %> main node-webkit app - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n'
+                },
+                files: {
+                    'dist/nw/approot/js/piecemeta-angular-frontend.min.js': [
+                        'src/shared/js/**/*.js',
+                        'src/nw/js/**/*.js'
                     ]
                 }
             }
@@ -62,10 +111,10 @@ module.exports = function (grunt) {
                 nonull: true,
                 banner: '/*! <%= pkg.name %> dependencies - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n'
             },
-            dist: {
+            web: {
                 src: [
                     'bower_components/ng-file-upload/angular-file-upload-html5-shim.min.js',
-                    'lib-build/modernizr/modernizr-custom.min.js',
+                    'lib/modernizr/modernizr-custom.min.js',
                     'bower_components/angular/angular.min.js',
                     'bower_components/angular-sanitize/angular-sanitize.min.js',
                     'bower_components/showdown/compressed/showdown.js',
@@ -80,30 +129,66 @@ module.exports = function (grunt) {
                     'bower_components/angular-markdown-directive/markdown.js',
                     'bower_components/async/lib/async.js',
                     'bower_components/bvh/bvh.min.js',
-                    'bower_components/piecemeta-apiclient/dist/piecemeta-apiclient.web.min.js',
+                    'bower_components/piecemeta-apiclient/dist-web/piecemeta-apiclient.web.min.js',
                     'configuration.js'
                 ],
-                dest: 'dist/js/piecemeta-angular-dependencies.min.js'
+                dest: 'dist/web/js/piecemeta-angular-dependencies.min.js'
+            },
+            nw: {
+                src: [
+                    'bower_components/angular/angular.min.js',
+                    'bower_components/angular-sanitize/angular-sanitize.min.js',
+                    'bower_components/showdown/compressed/showdown.js',
+                    'bower_components/angular-bootstrap/ui-bootstrap.min.js',
+                    'bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js',
+                    'bower_components/angular-route/angular-route.min.js',
+                    'bower_components/angular-animate/angular-animate.min.js',
+                    'bower_components/angular-busy/angular-busy.js',
+                    'bower_components/ng-file-upload/angular-file-upload.min.js',
+                    'bower_components/Chart.js/Chart.min.js',
+                    'bower_components/ng-chartjs/src/js/main.js',
+                    'bower_components/angular-markdown-directive/markdown.js',
+                    'bower_components/bvh/bvh.min.js',
+                    'bower_components/piecemeta-apiclient/dist-web/piecemeta-apiclient.web.min.js',
+                    'configuration.js'
+                ],
+                dest: 'dist/nw/approot/js/piecemeta-angular-dependencies.min.js'
             }
         },
         watch: {
-            js: {
+            web: {
                 files: [
-                    'src/js/**/*.js'
+                    'src/shared/js/**/*.js',
+                    'src/web/js/**/*.js',
+                    'src/shared/less/**/*.less',
+                    'src/web/less/**/*.less',
+                    'src/shared/jade/**/*.jade',
+                    'src/web/jade/**/*.jade'
                 ],
-                tasks: ['uglify']
+                tasks: ['uglify:web', 'less:web', 'jade:web_shared', 'jade:web_main']
             },
-            css: {
+            nw: {
                 files: [
-                    'src/less/**/*.less'
+                    'src/shared/js/**/*.js',
+                    'src/nw/js/**/*.js',
+                    'src/shared/less/**/*.less',
+                    'src/nw/less/**/*.less',
+                    'src/shared/jade/**/*.jade',
+                    'src/nw/jade/**/*.jade'
                 ],
-                tasks: ['less']
-            },
-            html: {
-                files: [
-                    'src/jade/**/*.jade'
-                ],
-                tasks: ['jade']
+                tasks: ['uglify:nw', 'nodewebkit', 'less:nw', 'nodewebkit', 'jade:nw_shared', 'jade:nw_main', 'nodewebkit']
+            }
+        },
+        nodewebkit: {
+            client: {
+                options: {
+                    platforms: ['osx'],
+                    buildDir: './build/',
+                    macPlist: {
+                        'NSHumanReadableCopyright': "2014 PieceMeta"
+                    }
+                },
+                src: ['./dist/nw/**/*']
             }
         }
     });
@@ -114,9 +199,26 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-modernizr");
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-node-webkit-builder');
 
-    grunt.registerTask('dev', ['default', 'watch']);
+    grunt.registerTask('build-nw', [
+       'less:nw',
+       'jade:nw_shared',
+       'jade:nw_main',
+       'concat:nw',
+       'uglify:nw',
+       'nodewebkit'
+    ]);
 
-    grunt.registerTask('default', ['modernizr', 'less', 'jade', 'uglify', 'concat']);
+    grunt.registerTask('build-web', [
+        'modernizr',
+        'less:web',
+        'jade:web_shared',
+        'jade:web_main',
+        'concat:web',
+        'uglify:web'
+    ]);
+
+    grunt.registerTask('default', ['build-web']);
 
 };

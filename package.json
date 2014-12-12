@@ -1,7 +1,7 @@
 {
   "name": "piecemeta-angular-frontend",
   "description": "Angular-based web frontend for PieceMeta service",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "license": "MIT",
   "homepage": "http://www.piecemeta.com",
   "author": {
@@ -22,6 +22,7 @@
     "grunt-contrib-less": "^0.12.0",
     "grunt-contrib-uglify": "^0.5.1",
     "grunt-contrib-watch": "^0.6.1",
-    "grunt-modernizr": "^0.5.2"
+    "grunt-modernizr": "^0.5.2",
+    "grunt-node-webkit-builder": "^0.3.1"
   }
 }
