@@ -72,13 +72,13 @@
                             deferred.reject(err);
                             return;
                         }
-                        deferred.resolve();
                         $scope.alerts = [
                             {
                                 type: 'success',
                                 msg: 'Successfully updated Collection.'
                             }
                         ];
+                        deferred.resolve();
                     });
                 };
             });

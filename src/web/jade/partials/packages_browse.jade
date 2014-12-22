@@ -1,9 +1,0 @@
-h2 Available packages
-.table-responsive
-    table.table.table-striped
-        tbody
-            tr(ng-repeat='package in data.data_packages')
-                td
-                    a(ng-href='/packages/{{package.id}}/show') {{package.title}}
-                td
-                    a.btn-sm.btn-success.pull-right(ng-href='/packages/{{package.id}}/edit', ng-if="package.user_id == userSession.id") Edit

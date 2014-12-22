@@ -593,7 +593,7 @@
                 $scope.$parent.status = 'ready';
             });
         }])
-        .controller('DataPackages.List', ['$scope', 'apiService', '$browser', function ($scope, apiService, $browser) {
+        .controller('DataPackages.List', ['$scope', 'apiService', function ($scope, apiService) {
             $scope.data = {};
             apiService('packages').actions.all(function (err, data_packages) {
                 if (err) {
@@ -601,8 +601,6 @@
                 }
                 $scope.data.data_packages = data_packages;
                 $scope.$apply();
-                console.log('blah');
-                $scope.htmlReady();
             });
         }])
         .controller('DataPackages.Create', ['$scope', 'apiService', '$q', '$location', function ($scope, apiService, $q, $location) {
@@ -627,6 +625,12 @@
                         deferred.reject(err);
                         return;
                     }
+                    $scope.alerts = [
+                        {
+                            type: 'success',
+                            msg: 'Successfully saved Package.'
+                        }
+                    ];
                     deferred.resolve();
                     $location.path('/packages/' + data_package.id + '/edit');
                 });

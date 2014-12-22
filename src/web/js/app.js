@@ -11,6 +11,7 @@
         'piecemeta-web.controllers.data-packages',
         'piecemeta-web.controllers.data-channels',
         'piecemeta-web.controllers.data-streams',
+        'piecemeta-web.controllers.trackers',
         'piecemeta-web.directives.helpers'
     ])
     .config(['$routeProvider', '$locationProvider', '$logProvider', function ($routeProvider, $locationProvider, $logProvider) {
@@ -47,6 +48,10 @@
 
         $routeProvider.when('/packages/:package_id/channels/create', {templateUrl: partialsPath + 'channels_edit.html', controller: 'DataChannels.Create'});
         $routeProvider.when('/channels/:id/edit', {templateUrl: partialsPath + 'channels_edit.html', controller: 'DataChannels.Edit'});
+
+        $routeProvider.when('/trackers', {templateUrl: partialsPath + 'trackers_list.html', controller: 'Trackers.List'});
+        $routeProvider.when('/trackers/create', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'Trackers.Create'});
+        $routeProvider.when('/trackers/:id/edit', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'Trackers.Edit'});
 
         $routeProvider.otherwise({redirectTo: '/'});
     }]).run(['$rootScope', '$q', function ($rootScope, $q) {

@@ -1,0 +1,16 @@
+.row.bottom-space
+    .col-sm-10
+        input.col-sm-12.input-lg.form-control(type="text", ng-model="dataUrl", placeholder="Package URL")
+    .col-sm-2
+        .btn.btn-primary.btn-lg.col-sm-12 Load
+
+.row
+    .col-sm-12
+        .panel.panel-default
+            .panel-heading
+                h3.panel-title Local packages
+            table.table.table-striped
+                tbody
+                    tr(ng-repeat='package in data.data_packages')
+                        td
+                            a(ng-href='oscplayer/{{package.id}}/play') {{package.title}}

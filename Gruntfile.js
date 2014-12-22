@@ -129,7 +129,7 @@ module.exports = function (grunt) {
                     'bower_components/angular-markdown-directive/markdown.js',
                     'bower_components/async/lib/async.js',
                     'bower_components/bvh/bvh.min.js',
-                    'bower_components/piecemeta-apiclient/dist-web/piecemeta-apiclient.web.min.js',
+                    'bower_components/piecemeta-apiclient/dist/piecemeta-apiclient.web.min.js',
                     'configuration.js'
                 ],
                 dest: 'dist/web/js/piecemeta-angular-dependencies.min.js'
@@ -148,8 +148,10 @@ module.exports = function (grunt) {
                     'bower_components/Chart.js/Chart.min.js',
                     'bower_components/ng-chartjs/src/js/main.js',
                     'bower_components/angular-markdown-directive/markdown.js',
+                    'bower_components/async/lib/async.js',
                     'bower_components/bvh/bvh.min.js',
-                    'bower_components/piecemeta-apiclient/dist-web/piecemeta-apiclient.web.min.js',
+                    'bower_components/tock/tock.min.js',
+                    'bower_components/piecemeta-apiclient/dist/piecemeta-apiclient.web.min.js',
                     'configuration.js'
                 ],
                 dest: 'dist/nw/approot/js/piecemeta-angular-dependencies.min.js'
@@ -179,11 +181,14 @@ module.exports = function (grunt) {
                 tasks: ['uglify:nw', 'nodewebkit', 'less:nw', 'nodewebkit', 'jade:nw_shared', 'jade:nw_main', 'nodewebkit']
             }
         },
+        clean: {
+            nw: ["build/nw"]
+        },
         nodewebkit: {
             client: {
                 options: {
-                    platforms: ['osx'],
-                    buildDir: './build/',
+                    platforms: ['osx64'],
+                    buildDir: './build/nw',
                     macPlist: {
                         'NSHumanReadableCopyright': "2014 PieceMeta"
                     }
@@ -199,6 +204,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-modernizr");
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-node-webkit-builder');
 
     grunt.registerTask('build-nw', [
@@ -207,6 +213,7 @@ module.exports = function (grunt) {
        'jade:nw_main',
        'concat:nw',
        'uglify:nw',
+       'clean:nw',
        'nodewebkit'
     ]);
 

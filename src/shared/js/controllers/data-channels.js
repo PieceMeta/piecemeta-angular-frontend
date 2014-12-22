@@ -50,12 +50,18 @@
                             $scope.alerts = [
                                 {
                                     type: 'danger',
-                                    msg: 'Failed to save data channel.'
+                                    msg: 'Failed to save channel.'
                                 }
                             ];
                             deferred.reject(err);
                             return;
                         }
+                        $scope.alerts = [
+                            {
+                                type: 'danger',
+                                msg: 'Successfully saved channel.'
+                            }
+                        ];
                         deferred.resolve();
                         $location.path('/packages/edit/' + $routeParams.package_id);
                     });
@@ -67,7 +73,7 @@
         .controller('DataChannels.Edit', ['$scope', '$routeParams', '$q', 'apiService', function ($scope, $routeParams, $q, apiService) {
             var deferred = $q.defer();
             $scope.data = {};
-            $scope.promiseString = 'Loading data channel...';
+            $scope.promiseString = 'Loading channel...';
             $scope.promise = deferred.promise;
             $scope.formTitle = 'Edit channel';
 
@@ -121,18 +127,24 @@
                     if (window.confirm('Do you really want to delete this stream?')) {
                         $scope.promiseString = 'Deleting data stream...';
                         $scope.promise = deferred.promise;
-                        $scope.dataStreams.splice($scope.dataStreams.indexOf(stream), 1);
+                        $scope.data.dataStreams.splice($scope.data.dataStreams.indexOf(stream), 1);
                         apiService('streams').actions.remove(stream.id, function (err) {
                             if (err) {
                                 $scope.alerts = [
                                     {
                                         type: 'danger',
-                                        msg: 'Failed to delete data stream.'
+                                        msg: 'Failed to delete stream.'
                                     }
                                 ];
                                 deferred.reject(err);
-                                return console.log('error deleting data stream', err);
+                                return console.log('error deleting stream', err);
                             }
+                            $scope.alerts = [
+                                {
+                                    type: 'success',
+                                    msg: 'Successfully saved stream.'
+                                }
+                            ];
                             deferred.resolve();
                         });
                     }
@@ -141,13 +153,14 @@
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('channels').actions.update($routeParams.id, $scope.dataChannel, function (err, data_channel) {
+                    apiService('channels').actions.update($routeParams.id, $scope.data.dataChannel, function (err, data_channel) {
+
                         if (err) {
                             console.log(err);
                             $scope.alerts = [
                                 {
                                     type: 'danger',
-                                    msg: 'Failed to update data channel.'
+                                    msg: 'Failed to update channel.'
                                 }
                             ];
                             deferred.reject(err);

@@ -61,12 +61,18 @@
                             $scope.alerts = [
                                 {
                                     type: 'danger',
-                                    msg: 'Failed to save data stream.'
+                                    msg: 'Failed to save stream.'
                                 }
                             ];
                             deferred.reject(err);
                             return;
                         }
+                        $scope.alerts = [
+                            {
+                                type: 'success',
+                                msg: 'Successfully saved stream.'
+                            }
+                        ];
                         deferred.resolve();
                         $location.path('/streams/' + data_stream.id + '/edit');
                     });
@@ -76,7 +82,7 @@
         .controller('DataStreams.Edit', ['$scope', '$routeParams', '$q', 'apiService', function ($scope, $routeParams, $q, apiService) {
             var deferred = $q.defer();
             $scope.data = {};
-            $scope.promiseString = 'Loading data stream...';
+            $scope.promiseString = 'Loading stream...';
             $scope.promise = deferred.promise;
             $scope.formTitle = 'Edit stream';
 
@@ -120,11 +126,11 @@
                     $scope.alerts = [
                         {
                             type: 'danger',
-                            msg: 'Failed to load data stream.'
+                            msg: 'Failed to load stream.'
                         }
                     ];
                     deferred.reject(err);
-                    return console.log('error getting data stream', err);
+                    return console.log('error getting stream', err);
                 }
                 deferred.resolve();
                 $scope.submit = function () {
@@ -143,13 +149,13 @@
                             deferred.reject(err);
                             return;
                         }
-                        deferred.resolve();
                         $scope.alerts = [
                             {
                                 type: 'success',
                                 msg: 'Successfully updated stream.'
                             }
                         ];
+                        deferred.resolve();
                     });
                 };
 

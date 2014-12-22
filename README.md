@@ -31,6 +31,9 @@ Once built you'll find the resulting app in the ``build`` folder. The frontend f
 ```shell
 npm install
 bower install
+cd dist/nw
+npm install
+cd ..
 grunt build-nw
 ```
 

@@ -8,10 +8,11 @@ html(ng-app='piecemeta-frontend')
         script(src='./js/piecemeta-angular-dependencies.min.js')
         script(src='./js/piecemeta-angular-frontend.min.js')
         link(rel='stylesheet', href='./css/piecemeta-frontend.css')
+        script(type="text/javascript") angular.element(document.getElementsByTagName('head')).append(angular.element('<base href="' + window.location.pathname + '" />'));
     body(data-status="{{ status }}")
-        .container(cg-busy="{promise:pagePromise,message:'Loading page...',templateUrl:'./partials/busy.html',minDuration:100}")
+        .container-fluid(cg-busy="{promise:pagePromise,message:'Loading page...',templateUrl:'./partials/busy.html',minDuration:100}")
             .navbar.navbar-inverse.navbar-fixed-top(name='mainNavigation', role='navigation', check-login)
-                .container
+                .container-fluid
                     .navbar-header
                         button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse', ng-click='isCollapsed = !isCollapsed')
                             span.sr-only Toggle navigation
@@ -21,8 +22,8 @@ html(ng-app='piecemeta-frontend')
                         a.navbar-brand(href='/') PieceMeta
                     .collapse.navbar-collapse(collapse='isCollapsed')
                         ul.nav.navbar-nav
-                            li.active
-                                a(href='/') Home
-            .container
+                            li
+                                a(href='packages/browse') Packages
+            .container-fluid
                 .main-content
                     div(ng-view,cg-busy="{promise:promise,message:promiseString,templateUrl:'./partials/busy.html'}")
