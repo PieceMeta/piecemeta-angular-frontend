@@ -10,6 +10,7 @@
         'piecemeta-web.controllers.data-packages',
         'piecemeta-web.controllers.data-channels',
         'piecemeta-web.controllers.data-streams',
+        'piecemeta-web.services.db',
         'piecemeta-web.directives.helpers'
     ])
         .config(['$routeProvider', '$locationProvider', '$logProvider', function ($routeProvider, $locationProvider, $logProvider) {

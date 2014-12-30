@@ -7,7 +7,7 @@
             'piecemeta-web.services.api',
             'chartjs'
         ])
-        .controller('OscPlayer.Play', ['$scope', '$q', '$routeParams', 'apiService', function ($scope, $q, $routeParams, apiService) {
+        .controller('OscPlayer.Play', ['$scope', '$q', '$routeParams', 'apiService', 'dbService', function ($scope, $q, $routeParams, apiService, dbService) {
             $scope.data = {
                 dataChannels: [],
                 streamGroups: [],
