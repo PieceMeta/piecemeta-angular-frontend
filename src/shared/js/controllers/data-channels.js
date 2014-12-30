@@ -10,7 +10,7 @@
             var deferred = $q.defer();
             $scope.data = {
                 dataChannel: {
-                    package_id: $routeParams.package_id
+                    package_uuid: $routeParams.package_uuid
                 }
             };
             $scope.formTitle = 'Create channel';
@@ -19,7 +19,7 @@
 
             async.waterfall([
                 function (cb) {
-                    apiService('packages').actions.find($routeParams.package_id, cb);
+                    apiService('packages').actions.find($routeParams.package_uuid, cb);
                 },
                 function (dataPackage, cb) {
                     if (!dataPackage) {
@@ -63,7 +63,7 @@
                             }
                         ];
                         deferred.resolve();
-                        $location.path('/packages/edit/' + $routeParams.package_id);
+                        $location.path('/packages/edit/' + $routeParams.package_uuid);
                     });
                 };
             });
@@ -79,7 +79,7 @@
 
             async.waterfall([
                 function (cb) {
-                    apiService('channels').actions.find($routeParams.id, cb);
+                    apiService('channels').actions.find($routeParams.uuid, cb);
                 },
                 function (dataChannel, cb) {
                     if (!dataChannel) {
@@ -91,7 +91,7 @@
                     cb(null);
                 },
                 function (cb) {
-                    apiService('packages').actions.find($scope.data.dataChannel.package_id, cb);
+                    apiService('packages').actions.find($scope.data.dataChannel.package_uuid, cb);
                 },
                 function (dataPackage, cb) {
                     if (!dataPackage) {
@@ -102,7 +102,7 @@
                     cb(null);
                 },
                 function (cb) {
-                    apiService('channels/' + $routeParams.id + '/streams').actions.all(cb);
+                    apiService('channels/' + $routeParams.uuid + '/streams').actions.all(cb);
                 },
                 function (dataStreams, cb) {
                     if (dataStreams.length > 0) {
@@ -128,7 +128,7 @@
                         $scope.promiseString = 'Deleting data stream...';
                         $scope.promise = deferred.promise;
                         $scope.data.dataStreams.splice($scope.data.dataStreams.indexOf(stream), 1);
-                        apiService('streams').actions.remove(stream.id, function (err) {
+                        apiService('streams').actions.remove(stream.uuid, function (err) {
                             if (err) {
                                 $scope.alerts = [
                                     {
@@ -153,7 +153,7 @@
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('channels').actions.update($routeParams.id, $scope.data.dataChannel, function (err, data_channel) {
+                    apiService('channels').actions.update($routeParams.uuid, $scope.data.dataChannel, function (err, data_channel) {
 
                         if (err) {
                             console.log(err);

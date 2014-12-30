@@ -1,7 +1,7 @@
 angular.module('piecemeta-web.services.api', []).
 factory('apiService', ['authService', function (authService) {
     'use strict';
-    var serviceInstance = function (resourceName) {
+    return function (resourceName) {
         var apiClient = PMApi({
             host: PIECEMETA_API_HOST,
             contentType: 'application/json',
@@ -14,18 +14,18 @@ factory('apiService', ['authService', function (authService) {
                 all: function (callback, progress) {
                     apiClient.resource(resourceName).action('get', null, callback, progress);
                 },
-                find: function (id, callback, progress) {
-                    apiClient.resource(resourceName).action('get', { id: id }, callback, progress);
+                find: function (uuid, callback, progress) {
+                    apiClient.resource(resourceName).action('get', { uuid: uuid }, callback, progress);
                 },
                 create: function (data, callback, progress) {
                     apiClient.resource(resourceName).action('post', data, callback, progress);
                 },
-                update: function (id, data, callback, progress) {
-                    data.id = id;
+                update: function (uuid, data, callback, progress) {
+                    data.uuid = uuid;
                     apiClient.resource(resourceName).action('put', data, callback, progress);
                 },
-                remove: function (id, callback, progress) {
-                    apiClient.resource(resourceName).action('delete', { id: id }, callback, progress);
+                remove: function (uuid, callback, progress) {
+                    apiClient.resource(resourceName).action('delete', { uuid: uuid }, callback, progress);
                 }
             },
             getCredentials: function (access_token, callback) {
@@ -66,6 +66,5 @@ factory('apiService', ['authService', function (authService) {
             }
         };
     };
-    return serviceInstance;
 }]);
 

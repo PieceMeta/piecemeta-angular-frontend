@@ -29,7 +29,7 @@ h3 View data
     .col-md-12
         .form-group
             label.control-label Select channel
-            select.form-control(name="channelSelect", ng-model="data.currentChannel", ng-options="channel.id as channel.title for channel in data.dataChannels")
+            select.form-control(name="channelSelect", ng-model="data.currentChannel", ng-options="channel.uuid as channel.title for channel in data.dataChannels")
         .form-group
             label.control-label Select value group
             select.form-control(name="groupSelect", ng-model="data.currentGroup", ng-options="group for group in data.streamGroups")

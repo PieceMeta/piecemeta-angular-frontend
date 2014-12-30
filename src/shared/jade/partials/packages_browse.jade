@@ -4,6 +4,6 @@ h2 Available packages
         tbody
             tr(ng-repeat='package in data.data_packages')
                 td
-                    a(ng-href='packages/{{package.id}}/show') {{package.title}}
+                    a(ng-href='packages/{{package.uuid}}/show') {{package.title}}
                 td
-                    a.btn-sm.btn-success.pull-right(ng-href='packages/{{package.id}}/edit', ng-if="package.user_id == userSession.id") Edit
+                    a.btn-sm.btn-success.pull-right(ng-href='packages/{{package.uuid}}/edit', ng-if="package.user_uuid == userSession.uuid") Edit

@@ -35,21 +35,21 @@
 
             async.waterfall([
                 function (cb) {
-                    apiService('packages').actions.find($routeParams.id, cb);
+                    apiService('packages').actions.find($routeParams.uuid, cb);
                 },
                 function (dataPackage, cb) {
-                    apiService('users').actions.find(dataPackage.user_id, function (err, user) {
+                    apiService('users').actions.find(dataPackage.user_uuid, function (err, user) {
                         cb(err, dataPackage, user);
                     });
                 },
                 function (dataPackage, user, cb) {
                     $scope.data.dataPackage = dataPackage;
                     $scope.data.packageAuthor = user;
-                    $scope.data.dataURL = PIECEMETA_API_HOST + '/packages/' + dataPackage.id;
+                    $scope.data.dataURL = PIECEMETA_API_HOST + '/packages/' + dataPackage.uuid;
                     cb(null);
                 },
                 function (cb) {
-                    apiService('packages/' + $scope.data.dataPackage.id + '/channels').actions.all(cb);
+                    apiService('packages/' + $scope.data.dataPackage.uuid + '/channels').actions.all(cb);
                 },
                 function (dataChannels, cb) {
                     $scope.data.dataPackage.channels = dataChannels;
@@ -57,7 +57,7 @@
                 },
                 function (cb) {
                     async.eachSeries($scope.data.dataPackage.channels, function (channel, nextChannel) {
-                        apiService('channels/' + channel.id + '/streams').actions.all(function (err, dataStreams) {
+                        apiService('channels/' + channel.uuid + '/streams').actions.all(function (err, dataStreams) {
                             if (err) {
                                 return nextChannel(err);
                             }
@@ -76,7 +76,7 @@
                                 $scope.data.dataPackage.channels[idx].streams[0].frames.length > 0) {
                                 $scope.data.dataChannels.push({
                                     title: $scope.data.dataPackage.channels[idx].title,
-                                    id: $scope.data.dataPackage.channels[idx].id
+                                    id: $scope.data.dataPackage.channels[idx].uuid
                                 });
                             }
                         }
@@ -85,7 +85,7 @@
                 },
                 function (cb) {
                     if ($scope.data.dataChannels.length > 0) {
-                        $scope.data.currentChannel = $scope.data.dataChannels[0].id;
+                        $scope.data.currentChannel = $scope.data.dataChannels[0].uuid;
                     }
                     cb(null);
                 }

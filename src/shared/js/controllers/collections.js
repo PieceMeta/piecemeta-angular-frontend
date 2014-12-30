@@ -33,7 +33,7 @@
                         }
                     ];
                     deferred.resolve();
-                    $location.path('/collections/' + data_collection.id + '/edit');
+                    $location.path('/collections/' + data_collection.uuid + '/edit');
                 });
             };
         }])
@@ -43,7 +43,7 @@
             $scope.promise = deferred.promise;
             $scope.formTitle = 'Edit Collection';
 
-            apiService('collections').actions.find($routeParams.id, function (err, data_collection) {
+            apiService('collections').actions.find($routeParams.uuid, function (err, data_collection) {
                 if (err) {
                     $scope.alerts = [
                         {
@@ -60,7 +60,7 @@
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('collections').actions.update($routeParams.id, $scope.dataCollection, function (err, data_collection) {
+                    apiService('collections').actions.update($routeParams.uuid, $scope.dataCollection, function (err, data_collection) {
                         if (err) {
                             console.log(err);
                             $scope.alerts = [

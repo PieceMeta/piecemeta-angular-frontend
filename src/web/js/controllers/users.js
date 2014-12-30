@@ -121,7 +121,7 @@
                                 }
                             ];
                         }
-                        $scope.alerts = alerts
+                        $scope.alerts = alerts;
                         deferred.reject(err);
                         return;
                     }

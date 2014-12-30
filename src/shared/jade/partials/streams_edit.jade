@@ -2,9 +2,9 @@ ol.breadcrumb
     li
         a(href="/packages/browse") Data
     li
-        a(ng-href="{{ '/packages/' + data.dataPackage.id + '/edit' }}") Edit "{{ data.dataPackage.title }}"
+        a(ng-href="{{ '/packages/' + data.dataPackage.uuid + '/edit' }}") Edit "{{ data.dataPackage.title }}"
     li
-        a(ng-href="{{ '/channels/' + data.dataChannel.id + '/edit' }}") Edit "{{ data.dataChannel.title }}"
+        a(ng-href="{{ '/channels/' + data.dataChannel.uuid + '/edit' }}") Edit "{{ data.dataChannel.title }}"
     li.active {{ formTitle }}
 
 alert(ng-repeat='alert in alerts' type='{{alert.type}}' close='closeAlert($index)') {{alert.msg}}

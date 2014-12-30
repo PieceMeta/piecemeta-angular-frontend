@@ -21,7 +21,7 @@
             var partialsPath = 'partials/';
 
             $routeProvider.when('/packages/browse', {templateUrl: partialsPath + 'oscplayer_packages_browse.html', controller: 'DataPackages.List'});
-            $routeProvider.when('/oscplayer/:id/play', {templateUrl: partialsPath + 'oscplayer_play.html', controller: 'OscPlayer.Play'});
+            $routeProvider.when('/oscplayer/:uuid/play', {templateUrl: partialsPath + 'oscplayer_play.html', controller: 'OscPlayer.Play'});
 
             $routeProvider.otherwise({redirectTo: '/packages/browse'});
 
