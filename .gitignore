@@ -8,6 +8,3 @@ build/
 cache/
 dist/nw/node_modules/
 dist/nw/approot/
-dist/web/**/*.js
-dist/web/**/*.css
-dist/web/**/*.html
