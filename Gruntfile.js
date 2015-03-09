@@ -178,7 +178,7 @@ module.exports = function (grunt) {
                     'src/shared/jade/**/*.jade',
                     'src/nw/jade/**/*.jade'
                 ],
-                tasks: ['uglify:nw', 'nodewebkit', 'less:nw', 'nodewebkit', 'jade:nw_shared', 'jade:nw_main', 'nodewebkit']
+                tasks: ['uglify:nw', 'less:nw', 'jade:nw_shared', 'jade:nw_main']
             }
         },
         clean: {
@@ -188,6 +188,7 @@ module.exports = function (grunt) {
             client: {
                 options: {
                     platforms: ['osx64'],
+                    version: '0.11.6',
                     buildDir: './build/nw',
                     macPlist: {
                         'NSHumanReadableCopyright': "2014 PieceMeta"

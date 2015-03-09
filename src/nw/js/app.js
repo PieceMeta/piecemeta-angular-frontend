@@ -27,6 +27,17 @@
             $routeProvider.otherwise({redirectTo: '/packages/browse'});
 
         }]).run(['$rootScope', '$q', function ($rootScope, $q) {
+
+            var gui = require('nw.gui');
+            var win = gui.Window.get();
+            var nativeMenuBar = new gui.Menu({ type: 'menubar' });
+            try {
+                nativeMenuBar.createMacBuiltin('PieceMeta');
+                win.menu = nativeMenuBar;
+            } catch (e) {
+                console.log('failed to setup native menubar', e.message);
+            }
+
             $rootScope.$on('$routeChangeStart', function (e, curr, prev) {
                 $rootScope.pageDefer = $q.defer();
                 $rootScope.pagePromise = $rootScope.pageDefer.promise;

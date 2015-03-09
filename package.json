@@ -23,9 +23,7 @@
     "grunt-contrib-less": "^0.12.0",
     "grunt-contrib-uglify": "^0.5.1",
     "grunt-contrib-watch": "^0.6.1",
-    "grunt-modernizr": "^0.5.2"
-  },
-  "dependencies": {
-    "grunt-node-webkit-builder": "file:../../../../var/folders/12/jhbf_03508db1j8w2bdv787w0000gn/T/npm-6894-193599d8/1418607017933-0.6157083625439554/f155cf3a8b1202e4f7fcfce79c11fb6cc5927cee"
+    "grunt-modernizr": "^0.5.2",
+    "grunt-node-webkit-builder": "^1.0.2"
   }
 }
