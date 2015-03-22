@@ -1,13 +1,12 @@
 (function () {
     'use strict';
     angular.module(
-        'piecemeta-web.controllers.osc-player',
+        'piecemeta-nw.controllers.osc-player',
         [
             'angularFileUpload',
-            'piecemeta-web.services.api',
             'chartjs'
         ])
-        .controller('OscPlayer.Play', ['$scope', '$q', '$routeParams', 'apiService', 'dbService', function ($scope, $q, $routeParams, apiService, dbService) {
+        .controller('OscPlayer.Play', ['$scope', '$q', '$routeParams', 'apiService', function ($scope, $q, $routeParams, apiService) {
             $scope.data = {
                 dataChannels: [],
                 streamGroups: [],

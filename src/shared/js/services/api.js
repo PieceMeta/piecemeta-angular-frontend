@@ -12,6 +12,7 @@ factory('apiService', ['authService', function (authService) {
             client: apiClient,
             actions: {
                 all: function (callback, progress) {
+                    console.log('test');
                     apiClient.resource(resourceName).action('get', null, callback, progress);
                 },
                 find: function (uuid, callback, progress) {

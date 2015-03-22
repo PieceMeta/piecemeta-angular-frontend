@@ -1,4 +1,4 @@
-angular.module('piecemeta-web.services.db', []).
+angular.module('piecemeta-nw.services.db', []).
     factory('apiService', function () {
         'use strict';
         return function (resourceName) {

@@ -188,7 +188,7 @@ module.exports = function (grunt) {
             client: {
                 options: {
                     platforms: ['osx64'],
-                    version: '0.11.6',
+                    version: '0.12.0',
                     buildDir: './build/nw',
                     macPlist: {
                         'NSHumanReadableCopyright': "2014 PieceMeta"

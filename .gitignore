@@ -1,10 +1,13 @@
 .DS_Store
 .idea
-node_modules/
+*.log
+!node_modules/
+node_modules/**/*
+dist/nw/node_modules/**/*
 bower_components/
 configuration.js
 lib/
 build/
 cache/
-dist/nw/node_modules/
 dist/nw/approot/
+!dist/nw/node_modules/piecemeta-oscplayer.js
