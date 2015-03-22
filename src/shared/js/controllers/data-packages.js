@@ -722,6 +722,7 @@
                         $scope.dataChannels = data_channels;
                     }
                     deferred.resolve();
+                    $scope.$apply();
                 });
             });
         }]);

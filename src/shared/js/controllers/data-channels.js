@@ -122,6 +122,7 @@
                     return;
                 }
                 deferred.resolve();
+                $scope.$apply();
                 $scope.deleteStream = function (stream, $event) {
                     $event.preventDefault();
                     if (window.confirm('Do you really want to delete this stream?')) {
@@ -146,6 +147,7 @@
                                 }
                             ];
                             deferred.resolve();
+                            $scope.$apply();
                         });
                     }
                 };

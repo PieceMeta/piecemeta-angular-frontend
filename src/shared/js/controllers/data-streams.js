@@ -360,7 +360,7 @@
                             cb(null, null);
                         } else {
                             var channel = {
-                                package_id: $routeParams.uuid,
+                                package_uuid: $routeParams.uuid,
                                 title: $scope.data.selectedChannel.title ? $scope.data.selectedChannel.title : $scope.data.channelTitle
                             };
                             apiService('channels').actions.create(channel, cb);
