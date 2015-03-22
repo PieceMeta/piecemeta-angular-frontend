@@ -15,7 +15,7 @@ factory('apiService', ['authService', function (authService) {
                     apiClient.resource(resourceName).action('get', null, callback, progress);
                 },
                 find: function (uuid, callback, progress) {
-                    apiClient.resource(resourceName).action('get', { uuid: uuid }, callback, progress);
+                    apiClient.resource(resourceName).action('get', uuid, callback, progress);
                 },
                 create: function (data, callback, progress) {
                     apiClient.resource(resourceName).action('post', data, callback, progress);
