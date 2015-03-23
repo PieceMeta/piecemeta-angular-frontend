@@ -12,7 +12,6 @@ factory('apiService', ['authService', function (authService) {
             client: apiClient,
             actions: {
                 all: function (callback, progress) {
-                    console.log('test');
                     apiClient.resource(resourceName).action('get', null, callback, progress);
                 },
                 find: function (uuid, callback, progress) {
@@ -26,7 +25,7 @@ factory('apiService', ['authService', function (authService) {
                     apiClient.resource(resourceName).action('put', data, callback, progress);
                 },
                 remove: function (uuid, callback, progress) {
-                    apiClient.resource(resourceName).action('delete', { uuid: uuid }, callback, progress);
+                    apiClient.resource(resourceName).action('delete', uuid, callback, progress);
                 }
             },
             getCredentials: function (access_token, callback) {

@@ -140,15 +140,21 @@
 
                 var tick = function() {
                     var messages = [];
+                    var addresses = {};
                     for (var i in pkg.channels) {
-                        var address = '/' + pkg.channels[i].title;
-                        var args = [];
                         for (var n in pkg.channels[i].streams) {
+                            var address = '/' + pkg.channels[i].title;
+                            address += pkg.channels[i].streams[n].group ? '/' + pkg.channels[i].streams[n].group : '';
+                            if (!addresses[address]) {
+                                addresses[address] = [];
+                            }
                             if (pkg.channels[i].streams[n].frames[$scope.data.frame]) {
-                                args.push(pkg.channels[i].streams[n].frames[$scope.data.frame]);
+                                addresses[address].push(pkg.channels[i].streams[n].frames[$scope.data.frame]);
                             }
                         }
-                        messages.push(osc.createMessage(address, args));
+                        for (var address in addresses) {
+                            messages.push(osc.createMessage(address, addresses[address]));
+                        }
                     }
                     osc.send('127.0.0.1', 8000, osc.createBundle(messages));
                     $scope.data.frame += 1;

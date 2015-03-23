@@ -5,7 +5,7 @@
   "chromium-args": "--js-flags=--harmony",
   "window": {
     "title": "PieceMeta",
-    "toolbar": true,
+    "toolbar": false,
     "frame": true,
     "fullscreen": false,
     "kiosk": false,
