@@ -12,6 +12,7 @@
                 streamGroups: [],
                 dataPackage: null,
                 currentGroup: null,
+                streamStatus: {},
                 channelIndex: 0,
                 frame: 0,
                 totalFrames: 0,
@@ -59,6 +60,9 @@
                         apiService('channels/' + channel.uuid + '/streams').actions.all(function (err, dataStreams) {
                             if (err) {
                                 return nextChannel(err);
+                            }
+                            for (var i in dataStreams) {
+                                $scope.data.streamStatus[dataStreams[i].uuid] = true;
                             }
                             $scope.data.dataPackage.channels[$scope.data.dataPackage.channels.indexOf(channel)].streams = dataStreams;
                             nextChannel();
@@ -149,11 +153,15 @@
                                 addresses[address] = [];
                             }
                             if (pkg.channels[i].streams[n].frames[$scope.data.frame]) {
-                                addresses[address].push(pkg.channels[i].streams[n].frames[$scope.data.frame]);
+                                if ($scope.data.streamStatus[pkg.channels[i].streams[n].uuid] === true) {
+                                    addresses[address].push(pkg.channels[i].streams[n].frames[$scope.data.frame]);
+                                }
                             }
                         }
                         for (var address in addresses) {
-                            messages.push(osc.createMessage(address, addresses[address]));
+                            if (addresses[address].length > 0) {
+                                messages.push(osc.createMessage(address, addresses[address]));
+                            }
                         }
                     }
                     osc.send('127.0.0.1', 8000, osc.createBundle(messages));

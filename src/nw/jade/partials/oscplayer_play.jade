@@ -23,6 +23,8 @@
             table.table.table-striped
                 tbody(ng-repeat="channel in data.dataPackage.channels")
                     tr(ng-repeat="stream in channel.streams")
+                        td
+                            input(type='checkbox', ng-model='data.streamStatus[stream.uuid]')
                         td {{ channel.title }}
                         td {{ stream.title }}
                         td {{ stream.group }}
