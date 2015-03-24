@@ -124,7 +124,27 @@
                 $scope.$apply();
 
                 var osc = require('piecemeta-oscplayer');
-                osc.openPort(51782);
+                osc.openPort('0.0.0.0', parseInt(localStorage.getItem('osc-controlport')));
+                osc.registerControls(function (err, command, args) {
+                    switch (command) {
+                        case 'toggle':
+                            $scope.play(null);
+                            break;
+                        case 'rewind':
+                            $scope.rewind(null);
+                            break;
+                        case 'frame':
+                            if (args && args.length > 0) {
+                                var targetFrame = parseInt(args[0]);
+                                if (targetFrame < $scope.data.totalFrames) {
+                                    $scope.data.frame = parseInt(args[0]);
+                                    $scope.playprogress = Math.round($scope.data.frame / $scope.data.totalFrames * 1000);
+                                    $scope.$apply();
+                                }
+                            }
+                            break;
+                    }
+                });
 
                 var interfaceTimer = new Tock({
                     interval: 100,
@@ -164,10 +184,11 @@
                             }
                         }
                     }
-                    osc.send('127.0.0.1', 8000, osc.createBundle(messages));
+                    osc.send(localStorage.getItem('osc-datahost'), parseInt(localStorage.getItem('osc-dataport')), osc.createBundle(messages));
                     $scope.data.frame += 1;
                     if ($scope.data.frame >= $scope.data.totalFrames) {
                         $scope.data.frame = 0;
+                        console.log('play took', window.performance.now() - tickStart);
                     }
 
                 };
@@ -190,6 +211,46 @@
                     $scope.data.frame = 0;
                     $scope.playprogress = 0;
                 };
+
+                $scope.$on('$routeChangeStart', function (next, current) {
+                    if (next !== current) {
+                        timer.pause();
+                        interfaceTimer.pause();
+                        osc.closePort();
+                    }
+                });
             });
+        }])
+        .controller('OscPlayer.Settings', ['$scope', function ($scope) {
+            $scope.settings = {
+                osc: {
+                    datahost: localStorage.getItem('osc-datahost'),
+                    dataport: parseInt(localStorage.getItem('osc-dataport')),
+                    controlport: parseInt(localStorage.getItem('osc-controlport'))
+                }
+            };
+            $scope.submit = function ($event) {
+                // TODO: proper validation!
+                if (!$scope.settings.osc.datahost ||
+                    !$scope.settings.osc.dataport ||
+                    !$scope.settings.osc.controlport) {
+                    $scope.alerts = [
+                        {
+                            type: 'danger',
+                            msg: 'You need to fill out all fields.'
+                        }
+                    ];
+                    return;
+                }
+                localStorage.setItem('osc-datahost', $scope.settings.osc.datahost);
+                localStorage.setItem('osc-dataport', $scope.settings.osc.dataport);
+                localStorage.setItem('osc-controlport', $scope.settings.osc.controlport);
+                $scope.alerts = [
+                    {
+                        type: 'success',
+                        msg: 'Settings saved.'
+                    }
+                ];
+            };
         }]);
 }());

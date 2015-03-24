@@ -1,19 +1,19 @@
 {
-  "name": "PieceMeta",
+  "name": "PieceMetaOSC",
   "main": "approot/index.html",
   "version": "0.9.2",
   "chromium-args": "--js-flags=--harmony",
   "window": {
-    "title": "PieceMeta",
+    "title": "PieceMeta OSC",
     "toolbar": false,
     "frame": true,
     "fullscreen": false,
     "kiosk": false,
     "position": "center",
-    "width": 800,
-    "height": 600,
-    "min_width": 800,
-    "min_height": 400
+    "width": 780,
+    "height": 520,
+    "min_width": 780,
+    "min_height": 360
   },
   "dependencies": {
     "async": "^0.9.0",

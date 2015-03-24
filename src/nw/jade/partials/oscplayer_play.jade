@@ -1,8 +1,9 @@
-.bottom-space
-    h3 {{ data.dataPackage.title }}
+.row.bottom-space
+    .col-sm-12
+        h3 {{ data.dataPackage.title }}
 .row.bottom-space
     .col-sm-7
-        progressbar(value="playprogress",max="1000",animated="false")
+        progressbar(value="playprogress", max="1000", animated="false")
         p.small
             span= 'Total time: {{ data.timeString }} | Target FPS: {{ data.fps }} | {{ data.totalFrames }} frames'
     .col-sm-3
@@ -13,21 +14,24 @@
         a.btn.btn-default.btn-sm.col-sm-12(role="button",ng-click="rewind()") Rewind
 
 .row
-    .col-md-12
+    .col-sm-12
         ul.nav.nav-tabs
             li(role="presentation", ng-class="selected_nav == 'channels' ? 'active' : ''")
                 a(ng-click="selected_nav = 'channels'") Channels
             li(role="presentation", ng-class="selected_nav == 'info' ? 'active' : ''")
                 a(ng-click="selected_nav = 'info'") Info
         .panel.panel-default#channels(ng-if="selected_nav == 'channels'")
-            table.table.table-striped
+            table.table.table-striped.table-hover.small
                 tbody(ng-repeat="channel in data.dataPackage.channels")
+                    tr
+                        th
+                        th {{ channel.title }}
+                        th
                     tr(ng-repeat="stream in channel.streams")
                         td
                             input(type='checkbox', ng-model='data.streamStatus[stream.uuid]')
-                        td {{ channel.title }}
+                        td /{{ channel.title }}/{{ stream.group }}
                         td {{ stream.title }}
-                        td {{ stream.group }}
         .panel.panel-default#info(ng-if="selected_nav == 'info'")
             .panel-body
                 .row

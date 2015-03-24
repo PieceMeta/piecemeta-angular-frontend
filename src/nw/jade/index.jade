@@ -4,7 +4,7 @@ html(ng-app='piecemeta-frontend')
         meta(charset='utf8')
         meta(http-equiv='X-UA-Compatible', content='IE=edge')
         meta(name='viewport', content='width=device-width, initial-scale=1')
-        title= title
+        title PieceMetaOSC
         script(src='./js/piecemeta-angular-dependencies.min.js')
         script(src='./js/piecemeta-angular-frontend.min.js')
         link(rel='stylesheet', href='./css/piecemeta-frontend.css')
@@ -19,11 +19,12 @@ html(ng-app='piecemeta-frontend')
                             span.icon-bar
                             span.icon-bar
                             span.icon-bar
-                        a.navbar-brand(href='/') PieceMeta
+                        .navbar-brand PieceMetaOSC
                     .collapse.navbar-collapse(collapse='isCollapsed')
                         ul.nav.navbar-nav
                             li
                                 a(href='packages/browse') Packages
+                            li
+                                a(href='oscplayer/settings') Settings
             .container-fluid
-                .main-content
-                    div(ng-view,cg-busy="{promise:promise,message:promiseString,templateUrl:'./partials/busy.html'}")
+                .main-content(ng-view,cg-busy="{promise:promise,message:promiseString,templateUrl:'./partials/busy.html'}")

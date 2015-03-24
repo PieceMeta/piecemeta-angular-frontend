@@ -1,0 +1,31 @@
+alert(ng-repeat='alert in alerts' type='{{alert.type}}' close='closeAlert($index)') {{alert.msg}}
+form(name='settingsForm', role='form',ng-submit='submit()')
+    .panel.panel-default
+        .panel-heading
+            h3.panel-title Settings
+        .panel-body
+            .col-sm-6
+                .form-group
+                    label.control-label(for='datahost') OSC target host
+                    input.input-lg.form-control(name='datahost', ng-model='settings.osc.datahost', placeholder='127.0.0.1')
+                .form-group
+                    label.control-label(for='dataport') OSC target port
+                    input.input-lg.form-control(name='dataport', type='integer', ng-model='settings.osc.dataport', placeholder='8000')
+                .form-group
+                    label.control-label(for='controlport') OSC control port
+                    input.input-lg.form-control(name='controlport', type='integer', ng-model='settings.osc.controlport', placeholder='9999')
+            .col-sm-6
+                p The control port allows you to control PieceMetaOSC via OSC messages:
+                ul.list-group
+                    li.list-group-item
+                        code /control/toggle
+                        | toggles playback
+                    li.list-group-item
+                        code /control/rewind
+                        | rewinds playback
+                    li.list-group-item
+                        code /control/frame/[FRAMENUMBER]
+                        | jumps to a specific frame
+            .col-sm-6
+        .panel-footer.btn-group-lg.text-right
+            input.btn.btn-primary.btn-lg(type='submit', value='Save settings')

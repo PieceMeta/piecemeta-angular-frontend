@@ -599,9 +599,7 @@
         }])
         .controller('DataPackages.List', ['$scope', 'apiService', function ($scope, apiService) {
             $scope.data = {};
-            console.log('enter', apiService, apiService('packages'), apiService('packages').actions);
             apiService('packages').actions.all(function (err, data_packages) {
-                console.log('return');
                 if (err) {
                     return console.log('error getting packages', err);
                 }

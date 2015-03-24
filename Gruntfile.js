@@ -191,7 +191,7 @@ module.exports = function (grunt) {
                     version: '0.12.0',
                     buildDir: './build/nw',
                     macPlist: {
-                        'NSHumanReadableCopyright': "2014 PieceMeta"
+                        'NSHumanReadableCopyright': "2015 PieceMeta"
                     }
                 },
                 src: ['./dist/nw/**/*']
