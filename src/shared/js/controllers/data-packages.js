@@ -418,6 +418,11 @@
                         datasetFill: false,
                         legend: true
                     }
+                },
+                exports: {
+                    json: PIECEMETA_API_HOST + '/exports/' + $routeParams.uuid + '.json',
+                    msgpack: PIECEMETA_API_HOST + '/exports/' + $routeParams.uuid + '.msgpack',
+                    xml: PIECEMETA_API_HOST + '/exports/' + $routeParams.uuid + '.xml'
                 }
             };
             $scope.updateTimeout = null;

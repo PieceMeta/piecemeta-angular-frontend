@@ -20,6 +20,14 @@ ol.breadcrumb
                 .row
                     .col-sm-12
                         .form-group
+                            label Download complete package (Right click, save as...)
+                            a.btn.btn-lg(ng-href='{{ data.exports.json }}') JSON
+                            a.btn.btn-lg(ng-href='{{ data.exports.msgpack }}') MsgPack
+                            a.btn.btn-lg(ng-href='{{ data.exports.xml }}') XML
+                hr
+                .row
+                    .col-sm-12
+                        .form-group
                             label API URL (Use this in the #[a(href="/software") OSC Player])
                             input.form-control(ng-model="data.dataURL", ng-click="onURLClick($event)")
 
