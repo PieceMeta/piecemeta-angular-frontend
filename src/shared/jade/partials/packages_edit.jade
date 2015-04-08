@@ -28,8 +28,10 @@ form(name='dataSequenceForm', role='form', ng-submit='submit()')
                 .col-sm-12
                     h3 Data channels
                     p
-                        a.btn.btn-success.btn-sm.spacer-right(ng-href="{{ '/packages/' + dataPackage.uuid + '/channels/import' }}") Import channel
+                        a.btn.btn-success.btn-sm.spacer-right(ng-href="{{ '/packages/' + dataPackage.uuid + '/channels/import/csv' }}") Import channel from Textfile
+                        a.btn.btn-info.btn-sm.spacer-right(ng-href="{{ '/packages/' + dataPackage.uuid + '/channels/import/trac' }}") Import channel from TRC file
                         a.btn.btn-info.btn-sm.spacer-right(ng-href="{{ '/packages/' + dataPackage.uuid + '/channels/create' }}") Add empty channel
+
             .row(ng-if='dataChannels')
                 .col-sm-12
                     ul.list-group

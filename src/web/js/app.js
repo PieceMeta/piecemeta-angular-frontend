@@ -33,7 +33,11 @@
         $routeProvider.when('/logout', {templateUrl: partialsPath + 'logout.html', controller: 'Users.Logout'});
 
         $routeProvider.when('/packages/browse', {templateUrl: partialsPath + 'packages_browse.html', controller: 'DataPackages.List'});
-        $routeProvider.when('/packages/:uuid/channels/import', {templateUrl: partialsPath+ 'streams_import.html', controller: 'DataStreams.ImportFile'});
+        $routeProvider.when('/packages/:uuid/channels/import/csv', {templateUrl: partialsPath+ 'streams_import.html', controller: 'DataStreams.ImportFile'});
+            $routeProvider.when('/packages/:uuid/channels/import/trac', {
+                templateUrl: partialsPath + 'streams_import_trac.html',
+                controller: 'DataStreams.ImportTrac'
+            });
         $routeProvider.when('/packages/upload', {templateUrl: partialsPath + 'packages_upload.html', controller: 'DataPackages.ImportBVH'});
         $routeProvider.when('/packages/uploadosc', {templateUrl: partialsPath + 'packages_upload_osc.html', controller: 'DataPackages.ImportOSC'});
         $routeProvider.when('/packages/create', {templateUrl: partialsPath + 'packages_edit.html', controller: 'DataPackages.Create'});
