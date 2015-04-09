@@ -117,7 +117,7 @@ module.exports = function (grunt) {
                     'lib/modernizr/modernizr-custom.min.js',
                     'bower_components/angular/angular.min.js',
                     'bower_components/angular-sanitize/angular-sanitize.min.js',
-                    'bower_components/showdown/compressed/showdown.js',
+                    'bower_components/showdown/compressed/Showdown.min.js',
                     'bower_components/angular-bootstrap/ui-bootstrap.min.js',
                     'bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js',
                     'bower_components/angular-route/angular-route.min.js',
@@ -138,7 +138,7 @@ module.exports = function (grunt) {
                 src: [
                     'bower_components/angular/angular.min.js',
                     'bower_components/angular-sanitize/angular-sanitize.min.js',
-                    'bower_components/showdown/compressed/showdown.js',
+                    'bower_components/showdown/compressed/Showdown.min.js',
                     'bower_components/angular-bootstrap/ui-bootstrap.min.js',
                     'bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js',
                     'bower_components/angular-route/angular-route.min.js',
