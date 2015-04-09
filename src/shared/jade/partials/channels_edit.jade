@@ -16,7 +16,6 @@ form(name='dataChannelForm', role='form', ng-submit='submit()')
                     label.control-label(for='name') Title
                     input.input-lg.form-control(name='title', ng-model='data.dataChannel.title')
         .panel-body
-            a.btn.btn-success.btn-sm.pull-right(ng-href="{{ '/channels/' + data.dataChannel.uuid + '/streams/create' }}") Add stream
             h3 Data streams
             ul.list-group(ng-if='data.dataStreams')
                 li.list-group-item(ng-repeat='stream in data.dataStreams')

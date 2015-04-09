@@ -85,7 +85,7 @@
                                 return nextChannel(err);
                             }
                             for (var i in dataStreams) {
-                                $scope.data.streamStatus[dataStreams[i].uuid] = true;
+                                $scope.data.streamStatus[dataStreams[i].uuid] = false;
                             }
                             $scope.data.dataPackage.channels[$scope.data.dataPackage.channels.indexOf(channel)].streams = dataStreams;
                             nextChannel();
@@ -185,6 +185,7 @@
                     }
                 });
 
+                var tickStart;
                 var tick = function() {
                     var messages = [];
                     var addresses = {};
@@ -207,13 +208,17 @@
                             }
                         }
                     }
-                    osc.send(localStorage.getItem('osc-datahost'), parseInt(localStorage.getItem('osc-dataport')), osc.createBundle(messages));
+                    osc.send(localStorage.getItem('osc-datahost'), parseInt(localStorage.getItem('osc-dataport')), osc.createBundle(messages), function (err) {
+                        if (err) {
+                            console.log('send error', err);
+                        }
+                    });
                     $scope.data.frame += 1;
                     if ($scope.data.frame >= $scope.data.totalFrames) {
-                        $scope.data.frame = 0;
                         console.log('play took', window.performance.now() - tickStart);
+                        $scope.data.frame = 0;
+                        tickStart = window.performance.now();
                     }
-
                 };
 
                 var timer = new Tock({
@@ -233,6 +238,7 @@
                 $scope.rewind = function ($event) {
                     $scope.data.frame = 0;
                     $scope.playprogress = 0;
+                    tickStart = window.performance.now();
                 };
 
                 $scope.$on('$routeChangeStart', function (next, current) {
