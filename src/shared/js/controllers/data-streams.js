@@ -137,7 +137,7 @@
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('streams').actions.update($routeParams.uuid, $scope.dataStream, function (err, data_stream) {
+                    apiService('streams').actions.update($routeParams.uuid, $scope.data.dataStream, function (err, data_stream) {
                         if (err) {
                             console.log(err);
                             $scope.alerts = [
