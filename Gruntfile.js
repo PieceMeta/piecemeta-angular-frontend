@@ -129,6 +129,7 @@ module.exports = function (grunt) {
                     'bower_components/angular-markdown-directive/markdown.js',
                     'bower_components/async/lib/async.js',
                     'bower_components/bvh/bvh.min.js',
+                    'bower_components/Papa-Parse/papaparse.min.js',
                     'bower_components/piecemeta-apiclient/dist/piecemeta-apiclient.web.min.js',
                     'configuration.js'
                 ],
@@ -151,6 +152,7 @@ module.exports = function (grunt) {
                     'bower_components/async/lib/async.js',
                     'bower_components/bvh/bvh.min.js',
                     'bower_components/tock/tock.min.js',
+                    'bower_components/Papa-Parse/papaparse.min.js',
                     'bower_components/piecemeta-apiclient/dist/piecemeta-apiclient.web.min.js',
                     'configuration.js'
                 ],

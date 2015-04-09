@@ -457,18 +457,21 @@
             });
 
             $scope.parseLines = function (callback) {
-                var lines = fileData.split('\n');
-                var headerLines = lines.splice(0, 6);
+
+                var lines = Papa.parse(fileData).data;
+                var headerLines = lines.splice(0, 5);
 
                 // drop the framenumber
-                var labels = headerLines[3].split('\t');
+                var labels = headerLines[3];
                 labels.splice(0, 1);
-                var props = headerLines[4].split('\t');
+                var props = headerLines[4];
                 props.splice(0, 2);
 
-                var propertyCount = props.length + 1;
+                while (props[props.length - 1] === null || props[props.length - 1] === "") {
+                    props.pop();
+                }
 
-                //console.log(props);
+                var propertyCount = props.length + 1;
 
                 // remove empty labels
                 labels = labels.filter(function (v) {
@@ -479,7 +482,7 @@
 
                 async.waterfall([
                     function (cb) {
-                        $scope.data.fps = parseFloat(headerLines[2].split('\t')[0]);
+                        $scope.data.fps = parseFloat(headerLines[2][0]);
                         $scope.frameCount = lines.length;
                         $scope.fileLines = lines.slice(Math.abs(parseInt($scope.data.startFrame)), 10);
                         cb();
@@ -500,7 +503,7 @@
                             async.each(xyz, function (streamlabel, nextStreamLabel) {
                                 var stream = {
                                     channel_uuid: $scope.data.selectedChannel.uuid,
-                                    title: streamlabel,
+                                    title: streamlabel.replace(/[0-9]/g, ''),
                                     group: label,
                                     frames: [],
                                     fps: $scope.data.fps
@@ -514,7 +517,7 @@
                     },
                     function (cb) {
                         for (var i in lines) {
-                            var values = lines[i].split('\t');
+                            var values = lines[i];
                             // drop framenumber
                             values.splice(0, 1);
                             if (propertyCount !== values.length) {
