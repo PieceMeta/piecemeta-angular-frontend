@@ -106,7 +106,13 @@
                 },
                 function (dataStreams, cb) {
                     if (dataStreams.length > 0) {
-                        $scope.data.dataStreams = dataStreams;
+                        $scope.data.dataStreams = dataStreams.sort(function (a, b) {
+                            if (a.group < b.group)
+                                return -1;
+                            if (a.group > b.group)
+                                return 1;
+                            return 0;
+                        });
                     }
                     cb(null);
                 }

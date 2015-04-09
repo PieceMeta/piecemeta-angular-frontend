@@ -75,7 +75,13 @@
                     apiService('packages/' + $scope.data.dataPackage.uuid + '/channels', $scope.data.baseUrl).actions.all(cb);
                 },
                 function (dataChannels, cb) {
-                    $scope.data.dataPackage.channels = dataChannels;
+                    $scope.data.dataPackage.channels = dataChannels.sort(function (a, b) {
+                        if (a.title < b.title)
+                            return -1;
+                        if (a.title > b.title)
+                            return 1;
+                        return 0;
+                    });
                     cb(null);
                 },
                 function (cb) {

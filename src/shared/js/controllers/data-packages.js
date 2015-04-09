@@ -536,7 +536,13 @@
                     apiService('packages/' + $scope.data.dataPackage.uuid + '/channels').actions.all(cb);
                 },
                 function (dataChannels, cb) {
-                    $scope.data.dataPackage.channels = dataChannels;
+                    $scope.data.dataPackage.channels = dataChannels.sort(function (a, b) {
+                        if (a.title < b.title)
+                            return -1;
+                        if (a.title > b.title)
+                            return 1;
+                        return 0;
+                    });
                     cb(null);
                 },
                 function (cb) {
@@ -600,7 +606,13 @@
                 if (err) {
                     return console.log('error getting packages', err);
                 }
-                $scope.data.data_packages = data_packages;
+                $scope.data.data_packages = data_packages.sort(function (a, b) {
+                    if (a.title < b.title)
+                        return -1;
+                    if (a.title > b.title)
+                        return 1;
+                    return 0;
+                });
                 $scope.$apply();
             });
         }])
@@ -716,7 +728,13 @@
                         return console.log('error getting channels', err);
                     }
                     if (data_channels.length > 0) {
-                        $scope.dataChannels = data_channels;
+                        $scope.dataChannels = data_channels.sort(function (a, b) {
+                            if (a.title < b.title)
+                                return -1;
+                            if (a.title > b.title)
+                                return 1;
+                            return 0;
+                        });
                     }
                     deferred.resolve();
                     $scope.$apply();
