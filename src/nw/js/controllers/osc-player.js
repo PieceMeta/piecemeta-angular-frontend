@@ -6,6 +6,27 @@
             'angularFileUpload',
             'chartjs'
         ])
+        .controller('OscPlayer.Load', ['$scope', '$location', function ($scope, $location) {
+            $scope.loadPackage = function () {
+                console.log("called!", $scope.dataURL);
+                if ($scope.dataURL) {
+                    var urlparts = $scope.dataURL.split('/'),
+                        path = '/oscplayer/' + urlparts.pop();
+                    urlparts.pop();
+                    path += '/play?host=' + urlparts.join('/');
+                    console.log(path);
+                    $location.url(path);
+                } else {
+                    $scope.alerts = [
+                        {
+                            type: 'danger',
+                            msg: 'You need to enter a URL.'
+                        }
+                    ];
+                    $scope.$apply();
+                }
+            };
+        }])
         .controller('OscPlayer.Play', ['$scope', '$q', '$routeParams', 'apiService', function ($scope, $q, $routeParams, apiService) {
             $scope.data = {
                 dataChannels: [],
@@ -17,9 +38,11 @@
                 frame: 0,
                 totalFrames: 0,
                 fps: 0,
+                baseUrl: $routeParams.host,
                 targetHost: '127.0.0.1',
                 targetPort: 8000
             };
+            console.log($scope.data);
             $scope.playprogress = 0;
             $scope.updateTimeout = null;
             var deferred = $q.defer();
@@ -35,21 +58,21 @@
 
             async.waterfall([
                 function (cb) {
-                    apiService('packages').actions.find($routeParams.uuid, cb);
+                    apiService('packages', $scope.data.baseUrl).actions.find($routeParams.uuid, cb);
                 },
                 function (dataPackage, cb) {
-                    apiService('users').actions.find(dataPackage.user_uuid, function (err, user) {
+                    apiService('users', $scope.data.baseUrl).actions.find(dataPackage.user_uuid, function (err, user) {
                         cb(err, dataPackage, user);
                     });
                 },
                 function (dataPackage, user, cb) {
                     $scope.data.dataPackage = dataPackage;
                     $scope.data.packageAuthor = user;
-                    $scope.data.dataURL = PIECEMETA_API_HOST + '/packages/' + dataPackage.uuid;
+                    $scope.data.dataURL = $scope.data.baseUrl + '/packages/' + dataPackage.uuid;
                     cb(null);
                 },
                 function (cb) {
-                    apiService('packages/' + $scope.data.dataPackage.uuid + '/channels').actions.all(cb);
+                    apiService('packages/' + $scope.data.dataPackage.uuid + '/channels', $scope.data.baseUrl).actions.all(cb);
                 },
                 function (dataChannels, cb) {
                     $scope.data.dataPackage.channels = dataChannels;
@@ -57,7 +80,7 @@
                 },
                 function (cb) {
                     async.eachSeries($scope.data.dataPackage.channels, function (channel, nextChannel) {
-                        apiService('channels/' + channel.uuid + '/streams').actions.all(function (err, dataStreams) {
+                        apiService('channels/' + channel.uuid + '/streams', $scope.data.baseUrl).actions.all(function (err, dataStreams) {
                             if (err) {
                                 return nextChannel(err);
                             }

@@ -21,11 +21,11 @@
 
             var partialsPath = 'partials/';
 
-            $routeProvider.when('/packages/browse', {templateUrl: partialsPath + 'oscplayer_packages_browse.html', controller: 'DataPackages.List'});
+            $routeProvider.when('/oscplayer/load', {templateUrl: partialsPath + 'oscplayer_packages_browse.html', controller: 'OscPlayer.Load'});
             $routeProvider.when('/oscplayer/settings', {templateUrl: partialsPath + 'oscplayer_settings.html', controller: 'OscPlayer.Settings'});
             $routeProvider.when('/oscplayer/:uuid/play', {templateUrl: partialsPath + 'oscplayer_play.html', controller: 'OscPlayer.Play'});
 
-            $routeProvider.otherwise({redirectTo: '/packages/browse'});
+            $routeProvider.otherwise({redirectTo: '/oscplayer/load'});
 
         }]).run(['$rootScope', '$q', function ($rootScope, $q) {
 

@@ -1,9 +1,9 @@
 angular.module('piecemeta-web.services.api', []).
 factory('apiService', ['authService', function (authService) {
     'use strict';
-    return function (resourceName) {
+    return function (resourceName, host) {
         var apiClient = PMApi({
-            host: PIECEMETA_API_HOST,
+            host: host ? host : PIECEMETA_API_HOST,
             contentType: 'application/json',
             api_key: authService.api_key,
             access_token: authService.access_token

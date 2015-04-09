@@ -1,10 +1,10 @@
 .row.bottom-space
     .col-sm-10
-        input.col-sm-12.input-lg.form-control(type="text", ng-model="dataUrl", placeholder="Package URL")
+        input.col-sm-12.input-lg.form-control(type="text", ng-model="dataURL", placeholder="Package URL")
     .col-sm-2
-        .btn.btn-primary.btn-lg.col-sm-12 Load
+        a.btn.btn-primary.btn-lg.col-sm-12(href="#", ng-click="loadPackage()") Load
 
-.row
+.row(ng-if='data.localPackages')
     .col-sm-12
         .panel.panel-default
             .panel-heading

@@ -163,7 +163,6 @@
                 $scope.dataPackage = null;
                 $scope.dataChannels = [];
                 var reader = new FileReader();
-                console.log('select');
                 reader.onload = function (onLoadEvent) {
                     console.log('onload');
                     async.waterfall([
@@ -445,11 +444,7 @@
 
                 $scope.data.streamGroups = [];
 
-                for (var ch in $scope.data.dataPackage.channels) {
-                    if ($scope.data.dataPackage.channels[ch].id === $scope.data.currentChannel) {
-                        channel = $scope.data.dataPackage.channels[ch];
-                    }
-                }
+                channel = $scope.data.currentChannel;
 
                 if (!channel) {
                     return;
@@ -489,9 +484,6 @@
                             }
                             if ($scope.data.streamGroups.indexOf(channel.streams[i].group) < 0) {
                                 $scope.data.streamGroups.push(channel.streams[i].group);
-                                if (!$scope.data.currentGroup) {
-                                    $scope.data.currentGroup = channel.streams[i].group;
-                                }
                             }
                         }
                     } else {
@@ -511,12 +503,17 @@
                     labels.push('');
                 }
 
+                $scope.data.streamGroups = $scope.data.streamGroups.sort();
+
+                if (!$scope.data.currentGroup) {
+                    $scope.data.currentGroup = $scope.data.streamGroups[0];
+                }
+
                 var dataSetChart = {
                     labels: labels,
                     datasets: finalDataSets
                 };
 
-                $scope.data.streamGroups = $scope.data.streamGroups.sort();
                 $scope.data.chartSetup.graphDataSet = dataSetChart;
             };
 
@@ -558,13 +555,8 @@
                 function (cb) {
                     for (var idx in $scope.data.dataPackage.channels) {
                         if (typeof $scope.data.dataPackage.channels[idx] === 'object') {
-                            if ($scope.data.dataPackage.channels[idx].streams.length > 0 &&
-                                $scope.data.dataPackage.channels[idx].streams.length > 0 &&
-                                $scope.data.dataPackage.channels[idx].streams[0].frames.length > 0) {
-                                $scope.data.dataChannels.push({
-                                    title: $scope.data.dataPackage.channels[idx].title,
-                                    id: $scope.data.dataPackage.channels[idx].uuid
-                                });
+                            if ($scope.data.dataPackage.channels[idx].streams.length > 0) {
+                                $scope.data.dataChannels.push($scope.data.dataPackage.channels[idx]);
                             }
                         }
                     }
@@ -572,7 +564,7 @@
                 },
                 function (cb) {
                     if ($scope.data.dataChannels.length > 0) {
-                        $scope.data.currentChannel = $scope.data.dataChannels[0].uuid;
+                        $scope.data.currentChannel = $scope.data.dataChannels[0];
                     }
                     cb(null);
                 },
@@ -584,10 +576,10 @@
                     $scope.$watch('data.currentChannel', function (newVal, oldVal) {
                         $scope.data.currentGroup = null;
                         $scope.updateChart();
-                    });
+                    }, true);
                     $scope.$watch('data.currentGroup', function (newVal, oldVal) {
                         $scope.updateChart();
-                    });
+                    }, true);
                     cb(null);
                 }
             ], function (err) {
