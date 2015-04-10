@@ -79,7 +79,7 @@
                 };
             });
         }])
-        .controller('DataStreams.Edit', ['$scope', '$routeParams', '$q', 'apiService', function ($scope, $routeParams, $q, apiService) {
+        .controller('DataStreams.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
             var deferred = $q.defer();
             $scope.data = {};
             $scope.promiseString = 'Loading stream...';
@@ -158,7 +158,27 @@
                         deferred.resolve();
                     });
                 };
-
+                $scope.deleteCurrentItem = function () {
+                    if (window.confirm('Do you really want to delete this stream?')) {
+                        var deferred = $q.defer();
+                        $scope.promiseString = 'Deleting data stream...';
+                        $scope.promise = deferred.promise;
+                        apiService('streams').actions.remove($routeParams.uuid, function (err) {
+                            if (err) {
+                                $scope.alerts = [
+                                    {
+                                        type: 'danger',
+                                        msg: 'Failed to delete stream.'
+                                    }
+                                ];
+                                deferred.reject(err);
+                                return console.log('error deleting stream', err);
+                            }
+                            deferred.resolve();
+                            $location.path('/channels/' + $scope.data.dataChannel.uuid + '/edit');
+                        });
+                    }
+                };
                 $scope.onFileSelect = function ($files) {
                     var reader = new FileReader();
                     reader.onload = function (onLoadEvent) {

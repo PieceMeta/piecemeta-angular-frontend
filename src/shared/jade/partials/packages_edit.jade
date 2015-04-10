@@ -21,6 +21,7 @@ form(name='dataSequenceForm', role='form', ng-submit='submit()')
                         textarea.form-control(rows='6', name='description', ng-model='dataPackage.description')
 
         .panel-footer.btn-group-lg.text-right
+            input.btn.btn-default.btn-lg.spacer-right(type='button', value='Delete package', ng-click="deleteCurrentItem()")
             input.btn.btn-primary.btn-lg(type='submit', value='Save package')
 
         .panel-body(ng-if="dataPackage.uuid")

@@ -649,7 +649,7 @@
                 });
             };
         }])
-        .controller('DataPackages.Edit', ['$scope', '$routeParams', '$q', 'apiService', function ($scope, $routeParams, $q, apiService) {
+        .controller('DataPackages.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
             var deferred = $q.defer();
             $scope.promiseString = 'Loading Package...';
             $scope.promise = deferred.promise;
@@ -657,26 +657,81 @@
 
             $scope.deleteChannel = function (channel, $event) {
                 $event.preventDefault();
-                if (window.confirm('Do you really want to delete this channel?')) {
-                    $scope.promiseString = 'Deleting Channel...';
+                if (window.confirm('Do you really want to delete this channel and all attached streams?')) {
+                    var deferred = $q.defer();
+                    $scope.promiseString = 'Deleting channel and streams...';
                     $scope.promise = deferred.promise;
-                    $scope.dataChannels.splice($scope.dataChannels.indexOf(channel), 1);
-                    apiService('channels').actions.remove(channel.uuid, function (err) {
-                            if (err) {
-                                $scope.alerts = [
-                                    {
-                                        type: 'danger',
-                                        msg: 'Failed to delete Channel.'
-                                    }
-                                ];
-                                deferred.reject(err);
-                                return console.log('error deleting channel', err);
-                            }
-                            deferred.resolve();
-                        });
+                    async.waterfall([
+                        function (cb) {
+                            apiService('channels/' + channel.uuid + '/streams').actions.all(function (err, streams) {
+                                async.each(streams, function (stream, nextStream) {
+                                    apiService('streams').actions.remove(stream.uuid, nextStream);
+                                }, cb);
+                            });
+                        },
+                        function (cb) {
+                            apiService('channels').actions.remove(channel.uuid, cb);
+                        }
+                    ], function (err) {
+                        if (err) {
+                            $scope.alerts = [
+                                {
+                                    type: 'danger',
+                                    msg: 'Failed to delete channel.'
+                                }
+                            ];
+                            deferred.reject(err);
+                            return console.log('error deleting channel', err);
+                        }
+                        deferred.resolve();
+                        $scope.dataChannels.splice($scope.dataChannels.indexOf(channel), 1);
+                        $scope.$apply();
+                    });
                 }
             };
-
+            $scope.deleteCurrentItem = function () {
+                if (window.confirm('Do you really want to delete this package and all attached channels and streams?')) {
+                    var deferred = $q.defer();
+                    $scope.promiseString = 'Deleting package, channels and streams...';
+                    $scope.promise = deferred.promise;
+                    async.waterfall([
+                        function (cb) {
+                            apiService('packages/' + $routeParams.uuid + '/channels').actions.all(cb);
+                        },
+                        function (channels, cb) {
+                            async.each(channels, function (channel, next) {
+                                apiService('channels/' + channel.uuid + '/streams').actions.all(function (err, streams) {
+                                    async.each(streams, function (stream, nextStream) {
+                                        apiService('streams').actions.remove(stream.uuid, nextStream);
+                                    }, function (err) {
+                                        if (err) {
+                                            next(err);
+                                        } else {
+                                            apiService('channels').actions.remove(channel.uuid, next);
+                                        }
+                                    });
+                                });
+                            }, cb);
+                        },
+                        function (cb) {
+                            apiService('packages').actions.remove($routeParams.uuid, cb);
+                        }
+                    ], function (err) {
+                        if (err) {
+                            $scope.alerts = [
+                                {
+                                    type: 'danger',
+                                    msg: 'Failed to delete package.'
+                                }
+                            ];
+                            deferred.reject(err);
+                            return console.log('error deleting package', err);
+                        }
+                        deferred.resolve();
+                        $location.path('/packages/browse');
+                    });
+                }
+            };
             $scope.submit = function () {
                 var deferred = $q.defer();
                 $scope.promiseString = 'Saving...';

@@ -70,7 +70,7 @@
 
 
         }])
-        .controller('DataChannels.Edit', ['$scope', '$routeParams', '$q', 'apiService', function ($scope, $routeParams, $q, apiService) {
+        .controller('DataChannels.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
             var deferred = $q.defer();
             $scope.data = {};
             $scope.promiseString = 'Loading channel...';
@@ -132,6 +132,7 @@
                 $scope.deleteStream = function (stream, $event) {
                     $event.preventDefault();
                     if (window.confirm('Do you really want to delete this stream?')) {
+                        var deferred = $q.defer();
                         $scope.promiseString = 'Deleting data stream...';
                         $scope.promise = deferred.promise;
                         $scope.data.dataStreams.splice($scope.data.dataStreams.indexOf(stream), 1);
@@ -154,6 +155,38 @@
                             ];
                             deferred.resolve();
                             $scope.$apply();
+                        });
+                    }
+                };
+                $scope.deleteCurrentItem = function () {
+                    if (window.confirm('Do you really want to delete this channel and all attached streams?')) {
+                        var deferred = $q.defer();
+                        $scope.promiseString = 'Deleting channel and streams...';
+                        $scope.promise = deferred.promise;
+                        async.waterfall([
+                            function (cb) {
+                                    apiService('channels/' + $routeParams.uuid + '/streams').actions.all(function (err, streams) {
+                                        async.each(streams, function (stream, nextStream) {
+                                            apiService('streams').actions.remove(stream.uuid, nextStream);
+                                        }, cb);
+                                    });
+                            },
+                            function (cb) {
+                                apiService('channels').actions.remove($routeParams.uuid, cb);
+                            }
+                        ], function (err) {
+                            if (err) {
+                                $scope.alerts = [
+                                    {
+                                        type: 'danger',
+                                        msg: 'Failed to delete channel.'
+                                    }
+                                ];
+                                deferred.reject(err);
+                                return console.log('error deleting channel', err);
+                            }
+                            deferred.resolve();
+                            $location.path('/packages/' + $scope.data.dataPackage.uuid + '/edit');
                         });
                     }
                 };
