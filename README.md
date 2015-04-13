@@ -1,5 +1,7 @@
 # PieceMeta Angular Frontends #
 
+[![Code Climate](https://codeclimate.com/github/PieceMeta/piecemeta-angular-frontend/badges/gpa.svg)](https://codeclimate.com/github/PieceMeta/piecemeta-angular-frontend) [![devDependency Status](https://david-dm.org/PieceMeta/piecemeta-angular-frontend/dev-status.svg)](https://david-dm.org/PieceMeta/piecemeta-angular-frontend#info=devDependencies)
+
 The Web and NodeWebkit frontends based on [AngularJS](https://angularjs.org/) for the [PieceMeta](http://www.piecemeta.com) service.
 
 ## Web Frontend ##
@@ -24,9 +26,11 @@ To watch and rebuild automatically:
 grunt watch:web
 ```
 
-## NodeWebkit Frontend (Coming soon) ##
+## NodeWebkit Frontend ##
 
-Once built you'll find the resulting app in the ``build`` folder. The frontend for a local Node-Webkit application can be built with:
+To build the native modules you need [nw-gyp](https://github.com/nwjs/nw-gyp) and [node-pre-gyp](https://github.com/mapbox/node-pre-gyp).
+
+Once built you'll find the resulting app in the ``build`` folder. To build a Node-Webkit application, edit `Gruntfile.js` and enter your platform at the bottom in the `nodewebkit` task. It can then be built with:
 
 ```shell
 npm install
@@ -37,7 +41,20 @@ cd ..
 grunt build-nw
 ```
 
-To watch and rebuild automatically:
+After the basic build you need to perform these steps to rebuild the native modules for your architecture. You only need to do this one time, the binaries are reused each time you run the grunt task.
+
+```shell
+cd dist/nw/node_modules/osc/node_modules/serialport
+node-pre-gyp rebuild --target=0.12.0 --runtime=node-webkit
+cd ../ws/node_modules/bufferutil
+nw-gyp configure --target=0.12.0
+nw-gyp build
+cd ../utf-8-validate
+nw-gyp configure --target=0.12.0
+nw-gyp build
+```
+
+To watch and rebuild JS and HTML automatically:
 
 ```shell
 grunt watch:nw
