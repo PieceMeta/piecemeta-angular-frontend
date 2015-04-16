@@ -1,5 +1,5 @@
 angular.module('piecemeta-nw.services.db', []).
-    factory('apiService', function () {
+    factory('dbService', function () {
         'use strict';
         return function (resourceName) {
             var Datastore = require('nedb'),

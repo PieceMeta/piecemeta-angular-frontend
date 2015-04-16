@@ -6,7 +6,6 @@ module.exports = function (grunt) {
             web: {
                 files: {
                     'dist/web/css/piecemeta-frontend.css': [
-                        'src/shared/less/site.less',
                         'src/web/less/site.less'
                     ]
                 },
@@ -18,8 +17,7 @@ module.exports = function (grunt) {
             nw: {
                 files: {
                     'dist/nw/approot/css/piecemeta-frontend.css': [
-                        'src/shared/less/site.less',
-                        'src/nw/less/site.less'
+                        'src/nw/less/app.less'
                     ]
                 },
                 options: {
@@ -208,6 +206,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-node-webkit-builder');
 
     grunt.registerTask('build-nw', [

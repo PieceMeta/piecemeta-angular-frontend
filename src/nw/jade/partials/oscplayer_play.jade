@@ -25,11 +25,12 @@
                 tbody(ng-repeat="channel in data.dataPackage.channels")
                     tr
                         th
+                            input(type='checkbox', ng-model='data.channelStatus[channel.uuid]')
                         th {{ channel.title }}
                         th
-                    tr(ng-repeat="stream in channel.streams")
+                    tr(ng-repeat="group in data.streamGroups[channel.uuid].groups")
                         td
-                            input(type='checkbox', ng-model='data.streamStatus[stream.uuid]')
+                            input(type='checkbox', ng-model='data.groupStatus[group.uuid]')
                         td /{{ channel.title }}/{{ stream.group }}
                         td {{ stream.title }}
         .panel.panel-default#info(ng-if="selected_nav == 'info'")

@@ -1,11 +1,7 @@
 (function () {
     'use strict';
     angular.module(
-        'piecemeta-nw.controllers.osc-player',
-        [
-            'angularFileUpload',
-            'chartjs'
-        ])
+        'piecemeta-nw.controllers.osc-player', [])
         .controller('OscPlayer.Load', ['$scope', '$location', function ($scope, $location) {
             $scope.loadPackage = function () {
                 console.log("called!", $scope.dataURL);
@@ -30,10 +26,12 @@
         .controller('OscPlayer.Play', ['$scope', '$q', '$routeParams', 'apiService', function ($scope, $q, $routeParams, apiService) {
             $scope.data = {
                 dataChannels: [],
-                streamGroups: [],
+                streamGroups: {},
                 dataPackage: null,
                 currentGroup: null,
                 streamStatus: {},
+                groupStatus: {},
+                channelStatus: {},
                 channelIndex: 0,
                 frame: 0,
                 totalFrames: 0,
@@ -82,6 +80,9 @@
                             return 1;
                         return 0;
                     });
+                    for (var i in $scope.data.dataPackage.channels) {
+                        $scope.data.channelStatus[$scope.data.dataPackage.channels[i].uuid] = true;
+                    }
                     cb(null);
                 },
                 function (cb) {
@@ -90,8 +91,24 @@
                             if (err) {
                                 return nextChannel(err);
                             }
+                            if (typeof $scope.data.streamGroups[channel.uuid] === 'undefined') {
+                                $scope.data.streamGroups[channel.uuid] = { groups: {}, nogroup: [] };
+                            }
                             for (var i in dataStreams) {
-                                $scope.data.streamStatus[dataStreams[i].uuid] = false;
+                                if (dataStreams[i].group) {
+                                    if (typeof $scope.data.streamGroups[channel.uuid][dataStreams[i].group] === 'undefined') {
+                                        $scope.data.streamGroups[channel.uuid].groups[dataStreams[i].uuid] =  {
+                                            title: dataStreams[i].group,
+                                            streams: [dataStreams[i]]
+                                        };
+                                    } else {
+                                        $scope.data.streamGroups[channel.uuid].groups[dataStreams[i].group].streams.push(dataStreams[i]);
+                                    }
+                                    $scope.data.groupStatus[dataStreams[i].group] = true;
+                                } else {
+                                    $scope.data.streamGroups[channel.uuid].nogroup.push(dataStreams[i]);
+                                }
+                                $scope.data.streamStatus[dataStreams[i].uuid] = true;
                             }
                             $scope.data.dataPackage.channels[$scope.data.dataPackage.channels.indexOf(channel)].streams = dataStreams;
                             nextChannel();
@@ -196,21 +213,23 @@
                     var messages = [];
                     var addresses = {};
                     for (var i in pkg.channels) {
-                        for (var n in pkg.channels[i].streams) {
-                            var address = '/' + pkg.channels[i].title;
-                            address += pkg.channels[i].streams[n].group ? '/' + pkg.channels[i].streams[n].group : '';
-                            if (!addresses[address]) {
-                                addresses[address] = [];
-                            }
-                            if (pkg.channels[i].streams[n].frames[$scope.data.frame]) {
-                                if ($scope.data.streamStatus[pkg.channels[i].streams[n].uuid] === true) {
-                                    addresses[address].push(pkg.channels[i].streams[n].frames[$scope.data.frame]);
+                        if ($scope.data.channelStatus[pkg.channels[i].uuid] === true) {
+                            for (var n in pkg.channels[i].streams) {
+                                var address = '/' + pkg.channels[i].title;
+                                address += pkg.channels[i].streams[n].group ? '/' + pkg.channels[i].streams[n].group : '';
+                                if (!addresses[address]) {
+                                    addresses[address] = [];
+                                }
+                                if (pkg.channels[i].streams[n].frames[$scope.data.frame]) {
+                                    if ($scope.data.streamStatus[pkg.channels[i].streams[n].uuid] === true) {
+                                        addresses[address].push(pkg.channels[i].streams[n].frames[$scope.data.frame]);
+                                    }
                                 }
                             }
-                        }
-                        for (var address in addresses) {
-                            if (addresses[address].length > 0) {
-                                messages.push(osc.createMessage(address, addresses[address]));
+                            for (var address in addresses) {
+                                if (addresses[address].length > 0) {
+                                    messages.push(osc.createMessage(address, addresses[address]));
+                                }
                             }
                         }
                     }
