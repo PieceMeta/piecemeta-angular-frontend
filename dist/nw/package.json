@@ -1,11 +1,11 @@
 {
   "name": "PieceMetaOSC",
   "main": "approot/index.html",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "chromium-args": "--js-flags=--harmony",
   "window": {
     "title": "PieceMeta OSC",
-    "toolbar": true,
+    "toolbar": false,
     "frame": true,
     "fullscreen": false,
     "kiosk": false,
