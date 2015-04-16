@@ -120,7 +120,7 @@ gulp.task('html-web', function () {
 });
 
 gulp.task('html-nw', function () {
-    return gulp.src(['./src/shared/jade/**/*.jade', './src/web/jade/**/*.jade'])
+    return gulp.src(['./src/shared/jade/**/*.jade', './src/nw/jade/**/*.jade'])
         .pipe(jade())
         .pipe(gulp.dest('./dist/nw/approot/'));
 });
