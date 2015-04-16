@@ -1,14 +1,15 @@
-var gulp = require('gulp');
-var header = require('gulp-header');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var rename = require('gulp-rename');
-var jade = require('gulp-jade');
-var less = require('gulp-less');
-var minify = require('gulp-minify-css');
-var modernizr = require('gulp-modernizr');
+var gulp = require('gulp'),
+    header = require('gulp-header'),
+    concat = require('gulp-concat'),
+    uglify = require('gulp-uglify'),
+    rename = require('gulp-rename'),
+    jade = require('gulp-jade'),
+    less = require('gulp-less'),
+    minify = require('gulp-minify-css'),
+    modernizr = require('gulp-modernizr'),
+    watch = require('gulp-watch'),
+    pkg = require('./package.json');
 
-var pkg = require('./package.json');
 var banner = ['/**',
     ' * <%= pkg.name %> - <%= pkg.description %>',
     ' * @version v<%= pkg.version %>',
@@ -150,7 +151,6 @@ gulp.task('html-nw', function () {
 // NW app
 
 gulp.task('build-webkit-app', function (cb) {
-    // uses ./build by default
     var NwBuilder = require('node-webkit-builder');
     var nw = new NwBuilder({
         files: './dist/nw/**/**',
@@ -165,6 +165,23 @@ gulp.task('build-webkit-app', function (cb) {
     nw.on('log', console.log);
     nw.build(function (err) {
         cb(err);
+    });
+});
+
+
+//
+//
+// Watch tasks
+
+gulp.task('watch-web', function () {
+    watch(['src/web/js/**/*.js', 'src/shared/js/**/*.js', 'configuration.js'], function () {
+        gulp.start('js-web');
+    });
+    watch('src/web/less/**/*.less', function () {
+        gulp.start('css-web');
+    });
+    watch(['src/web/jade/**/*.jade', 'src/shared/jade/**/*.js'], function () {
+        gulp.start('html-web');
     });
 });
 
