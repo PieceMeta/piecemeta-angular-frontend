@@ -92,7 +92,7 @@
                             }
                             for (var i in dataStreams) {
                                 if (dataStreams[i].group) {
-                                    $scope.data.groupStatus[dataStreams[i].group] = false;
+                                    $scope.data.groupStatus[dataStreams[i].group] = true;
                                 }
                                 $scope.data.streamStatus[dataStreams[i].uuid] = true;
                             }
@@ -207,7 +207,7 @@
                             }
                             if (pkg.channels[i].streams[n].frames[$scope.data.frame]) {
                                 if ($scope.data.streamStatus[pkg.channels[i].streams[n].uuid] === true
-                                    && (pkg.channels[i].streams[n].group && $scope.data.groupStatus[pkg.channels[i].streams[n].group] === true)) {
+                                    && (!pkg.channels[i].streams[n].group || $scope.data.groupStatus[pkg.channels[i].streams[n].group] === true)) {
                                     addresses[address].push(pkg.channels[i].streams[n].frames[$scope.data.frame]);
                                 }
                             }

@@ -6,6 +6,7 @@ var rename = require('gulp-rename');
 var jade = require('gulp-jade');
 var less = require('gulp-less');
 var minify = require('gulp-minify-css');
+var modernizr = require('gulp-modernizr');
 
 var pkg = require('./package.json');
 var banner = ['/**',
@@ -20,7 +21,24 @@ var banner = ['/**',
 //
 // JS building
 
-gulp.task('js-deps', function () {
+gulp.task('modernizr', function () {
+    return gulp.src('./src/**/*.js')
+        .pipe(modernizr('modernizr-custom.min.js', {
+            "extra": {
+                "shiv": false,
+                "load": false,
+                "cssclasses": false
+            },
+            "uglify": true,
+            "tests": ['fontface', 'localstorage', 'canvas', 'hashchange'],
+            "parseFiles": true,
+            "matchCommunityTests": false,
+            "customTests": []
+        }))
+        .pipe(gulp.dest("lib/modernizr"))
+});
+
+gulp.task('js-deps', ['modernizr'], function () {
     return gulp.src([
             'bower_components/ng-file-upload/angular-file-upload-html5-shim.min.js',
             'lib/modernizr/modernizr-custom.min.js',
@@ -38,6 +56,7 @@ gulp.task('js-deps', function () {
             'bower_components/angular-markdown-directive/markdown.js',
             'bower_components/async/lib/async.js',
             'bower_components/bvh/bvh.min.js',
+            'bower_components/tock/tock.min.js',
             'bower_components/Papa-Parse/papaparse.min.js',
             'bower_components/piecemeta-apiclient/dist/piecemeta-apiclient.web.min.js'
         ])

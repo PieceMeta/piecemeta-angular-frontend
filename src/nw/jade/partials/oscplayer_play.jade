@@ -25,7 +25,6 @@
                 tbody(ng-repeat="channel in data.dataPackage.channels")
                     tr
                         th
-                            input(type='checkbox', ng-model='data.groupStatus[stream.group]')
                         th {{ channel.title }}
                         th
                     tr(ng-repeat="stream in channel.streams")
