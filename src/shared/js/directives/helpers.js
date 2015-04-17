@@ -1,3 +1,4 @@
+/* global console,angular */
 angular.module('piecemeta-web.directives.helpers', [
         'piecemeta-web.services.api',
         'piecemeta-web.services.auth'

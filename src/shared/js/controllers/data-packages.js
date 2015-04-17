@@ -7,9 +7,11 @@
         [
             'angularFileUpload',
             'piecemeta-web.services.api',
+            'piecemeta-web.services.importers.json',
+            'piecemeta-web.services.importers.bvh',
             'chartjs'
         ])
-        .controller('DataPackages.ImportBVH', ['$scope', '$q', 'authService', 'apiService', function ($scope, $q, authService, apiService) {
+        .controller('DataPackages.ImportBVH', ['$scope', '$q', 'bvhImportService', function ($scope, $q, bvhImportService) {
             $scope.file = null;
             $scope.onFileSelect = function ($files) {
                 var deferred = $q.defer();
@@ -18,138 +20,18 @@
 
                 $scope.file = $files[0];
                 $scope.dataPackage = null;
-                $scope.dataChannels = [];
                 var reader = new FileReader();
                 reader.onload = function (onLoadEvent) {
-                    async.waterfall([
-                        function (cb) {
-                            cb(null, BVH.parse(onLoadEvent.target.result));
-                        },
-                        function (motion, cb) {
-                            $scope.motion = motion;
-                            cb(null);
-                        },
-                        function (cb) {
-                            var dataPackage = {
-                                title: $files[0].name
-                            };
-                            apiService('packages').actions.create(dataPackage, function (err, dataPackage) {
-                                cb(err, dataPackage);
-                            });
-                        },
-                        function (dataPackage, cb) {
-                            $scope.dataPackage = dataPackage;
-                            cb(null);
-                        },
-                        function (cb) {
-                            async.eachSeries($scope.motion.nodeList, function (node, nextNode) {
-                                var dataChannel = {
-                                    title: node.id,
-                                    package_uuid: $scope.dataPackage.uuid
-                                };
-                                apiService('channels').create(dataChannel, function (err, dataChannel) {
-                                    if (err) {
-                                        return nextNode(err);
-                                    }
-                                    $scope.dataChannels.push(dataChannel);
-                                    var dataStreams = [
-                                        {
-                                            title: 'x',
-                                            group: 'position',
-                                            value_offset: node.offsetX
-                                        },
-                                        {
-                                            title: 'y',
-                                            group: 'position',
-                                            value_offset: node.offsetY
-                                        },
-                                        {
-                                            title: 'z',
-                                            group: 'position',
-                                            value_offset: node.offsetZ
-                                        },
-                                        {
-                                            title: 'z',
-                                            group: 'rotation'
-                                        },
-                                        {
-                                            title: 'y',
-                                            group: 'rotation'
-                                        },
-                                        {
-                                            title: 'x',
-                                            group: 'rotation'
-                                        }
-                                    ];
-                                    for (var i in dataStreams) {
-                                        if (typeof dataStreams[i] === 'object') {
-                                            dataStreams[i].frames = [];
-                                            dataStreams[i].fps = parseFloat((1.0 / $scope.motion.frameTime).toFixed(2));
-                                        }
-                                    }
-                                    for (var f in node.frames) {
-                                        if (typeof node.frames[f] === 'object') {
-                                            var frameSource = node.frames[f];
-                                            for (var n in frameSource) {
-                                                if (typeof frameSource[n] === 'number') {
-                                                    dataStreams[n].frames.push(frameSource[n]);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    async.eachSeries(dataStreams, function (dataStream, nextStream) {
-                                        dataStream.channel_uuid = dataChannel.uuid;
-                                        apiService('streams').actions.create(
-                                            dataStream,
-                                            function (err) {
-                                                nextStream(err);
-                                            }
-                                        );
-                                    },
-                                    function (err) {
-                                        nextNode(err);
-                                    });
-                                });
-                            },
-                            function (err) {
-                                cb(err);
-                            });
-                        },
-                        function (cb) {
-                            async.eachSeries($scope.dataChannels, function (dataChannel, nextChannel) {
-                                var i = 0,
-                                    nodes = $scope.motion.nodeList;
-                                while (nodes[i].id !== dataChannel.title && i < nodes.length) {
-                                    i += 1;
-                                }
-                                if (nodes[i].parent) {
-                                    var n = 0;
-                                    while ($scope.dataChannels[n].title !== nodes[i].parent.id && n < $scope.dataChannels.length) {
-                                        n += 1;
-                                    }
-                                    dataChannel.parent_channel_uuid = $scope.dataChannels[n].uuid;
-                                    apiService('channels').actions.update(dataChannel.uuid, dataChannel, function (err) {
-                                        nextChannel(err);
-                                    });
-                                } else {
-                                    nextChannel(null);
-                                }
-                            },
-                            function (err) {
-                                cb(err);
-                            });
+                    bvhImportService.parse(onLoadEvent.target.result, $files[0].name, function (err, result) {
+                        if (err) {
+                            console.log('error processing bvh file', err);
+                            deferred.reject(err);
+                            return;
                         }
-                        ],
-                        function (err, result) {
-                            if (err) {
-                                console.log('error processing bvh file', err);
-                                deferred.reject(err);
-                                return;
-                            }
-                            console.log('successfully processed bvh file', result);
-                            deferred.resolve();
-                        }
-                    );
+                        $scope.dataPackage = result;
+                        console.log('successfully processed bvh file', result);
+                        deferred.resolve();
+                    });
                 };
                 reader.readAsText($files[0]);
             };
@@ -163,249 +45,19 @@
 
                 $scope.file = $files[0];
                 $scope.dataPackage = null;
-                $scope.dataChannels = [];
                 var reader = new FileReader();
                 reader.onload = function (onLoadEvent) {
                     console.log('onload');
-                    async.waterfall([
-                            function (cb) {
-                                var input;
-                                try {
-                                    input = JSON.parse(onLoadEvent.target.result);
-                                    cb(null, input);
-                                } catch (e) {
-                                    cb(new Error('error parsing json: ' + e.toString()), null);
-                                }
-                            },
-                            function (input, cb) {
-                                var key;
-                                if ($routeParams.garbage) {
-                                    var maxFrames = 0;
-                                    var paddedFrames = {};
-                                    for (key in input) {
-                                        if (typeof input[key] === 'object' && input[key].length > 0) {
-                                            if (input[key].length > maxFrames) {
-                                                maxFrames = input[key].length;
-                                            }
-                                        }
-                                    }
-                                    console.log('max frame is', maxFrames);
-                                    for (key in input) {
-                                        if (typeof input[key] === 'object' && input[key].length > 0) {
-                                            paddedFrames[key] = [];
-                                            if (input[key].length < maxFrames) {
-                                                var frameDiff = maxFrames - input[key].length;
-                                                var addInterval = Math.ceil(maxFrames / frameDiff);
-                                                var added = 0;
-                                                console.log('extend', input[key].length, frameDiff, addInterval);
-                                                for (var i = 0; i < input[key].length; i += 1) {
-                                                    if (input[key][i]) {
-                                                        //for (var n = 0; n < addInterval; n += 1) {
-                                                            paddedFrames[key].push(input[key][i]);
-                                                        if (added < frameDiff) {
-                                                            paddedFrames[key].push(input[key][i]);
-                                                            added += 1;
-                                                        }
-                                                        //}
-                                                        /*
-                                                        if (i % addInterval === 0) {
-                                                            paddedFrames[key].push(input[key][i]);
-                                                            paddedFrames[key].push(input[key][i]);
-                                                        } else {
-                                                            paddedFrames[key].push(input[key][i]);
-                                                        }
-                                                        */
-                                                    }
-                                                }
-                                                while (paddedFrames[key].length < maxFrames) {
-                                                    paddedFrames[key].push(input[key][input[key].length-1]);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    cb(null, paddedFrames);
-                                } else {
-                                    var targetMillis = 1000 / 60;
-                                    var saneFrames = {};
-                                    for (key in input) {
-                                        if (typeof input[key] === 'object' && input[key].length > 0) {
-                                            var lastMillis = input[key][0].m * 1000 + input[key][0].s;
-                                            saneFrames[key] = [];
-                                            console.log('frames', input[key].length);
-                                            for (var index in input[key]) {
-                                                if (typeof input[key][index] === 'object') {
-                                                    var nowMillis = input[key][index].m * 1000 + input[key][index].s;
-                                                    var diff = Math.round((nowMillis - lastMillis) / targetMillis);
-                                                    //if (diff > 1) {
-                                                    for (var d = 0; d < diff; d += 1) {
-                                                        var milliOffset = d * targetMillis;
-                                                        var newMillis = nowMillis + milliOffset;
-                                                        saneFrames[key].push({
-                                                            a: input[key][index].a,
-                                                            m: Math.floor(newMillis / 1000),
-                                                            s: (newMillis / 1000 - Math.floor(newMillis / 1000)) * 1000
-                                                        });
-                                                    }
-                                                    //console.log('diff', (nowMillis - lastMillis) / targetMillis);
-                                                    /*
-                                                     } else {
-                                                     saneFrames[key].push(input[key][index]);
-                                                     }
-                                                     */
-                                                    lastMillis = nowMillis;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    cb(null, saneFrames);
-                                }
-                            },
-                            function (input, cb) {
-                                var key;
-                                if ($routeParams.garbage) {
-                                    for (key in input) {
-                                        if (typeof input[key] === 'object' && input[key].length > 0) {
-                                            console.log(key, input[key].length);
-                                        }
-                                    }
-                                    cb(null, input);
-                                } else {
-                                    var filteredFrames = {};
-                                    var targetMillis = 1000 / 60;
-                                    for (key in input) {
-                                        if (typeof input[key] === 'object' && input[key].length > 0) {
-                                            var faults = 0;
-                                            var lastMillis = input[key][0].m * 1000 + input[key][0].s;
-                                            filteredFrames[key] = [];
-                                            console.log('frames', input[key].length);
-                                            for (var index in input[key]) {
-                                                if (typeof input[key][index] === 'object') {
-                                                    var nowMillis = input[key][index].m * 1000 + input[key][index].s;
-                                                    var diff = Math.round((nowMillis - lastMillis) / targetMillis);
-                                                    if (diff !== 1) {
-                                                        faults += 1;
-                                                        console.log('dropped faulty frame with diff != 1at', diff, index);
-                                                    } else {
-                                                        filteredFrames[key].push(input[key][index]);
-                                                    }
-                                                    lastMillis = nowMillis;
-                                                }
-                                            }
-                                            console.log('total faults', faults);
-                                        }
-                                    }
-                                    cb(null, filteredFrames);
-                                }
-                            },
-                            function (input, cb) {
-                                if ($routeParams.garbage) {
-                                    cb(null, input);
-                                } else {
-                                    var targetMillis = 1000 / 60;
-                                    for (var key in input) {
-                                        if (typeof input[key] === 'object' && input[key].length > 0) {
-                                            var faults = 0;
-                                            var lastMillis = input[key][0].m * 1000 + input[key][0].s;
-                                            console.log('cleaned frames for index', key, input[key].length);
-                                            for (var index in input[key]) {
-                                                if (typeof input[key][index] === 'object') {
-                                                    var nowMillis = input[key][index].m * 1000 + input[key][index].s;
-                                                    var diff = Math.round((nowMillis - lastMillis) / targetMillis);
-                                                    if (diff !== 1) {
-                                                        faults += 1;
-                                                        //console.log('faulty frame with diff != 1 at', diff, index);
-                                                    }
-                                                    lastMillis = nowMillis;
-                                                }
-                                            }
-                                            console.log('total faults', faults);
-                                        }
-                                    }
-                                    cb(null, input);
-                                }
-                            },
-                            function (input, cb) {
-                                var dataPackage = {
-                                    title: $files[0].name
-                                };
-                                apiService('packages').actions.create(dataPackage, function (err, newPackage) {
-                                    cb(err, newPackage, input);
-                                });
-                            },
-                            function (dataPackage, input, cb) {
-                                $scope.dataPackage = dataPackage;
-                                console.log($scope.dataPackage);
-                                cb(null, input);
-                            },
-                            function (input, cb) {
-                                for (var key in input) {
-                                    if (typeof input[key] === 'object' && input[key].length > 0) {
-                                        var dataChannel = {
-                                            title: key.substr(1, key.length-1),
-                                            id: null,
-                                            package_uuid: $scope.dataPackage.uuid,
-                                            streams: []
-                                        };
-                                        var paramLength = input[key][0].a.length;
-                                        for (var n = 0; n < paramLength; n+=1) {
-                                            dataChannel.streams.push({
-                                                id: null,
-                                                fps: 60,
-                                                channel_id: null,
-                                                title: 'p' + n.toString(),
-                                                group: paramLength > 1 ? 'grouped' : null,
-                                                frames: []
-                                            });
-                                        }
-                                        for (var index in input[key]) {
-                                            if (typeof input[key][index] === 'object') {
-                                                for (var p = 0; p < paramLength; p += 1) {
-                                                    dataChannel.streams[p].frames.push(input[key][index].a[p]);
-                                                }
-                                            }
-                                        }
-                                        $scope.dataChannels.push(dataChannel);
-                                    }
-                                }
-                                cb(null);
-                            },
-                            function (cb) {
-                                async.eachSeries($scope.dataChannels, function (channel, nextChannel) {
-                                    channel.package_uuid = $scope.dataPackage.uuid;
-                                    apiService('channels').actions.create(channel, function (err, dataChannel) {
-                                        if (err) {
-                                            return nextChannel(err);
-                                        }
-                                        $scope.dataChannels[$scope.dataChannels.indexOf(channel)].uuid = dataChannel.uuid;
-                                        async.eachSeries($scope.dataChannels[$scope.dataChannels.indexOf(channel)].streams, function (dataStream, nextStream) {
-                                                dataStream.channel_uuid = dataChannel.uuid;
-                                                apiService('streams').actions.create(
-                                                    dataStream,
-                                                    function (err) {
-                                                        nextStream(err);
-                                                    }
-                                                );
-                                            },
-                                            function (err) {
-                                                nextChannel(err);
-                                            });
-                                    });
-                                },
-                                function (err) {
-                                    cb(err);
-                                });
-                            }
-                        ],
-                        function (err, result) {
-                            if (err) {
-                                console.log('error processing json file', err);
-                                deferred.reject(err);
-                                return;
-                            }
-                            console.log('successfully processed json file', result);
-                            deferred.resolve();
+                    jsonImportService.parse(onLoadEvent.target.result, $files[0].name, $routeParams.garbage, function (err, result) {
+                        if (err) {
+                            console.log('error processing json file', err);
+                            deferred.reject(err);
+                            return;
                         }
-                    );
+                        $scope.dataPackage = result;
+                        console.log('successfully processed json file', result);
+                        deferred.resolve();
+                    });
                 };
                 reader.readAsText($files[0]);
             };
