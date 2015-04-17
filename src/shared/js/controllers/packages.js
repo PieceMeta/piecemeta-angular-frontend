@@ -3,7 +3,7 @@
 (function () {
     'use strict';
     angular.module(
-        'piecemeta-web.controllers.data-packages',
+        'piecemeta-web.controllers.packages',
         [
             'angularFileUpload',
             'piecemeta-web.services.api',
@@ -11,7 +11,7 @@
             'piecemeta-web.services.importers.bvh',
             'chartjs'
         ])
-        .controller('DataPackages.ImportBVH', ['$scope', '$q', 'bvhImportService', function ($scope, $q, bvhImportService) {
+        .controller('Packages.ImportBVH', ['$scope', '$q', 'bvhImportService', function ($scope, $q, bvhImportService) {
             $scope.file = null;
             $scope.onFileSelect = function ($files) {
                 var deferred = $q.defer();
@@ -36,7 +36,7 @@
                 reader.readAsText($files[0]);
             };
         }])
-        .controller('DataPackages.ImportJSON', ['$scope', '$q', '$routeParams', 'jsonImportService', function ($scope, $q, $routeParams, jsonImportService) {
+        .controller('Packages.ImportJSON', ['$scope', '$q', '$routeParams', 'jsonImportService', function ($scope, $q, $routeParams, jsonImportService) {
             $scope.file = null;
             $scope.onFileSelect = function ($files) {
                 var deferred = $q.defer();
@@ -62,7 +62,7 @@
                 reader.readAsText($files[0]);
             };
         }])
-        .controller('DataPackages.Show', ['$scope', '$q', '$routeParams', 'apiService', function ($scope, $q, $routeParams, apiService) {
+        .controller('Packages.Show', ['$scope', '$q', '$routeParams', 'apiService', function ($scope, $q, $routeParams, apiService) {
             $scope.data = {
                 dataChannels: [],
                 streamGroups: [],
@@ -265,7 +265,7 @@
                 $scope.$parent.status = 'ready';
             });
         }])
-        .controller('DataPackages.List', ['$scope', 'apiService', function ($scope, apiService) {
+        .controller('Packages.List', ['$scope', 'apiService', function ($scope, apiService) {
             $scope.data = {};
             apiService('packages').actions.all(function (err, data_packages) {
                 if (err) {
@@ -282,7 +282,7 @@
                 $scope.$apply();
             });
         }])
-        .controller('DataPackages.Create', ['$scope', 'apiService', '$q', '$location', function ($scope, apiService, $q, $location) {
+        .controller('Packages.Create', ['$scope', 'apiService', '$q', '$location', function ($scope, apiService, $q, $location) {
             $scope.dataPackage = {
                 title: null,
                 description: null,
@@ -315,7 +315,7 @@
                 });
             };
         }])
-        .controller('DataPackages.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
+        .controller('Packages.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
             var deferred = $q.defer();
             $scope.promiseString = 'Loading Package...';
             $scope.promise = deferred.promise;

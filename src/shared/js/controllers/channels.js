@@ -2,12 +2,12 @@
 (function () {
     'use strict';
     angular.module(
-        'piecemeta-web.controllers.data-channels',
+        'piecemeta-web.controllers.channels',
         [
             'angularFileUpload',
             'piecemeta-web.services.api'
         ])
-        .controller('DataChannels.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
+        .controller('Channels.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
             var deferred = $q.defer();
             $scope.data = {
                 dataChannel: {
@@ -71,7 +71,7 @@
 
 
         }])
-        .controller('DataChannels.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
+        .controller('Channels.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
             var deferred = $q.defer();
             $scope.data = {};
             $scope.promiseString = 'Loading channel...';

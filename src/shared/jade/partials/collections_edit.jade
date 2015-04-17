@@ -1,5 +1,5 @@
 alert(ng-repeat='alert in alerts' type='{{alert.type}}' close='closeAlert($index)') {{alert.msg}}
-form(name='dataCollectionForm', role='form', ng-submit='submit()')
+form(name='dataForm', role='form', ng-submit='submit()')
     .panel.panel-primary
         .panel-heading
             h3.panel-title {{ formTitle }}
@@ -8,11 +8,11 @@ form(name='dataCollectionForm', role='form', ng-submit='submit()')
                 .col-sm-12
                     .form-group
                         label.control-label(for='name') Title
-                        input.input-lg.form-control(name='title', ng-model='dataCollection.title')
+                        input.input-lg.form-control(name='title', ng-model='data.title')
             .row
                 .col-sm-12
                     .form-group
                         label.control-label(for='name') Description (You can use #[a(href="http://daringfireball.net/projects/markdown/") Markdown])
-                        textarea.input-lg.form-control(name='description', ng-model='dataCollection.description', rows='6')
+                        textarea.input-lg.form-control(name='description', ng-model='data.description', rows='6')
         .panel-footer.btn-group-lg.text-right
             input.btn.btn-primary.btn-lg(type='submit', value='Save Collection')

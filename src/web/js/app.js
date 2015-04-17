@@ -9,9 +9,9 @@
         'piecemeta-web.controllers.site',
         'piecemeta-web.controllers.users',
         'piecemeta-web.controllers.collections',
-        'piecemeta-web.controllers.data-packages',
-        'piecemeta-web.controllers.data-channels',
-        'piecemeta-web.controllers.data-streams',
+        'piecemeta-web.controllers.packages',
+        'piecemeta-web.controllers.channels',
+        'piecemeta-web.controllers.streams',
         'piecemeta-web.controllers.trackers',
         'piecemeta-web.directives.helpers'
     ])
@@ -33,30 +33,27 @@
         $routeProvider.when('/login', {templateUrl: partialsPath + 'login.html', controller: 'Users.Login'});
         $routeProvider.when('/logout', {templateUrl: partialsPath + 'logout.html', controller: 'Users.Logout'});
 
-        $routeProvider.when('/packages/browse', {templateUrl: partialsPath + 'packages_browse.html', controller: 'DataPackages.List'});
-        $routeProvider.when('/packages/:uuid/channels/import/csv', {templateUrl: partialsPath+ 'streams_import.html', controller: 'DataStreams.ImportFile'});
-            $routeProvider.when('/packages/:uuid/channels/import/trac', {
-                templateUrl: partialsPath + 'streams_import_trac.html',
-                controller: 'DataStreams.ImportTrac'
-            });
-        $routeProvider.when('/packages/upload', {templateUrl: partialsPath + 'packages_upload.html', controller: 'DataPackages.ImportBVH'});
-        $routeProvider.when('/packages/uploadjson', {templateUrl: partialsPath + 'packages_upload_json.html', controller: 'DataPackages.ImportJSON'});
-        $routeProvider.when('/packages/create', {templateUrl: partialsPath + 'packages_edit.html', controller: 'DataPackages.Create'});
-        $routeProvider.when('/packages/:uuid/edit', {templateUrl: partialsPath + 'packages_edit.html', controller: 'DataPackages.Edit'});
-        $routeProvider.when('/packages/:uuid/show', {templateUrl: partialsPath + 'packages_show.html', controller: 'DataPackages.Show'});
+        $routeProvider.when('/packages/browse', {templateUrl: partialsPath + 'packages_browse.html', controller: 'Packages.List'});
+        $routeProvider.when('/packages/:uuid/channels/import/csv', {templateUrl: partialsPath+ 'streams_import.html', controller: 'Streams.ImportFile'});
+        $routeProvider.when('/packages/:uuid/channels/import/trac', {templateUrl: partialsPath + 'streams_import_trac.html', controller: 'Streams.ImportTrac'});
+        $routeProvider.when('/packages/upload', {templateUrl: partialsPath + 'packages_upload.html', controller: 'Packages.ImportBVH'});
+        $routeProvider.when('/packages/uploadjson', {templateUrl: partialsPath + 'packages_upload_json.html', controller: 'Packages.ImportJSON'});
+        $routeProvider.when('/packages/create', {templateUrl: partialsPath + 'packages_edit.html', controller: 'Packages.Create'});
+        $routeProvider.when('/packages/:uuid/edit', {templateUrl: partialsPath + 'packages_edit.html', controller: 'Packages.Edit'});
+        $routeProvider.when('/packages/:uuid/show', {templateUrl: partialsPath + 'packages_show.html', controller: 'Packages.Show'});
 
-        $routeProvider.when('/collections/create', {templateUrl: partialsPath + 'collections_edit.html', controller: 'Collections.Create'});
-        $routeProvider.when('/collections/:uuid/edit', {templateUrl: partialsPath + 'collections_edit.html', controller: 'Collections.Edit'});
+        $routeProvider.when('/collections/create', {templateUrl: partialsPath + 'collections_edit.html', controller: 'BasicResource.Create'});
+        $routeProvider.when('/collections/:uuid/edit', {templateUrl: partialsPath + 'collections_edit.html', controller: 'BasicResource.Edit'});
 
-        $routeProvider.when('/channels/:uuid/streams/create', {templateUrl: partialsPath + 'streams_edit.html', controller: 'DataStreams.Create'});
-        $routeProvider.when('/streams/:uuid/edit', {templateUrl: partialsPath + 'streams_edit.html', controller: 'DataStreams.Edit'});
+        $routeProvider.when('/channels/:uuid/streams/create', {templateUrl: partialsPath + 'streams_edit.html', controller: 'Streams.Create'});
+        $routeProvider.when('/streams/:uuid/edit', {templateUrl: partialsPath + 'streams_edit.html', controller: 'Streams.Edit'});
 
-        $routeProvider.when('/packages/:package_uuid/channels/create', {templateUrl: partialsPath + 'channels_edit.html', controller: 'DataChannels.Create'});
-        $routeProvider.when('/channels/:uuid/edit', {templateUrl: partialsPath + 'channels_edit.html', controller: 'DataChannels.Edit'});
+        $routeProvider.when('/packages/:package_uuid/channels/create', {templateUrl: partialsPath + 'channels_edit.html', controller: 'Channels.Create'});
+        $routeProvider.when('/channels/:uuid/edit', {templateUrl: partialsPath + 'channels_edit.html', controller: 'Channels.Edit'});
 
         $routeProvider.when('/trackers', {templateUrl: partialsPath + 'trackers_list.html', controller: 'Trackers.List'});
-        $routeProvider.when('/trackers/create', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'Trackers.Create'});
-        $routeProvider.when('/trackers/:uuid/edit', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'Trackers.Edit'});
+        $routeProvider.when('/trackers/create', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'BasicResource.Create'});
+        $routeProvider.when('/trackers/:uuid/edit', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'BasicResource.Edit'});
 
         $routeProvider.otherwise({redirectTo: '/'});
     }]).run(['$rootScope', '$q', function ($rootScope, $q) {

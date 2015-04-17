@@ -2,14 +2,14 @@
 (function () {
     'use strict';
     angular.module(
-        'piecemeta-web.controllers.data-streams',
+        'piecemeta-web.controllers.streams',
         [
             'angularFileUpload',
             'piecemeta-web.services.api',
             'piecemeta-web.services.importers.text',
             'piecemeta-web.services.importers.trac'
         ])
-        .controller('DataStreams.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
+        .controller('Streams.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
             $scope.data = {
                 dataStream: {
                     channel_uuid: $routeParams.uuid
@@ -82,7 +82,7 @@
                 };
             });
         }])
-        .controller('DataStreams.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
+        .controller('Streams.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
             var deferred = $q.defer();
             $scope.data = {};
             $scope.promiseString = 'Loading stream...';
@@ -213,7 +213,7 @@
                 };
             });
         }])
-        .controller('DataStreams.ImportFile', ['$scope', '$q', '$routeParams', '$location', 'apiService', 'textImportService', function ($scope, $q, $routeParams, $location, apiService, textImportService) {
+        .controller('Streams.ImportFile', ['$scope', '$q', '$routeParams', '$location', 'apiService', 'textImportService', function ($scope, $q, $routeParams, $location, apiService, textImportService) {
             var fileData, fileLines,
                 deferred = $q.defer();
 
@@ -352,7 +352,7 @@
                 });
             };
         }])
-        .controller('DataStreams.ImportTrac', ['$scope', '$q', 'apiService', '$routeParams', '$location', 'tracImportService', function ($scope, $q, apiService, $routeParams, $location, tracImportService) {
+        .controller('Streams.ImportTrac', ['$scope', '$q', 'apiService', '$routeParams', '$location', 'tracImportService', function ($scope, $q, apiService, $routeParams, $location, tracImportService) {
             var fileData = "",
                 deferred = $q.defer();
 

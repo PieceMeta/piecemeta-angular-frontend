@@ -15,26 +15,24 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
 (function () {
     'use strict';
     angular.module(
-        'piecemeta-web.controllers.collections',
+        'piecemeta-web.controllers.basic-resource',
         [
             'piecemeta-web.services.api'
         ])
-        .controller('Collections.Create', ['$scope', 'apiService', '$q', '$location', function ($scope, apiService, $q, $location) {
-            $scope.dataCollection = {
-                title: null,
-                description: null
-            };
-            $scope.formTitle = 'Create Collection';
+        .controller('BasicResource.Create', ['$scope', 'apiService', '$q', '$location', function ($scope, apiService, $q, $location) {
+            var resourceSingular = $location.path.split('/')[1].substr(0, $location.path.split('/')[1].length-1);
+            $scope.data = {};
+            $scope.formTitle = 'Create ' + resourceSingular;
             $scope.submit = function () {
                 var deferred = $q.defer();
                 $scope.promiseString = 'Saving...';
                 $scope.promise = deferred.promise;
-                apiService('collections').actions.create($scope.dataCollection, function (err, data_collection) {
+                apiService(resourceSingular + 's').actions.create($scope.data, function (err, data) {
                     if (err) {
                         $scope.alerts = [
                             {
                                 type: 'danger',
-                                msg: 'Failed to save Collection.'
+                                msg: 'Failed to save ' + resourceSingular
                             }
                         ];
                         deferred.reject(err);
@@ -43,44 +41,45 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                     $scope.alerts = [
                         {
                             type: 'success',
-                            msg: 'Successfully created Collection.'
+                            msg: 'Successfully created ' + resourceSingular
                         }
                     ];
                     deferred.resolve();
-                    $location.path('/collections/' + data_collection.uuid + '/edit');
+                    $location.path('/' + resourceSingular + 's/' + data.uuid + '/edit');
                 });
             };
         }])
-        .controller('Collections.Edit', ['$scope', '$routeParams', '$q', 'apiService', function ($scope, $routeParams, $q, apiService) {
+        .controller('BasicResource.Edit', ['$scope', '$routeParams', '$q', 'apiService', '$location', function ($scope, $routeParams, $q, apiService, $location) {
+            var resourceSingular = $location.path.split('/')[1].substr(0, $location.path.split('/')[1].length - 1);
             var deferred = $q.defer();
-            $scope.promiseString = 'Loading Collection...';
+            $scope.promiseString = 'Loading...';
             $scope.promise = deferred.promise;
-            $scope.formTitle = 'Edit Collection';
+            $scope.formTitle = 'Edit ' + resourceSingular;
 
-            apiService('collections').actions.find($routeParams.uuid, function (err, data_collection) {
+            apiService(resourceSingular + 's').actions.find($routeParams.uuid, function (err, data) {
                 if (err) {
                     $scope.alerts = [
                         {
                             type: 'danger',
-                            msg: 'Failed to load Collection.'
+                            msg: 'Failed to load ' + resourceSingular
                         }
                     ];
                     deferred.reject(err);
-                    return console.log('error getting collection', err);
+                    return console.log('error getting ' + resourceSingular, err);
                 }
-                $scope.dataCollection = data_collection;
+                $scope.data = data;
                 deferred.resolve();
                 $scope.submit = function () {
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('collections').actions.update($routeParams.uuid, $scope.dataCollection, function (err) {
+                    apiService(resourceSingular + 's').actions.update($routeParams.uuid, $scope.dataCollection, function (err) {
                         if (err) {
                             console.log(err);
                             $scope.alerts = [
                                 {
                                     type: 'danger',
-                                    msg: 'Failed to update Collection.'
+                                    msg: 'Failed to update ' + resourceSingular
                                 }
                             ];
                             deferred.reject(err);
@@ -89,7 +88,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                         $scope.alerts = [
                             {
                                 type: 'success',
-                                msg: 'Successfully updated Collection.'
+                                msg: 'Successfully updated ' + resourceSingular
                             }
                         ];
                         deferred.resolve();
@@ -102,12 +101,12 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
 (function () {
     'use strict';
     angular.module(
-        'piecemeta-web.controllers.data-channels',
+        'piecemeta-web.controllers.channels',
         [
             'angularFileUpload',
             'piecemeta-web.services.api'
         ])
-        .controller('DataChannels.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
+        .controller('Channels.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
             var deferred = $q.defer();
             $scope.data = {
                 dataChannel: {
@@ -171,7 +170,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
 
 
         }])
-        .controller('DataChannels.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
+        .controller('Channels.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
             var deferred = $q.defer();
             $scope.data = {};
             $scope.promiseString = 'Loading channel...';
@@ -326,7 +325,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
 (function () {
     'use strict';
     angular.module(
-        'piecemeta-web.controllers.data-packages',
+        'piecemeta-web.controllers.packages',
         [
             'angularFileUpload',
             'piecemeta-web.services.api',
@@ -334,7 +333,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
             'piecemeta-web.services.importers.bvh',
             'chartjs'
         ])
-        .controller('DataPackages.ImportBVH', ['$scope', '$q', 'bvhImportService', function ($scope, $q, bvhImportService) {
+        .controller('Packages.ImportBVH', ['$scope', '$q', 'bvhImportService', function ($scope, $q, bvhImportService) {
             $scope.file = null;
             $scope.onFileSelect = function ($files) {
                 var deferred = $q.defer();
@@ -359,7 +358,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                 reader.readAsText($files[0]);
             };
         }])
-        .controller('DataPackages.ImportJSON', ['$scope', '$q', '$routeParams', 'jsonImportService', function ($scope, $q, $routeParams, jsonImportService) {
+        .controller('Packages.ImportJSON', ['$scope', '$q', '$routeParams', 'jsonImportService', function ($scope, $q, $routeParams, jsonImportService) {
             $scope.file = null;
             $scope.onFileSelect = function ($files) {
                 var deferred = $q.defer();
@@ -385,7 +384,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                 reader.readAsText($files[0]);
             };
         }])
-        .controller('DataPackages.Show', ['$scope', '$q', '$routeParams', 'apiService', function ($scope, $q, $routeParams, apiService) {
+        .controller('Packages.Show', ['$scope', '$q', '$routeParams', 'apiService', function ($scope, $q, $routeParams, apiService) {
             $scope.data = {
                 dataChannels: [],
                 streamGroups: [],
@@ -588,7 +587,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                 $scope.$parent.status = 'ready';
             });
         }])
-        .controller('DataPackages.List', ['$scope', 'apiService', function ($scope, apiService) {
+        .controller('Packages.List', ['$scope', 'apiService', function ($scope, apiService) {
             $scope.data = {};
             apiService('packages').actions.all(function (err, data_packages) {
                 if (err) {
@@ -605,7 +604,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                 $scope.$apply();
             });
         }])
-        .controller('DataPackages.Create', ['$scope', 'apiService', '$q', '$location', function ($scope, apiService, $q, $location) {
+        .controller('Packages.Create', ['$scope', 'apiService', '$q', '$location', function ($scope, apiService, $q, $location) {
             $scope.dataPackage = {
                 title: null,
                 description: null,
@@ -638,7 +637,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                 });
             };
         }])
-        .controller('DataPackages.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
+        .controller('Packages.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
             var deferred = $q.defer();
             $scope.promiseString = 'Loading Package...';
             $scope.promise = deferred.promise;
@@ -791,14 +790,14 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
 (function () {
     'use strict';
     angular.module(
-        'piecemeta-web.controllers.data-streams',
+        'piecemeta-web.controllers.streams',
         [
             'angularFileUpload',
             'piecemeta-web.services.api',
             'piecemeta-web.services.importers.text',
             'piecemeta-web.services.importers.trac'
         ])
-        .controller('DataStreams.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
+        .controller('Streams.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
             $scope.data = {
                 dataStream: {
                     channel_uuid: $routeParams.uuid
@@ -871,7 +870,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                 };
             });
         }])
-        .controller('DataStreams.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
+        .controller('Streams.Edit', ['$scope', '$routeParams', '$q', '$location', 'apiService', function ($scope, $routeParams, $q, $location, apiService) {
             var deferred = $q.defer();
             $scope.data = {};
             $scope.promiseString = 'Loading stream...';
@@ -1002,7 +1001,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                 };
             });
         }])
-        .controller('DataStreams.ImportFile', ['$scope', '$q', '$routeParams', '$location', 'apiService', 'textImportService', function ($scope, $q, $routeParams, $location, apiService, textImportService) {
+        .controller('Streams.ImportFile', ['$scope', '$q', '$routeParams', '$location', 'apiService', 'textImportService', function ($scope, $q, $routeParams, $location, apiService, textImportService) {
             var fileData, fileLines,
                 deferred = $q.defer();
 
@@ -1141,7 +1140,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                 });
             };
         }])
-        .controller('DataStreams.ImportTrac', ['$scope', '$q', 'apiService', '$routeParams', '$location', 'tracImportService', function ($scope, $q, apiService, $routeParams, $location, tracImportService) {
+        .controller('Streams.ImportTrac', ['$scope', '$q', 'apiService', '$routeParams', '$location', 'tracImportService', function ($scope, $q, apiService, $routeParams, $location, tracImportService) {
             var fileData = "",
                 deferred = $q.defer();
 
@@ -1978,9 +1977,9 @@ angular.module('piecemeta-web.services.importers.trac', ['piecemeta-web.services
         'piecemeta-web.controllers.site',
         'piecemeta-web.controllers.users',
         'piecemeta-web.controllers.collections',
-        'piecemeta-web.controllers.data-packages',
-        'piecemeta-web.controllers.data-channels',
-        'piecemeta-web.controllers.data-streams',
+        'piecemeta-web.controllers.packages',
+        'piecemeta-web.controllers.channels',
+        'piecemeta-web.controllers.streams',
         'piecemeta-web.controllers.trackers',
         'piecemeta-web.directives.helpers'
     ])
@@ -2002,30 +2001,27 @@ angular.module('piecemeta-web.services.importers.trac', ['piecemeta-web.services
         $routeProvider.when('/login', {templateUrl: partialsPath + 'login.html', controller: 'Users.Login'});
         $routeProvider.when('/logout', {templateUrl: partialsPath + 'logout.html', controller: 'Users.Logout'});
 
-        $routeProvider.when('/packages/browse', {templateUrl: partialsPath + 'packages_browse.html', controller: 'DataPackages.List'});
-        $routeProvider.when('/packages/:uuid/channels/import/csv', {templateUrl: partialsPath+ 'streams_import.html', controller: 'DataStreams.ImportFile'});
-            $routeProvider.when('/packages/:uuid/channels/import/trac', {
-                templateUrl: partialsPath + 'streams_import_trac.html',
-                controller: 'DataStreams.ImportTrac'
-            });
-        $routeProvider.when('/packages/upload', {templateUrl: partialsPath + 'packages_upload.html', controller: 'DataPackages.ImportBVH'});
-        $routeProvider.when('/packages/uploadjson', {templateUrl: partialsPath + 'packages_upload_json.html', controller: 'DataPackages.ImportJSON'});
-        $routeProvider.when('/packages/create', {templateUrl: partialsPath + 'packages_edit.html', controller: 'DataPackages.Create'});
-        $routeProvider.when('/packages/:uuid/edit', {templateUrl: partialsPath + 'packages_edit.html', controller: 'DataPackages.Edit'});
-        $routeProvider.when('/packages/:uuid/show', {templateUrl: partialsPath + 'packages_show.html', controller: 'DataPackages.Show'});
+        $routeProvider.when('/packages/browse', {templateUrl: partialsPath + 'packages_browse.html', controller: 'Packages.List'});
+        $routeProvider.when('/packages/:uuid/channels/import/csv', {templateUrl: partialsPath+ 'streams_import.html', controller: 'Streams.ImportFile'});
+        $routeProvider.when('/packages/:uuid/channels/import/trac', {templateUrl: partialsPath + 'streams_import_trac.html', controller: 'Streams.ImportTrac'});
+        $routeProvider.when('/packages/upload', {templateUrl: partialsPath + 'packages_upload.html', controller: 'Packages.ImportBVH'});
+        $routeProvider.when('/packages/uploadjson', {templateUrl: partialsPath + 'packages_upload_json.html', controller: 'Packages.ImportJSON'});
+        $routeProvider.when('/packages/create', {templateUrl: partialsPath + 'packages_edit.html', controller: 'Packages.Create'});
+        $routeProvider.when('/packages/:uuid/edit', {templateUrl: partialsPath + 'packages_edit.html', controller: 'Packages.Edit'});
+        $routeProvider.when('/packages/:uuid/show', {templateUrl: partialsPath + 'packages_show.html', controller: 'Packages.Show'});
 
-        $routeProvider.when('/collections/create', {templateUrl: partialsPath + 'collections_edit.html', controller: 'Collections.Create'});
-        $routeProvider.when('/collections/:uuid/edit', {templateUrl: partialsPath + 'collections_edit.html', controller: 'Collections.Edit'});
+        $routeProvider.when('/collections/create', {templateUrl: partialsPath + 'collections_edit.html', controller: 'BasicResource.Create'});
+        $routeProvider.when('/collections/:uuid/edit', {templateUrl: partialsPath + 'collections_edit.html', controller: 'BasicResource.Edit'});
 
-        $routeProvider.when('/channels/:uuid/streams/create', {templateUrl: partialsPath + 'streams_edit.html', controller: 'DataStreams.Create'});
-        $routeProvider.when('/streams/:uuid/edit', {templateUrl: partialsPath + 'streams_edit.html', controller: 'DataStreams.Edit'});
+        $routeProvider.when('/channels/:uuid/streams/create', {templateUrl: partialsPath + 'streams_edit.html', controller: 'Streams.Create'});
+        $routeProvider.when('/streams/:uuid/edit', {templateUrl: partialsPath + 'streams_edit.html', controller: 'Streams.Edit'});
 
-        $routeProvider.when('/packages/:package_uuid/channels/create', {templateUrl: partialsPath + 'channels_edit.html', controller: 'DataChannels.Create'});
-        $routeProvider.when('/channels/:uuid/edit', {templateUrl: partialsPath + 'channels_edit.html', controller: 'DataChannels.Edit'});
+        $routeProvider.when('/packages/:package_uuid/channels/create', {templateUrl: partialsPath + 'channels_edit.html', controller: 'Channels.Create'});
+        $routeProvider.when('/channels/:uuid/edit', {templateUrl: partialsPath + 'channels_edit.html', controller: 'Channels.Edit'});
 
         $routeProvider.when('/trackers', {templateUrl: partialsPath + 'trackers_list.html', controller: 'Trackers.List'});
-        $routeProvider.when('/trackers/create', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'Trackers.Create'});
-        $routeProvider.when('/trackers/:uuid/edit', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'Trackers.Edit'});
+        $routeProvider.when('/trackers/create', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'BasicResource.Create'});
+        $routeProvider.when('/trackers/:uuid/edit', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'BasicResource.Edit'});
 
         $routeProvider.otherwise({redirectTo: '/'});
     }]).run(['$rootScope', '$q', function ($rootScope, $q) {
@@ -2068,84 +2064,6 @@ angular.module('piecemeta-web.services.importers.trac', ['piecemeta-web.services
         [
             'piecemeta-web.services.api'
         ])
-        .controller('Trackers.Create', ['$scope', 'apiService', '$q', '$location', function ($scope, apiService, $q, $location) {
-            $scope.tracker = {
-                title: null,
-                description: null
-            };
-            $scope.formTitle = 'Create Tracker';
-            $scope.submit = function () {
-                var deferred = $q.defer();
-                $scope.promiseString = 'Saving...';
-                $scope.promise = deferred.promise;
-                apiService('trackers').actions.create($scope.tracker, function (err, tracker) {
-                    if (err) {
-                        $scope.alerts = [
-                            {
-                                type: 'danger',
-                                msg: 'Failed to save tracker.'
-                            }
-                        ];
-                        deferred.reject(err);
-                        return;
-                    }
-                    $scope.alerts = [
-                        {
-                            type: 'success',
-                            msg: 'Successfully registered tracker.'
-                        }
-                    ];
-                    deferred.resolve();
-                    $location.path('/trackers/' + tracker.id + '/edit');
-                });
-            };
-        }])
-        .controller('Trackers.Edit', ['$scope', '$routeParams', '$q', 'apiService', function ($scope, $routeParams, $q, apiService) {
-            var deferred = $q.defer();
-            $scope.promiseString = 'Loading Tracker...';
-            $scope.promise = deferred.promise;
-            $scope.formTitle = 'Edit Tracker';
-
-            apiService('trackers').actions.find($routeParams.id, function (err, tracker) {
-                if (err) {
-                    $scope.alerts = [
-                        {
-                            type: 'danger',
-                            msg: 'Failed to load tracker.'
-                        }
-                    ];
-                    deferred.reject(err);
-                    return console.log('error getting tracker', err);
-                }
-                $scope.tracker = tracker;
-                deferred.resolve();
-                $scope.submit = function () {
-                    var deferred = $q.defer();
-                    $scope.promiseString = 'Saving...';
-                    $scope.promise = deferred.promise;
-                    apiService('trackers').actions.update($routeParams.id, $scope.tracker, function (err) {
-                        if (err) {
-                            console.log(err);
-                            $scope.alerts = [
-                                {
-                                    type: 'danger',
-                                    msg: 'Failed to update tracker.'
-                                }
-                            ];
-                            deferred.reject(err);
-                            return;
-                        }
-                        $scope.alerts = [
-                            {
-                                type: 'success',
-                                msg: 'Successfully updated tracker.'
-                            }
-                        ];
-                        deferred.resolve();
-                    });
-                };
-            });
-        }])
         .controller('Trackers.List', ['$scope', 'apiService', function ($scope, apiService) {
             $scope.data = {};
             apiService('trackers').actions.all(function (err, trackers) {

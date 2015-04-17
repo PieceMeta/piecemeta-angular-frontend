@@ -7,10 +7,6 @@
         'cgBusy',
         'btford.markdown',
         'piecemeta-nw.controllers.osc-player',
-        'piecemeta-web.controllers.collections',
-        'piecemeta-web.controllers.data-packages',
-        'piecemeta-web.controllers.data-channels',
-        'piecemeta-web.controllers.data-streams',
         'piecemeta-web.services.api',
         'piecemeta-web.directives.helpers'
     ])
