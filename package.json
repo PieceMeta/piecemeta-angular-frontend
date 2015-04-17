@@ -27,5 +27,6 @@
     "gulp-uglify": "^1.2.0",
     "gulp-watch": "^4.2.4",
     "node-webkit-builder": "^1.0.11"
-  }
+  },
+  "stability": "experimental"
 }

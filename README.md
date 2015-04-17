@@ -4,6 +4,10 @@
 
 The Web and NodeWebkit frontends based on [AngularJS](https://angularjs.org/) for the [PieceMeta](http://www.piecemeta.com) service.
 
+## Stability
+
+Experimental: Expect the unexpected. Please provide feedback on api and your use-case.
+
 ## Web Frontend ##
 
 The web app consists of static code only so you can just clone the repo, set the ``dist/web`` folder as the document root and it should work.
