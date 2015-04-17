@@ -1,4 +1,4 @@
-/* global angular,async */
+/* global angular,async,console */
 (function () {
     'use strict';
     angular.module(

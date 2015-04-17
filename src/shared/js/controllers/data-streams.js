@@ -1,4 +1,4 @@
-/* global angular,async */
+/* global console,angular,async,Papa */
 (function () {
     'use strict';
     angular.module(
@@ -288,16 +288,18 @@
                 $scope.valLength = 0;
                 $scope.valLabel = [];
                 for (var idx in $scope.fileLines) {
-                    var match = null;
-                    var values = [];
-                    while ((match = $scope.regex.exec($scope.fileLines[idx])) !== null) {
-                        values = match;
+                    if (typeof $scope.fileLines[idx] === 'string') {
+                        var match = null;
+                        var values = [];
+                        while ((match = $scope.regex.exec($scope.fileLines[idx])) !== null) {
+                            values = match;
+                        }
+                        values.shift();
+                        if ($scope.valLength < values.length) {
+                            $scope.valLength = values.length;
+                        }
+                        $scope.data.resultLines.push(values);
                     }
-                    values.shift();
-                    if ($scope.valLength < values.length) {
-                        $scope.valLength = values.length;
-                    }
-                    $scope.data.resultLines.push(values);
                 }
                 for (var i = 0; i < $scope.valLength; i += 1) {
                     $scope.valLabel.push('');
@@ -366,15 +368,17 @@
                     },
                     function (cb) {
                         for (var l in lines) {
-                            var match = null,
-                                values = [];
-                            while ((match = $scope.regex.exec(lines[l])) !== null) {
-                                values = match;
-                            }
-                            values.shift();
-                            for (var n in values) {
-                                if (typeof dataStreams[n] === 'object') {
-                                    dataStreams[n].frames.push(values[n]);
+                            if (typeof lines[l] === 'string') {
+                                var match = null,
+                                    values = [];
+                                while ((match = $scope.regex.exec(lines[l])) !== null) {
+                                    values = match;
+                                }
+                                values.shift();
+                                for (var n in values) {
+                                    if (typeof dataStreams[n] === 'object') {
+                                        dataStreams[n].frames.push(values[n]);
+                                    }
                                 }
                             }
                         }
@@ -542,17 +546,19 @@
                     },
                     function (cb) {
                         for (var i in lines) {
-                            var values = lines[i];
-                            // drop framenumber
-                            values.splice(0, 1);
-                            if (propertyCount !== values.length) {
-                                inconsistencies += 1;
-                            }
-                            for (var n = 0; n < propertyCount; n += 1) {
-                                if (typeof values[n] === 'undefined') {
-                                    $scope.data.dataStreams[n].frames.push(null);
-                                } else {
-                                    $scope.data.dataStreams[n].frames.push(parseFloat(values[n]));
+                            if (typeof lines[i] === 'object') {
+                                var values = lines[i];
+                                // drop framenumber
+                                values.splice(0, 1);
+                                if (propertyCount !== values.length) {
+                                    inconsistencies += 1;
+                                }
+                                for (var n = 0; n < propertyCount; n += 1) {
+                                    if (typeof values[n] === 'undefined') {
+                                        $scope.data.dataStreams[n].frames.push(null);
+                                    } else {
+                                        $scope.data.dataStreams[n].frames.push(parseFloat(values[n]));
+                                    }
                                 }
                             }
                         }

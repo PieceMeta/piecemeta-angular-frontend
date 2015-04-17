@@ -1,4 +1,4 @@
-/* global angular */
+/* global angular,Modernizr */
 (function () {
     'use strict';
     angular.module('piecemeta-frontend', [

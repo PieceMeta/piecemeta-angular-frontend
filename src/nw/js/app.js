@@ -1,3 +1,4 @@
+/* global angular,require,console */
 (function () {
     'use strict';
     angular.module('piecemeta-frontend', [
@@ -50,14 +51,14 @@
                 localStorage.setItem('osc-controlport', 9999);
             }
 
-            $rootScope.$on('$routeChangeStart', function (e, curr, prev) {
+            $rootScope.$on('$routeChangeStart', function () {
                 $rootScope.pageDefer = $q.defer();
                 $rootScope.pagePromise = $rootScope.pageDefer.promise;
             });
-            $rootScope.$on('$routeChangeSuccess', function (e, curr, prev) {
+            $rootScope.$on('$routeChangeSuccess', function () {
                 $rootScope.pageDefer.resolve();
             });
-            $rootScope.$on('$routeChangeError', function (e, curr, prev) {
+            $rootScope.$on('$routeChangeError', function () {
                 $rootScope.pageDefer.reject();
             });
         }]);

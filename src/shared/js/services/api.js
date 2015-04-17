@@ -1,4 +1,4 @@
-/* global angular,PIECEMETA_API_HOST */
+/* global angular,PIECEMETA_API_HOST,PMApi */
 angular.module('piecemeta-web.services.api', []).
 factory('apiService', ['authService', function (authService) {
     'use strict';

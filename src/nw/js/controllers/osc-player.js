@@ -1,4 +1,4 @@
-/* global angular,async,Tock */
+/* global console,angular,async,Tock,require */
 (function () {
     'use strict';
     angular.module(
@@ -93,10 +93,12 @@
                                 return nextChannel(err);
                             }
                             for (var i in dataStreams) {
-                                if (dataStreams[i].group) {
-                                    $scope.data.groupStatus[dataStreams[i].group] = true;
+                                if (typeof dataStreams[i] === 'object') {
+                                    if (dataStreams[i].group) {
+                                        $scope.data.groupStatus[dataStreams[i].group] = true;
+                                    }
+                                    $scope.data.streamStatus[dataStreams[i].uuid] = true;
                                 }
-                                $scope.data.streamStatus[dataStreams[i].uuid] = true;
                             }
                             $scope.data.dataPackage.channels[$scope.data.dataPackage.channels.indexOf(channel)].streams = dataStreams;
                             nextChannel();
@@ -138,10 +140,12 @@
                 $scope.$parent.status = 'ready';
                 var pkg = $scope.data.dataPackage;
                 for (var i in pkg.channels) {
-                    for (var n in pkg.channels[i].streams) {
-                        if (pkg.channels[i].streams[n].frames.length > $scope.data.totalFrames) {
-                            $scope.data.totalFrames = pkg.channels[i].streams[n].frames.length;
-                            $scope.data.fps = pkg.channels[i].streams[n].fps;
+                    if (typeof pkg.channels[i] === 'object') {
+                        for (var n in pkg.channels[i].streams) {
+                            if (pkg.channels[i].streams[n].frames.length > $scope.data.totalFrames) {
+                                $scope.data.totalFrames = pkg.channels[i].streams[n].frames.length;
+                                $scope.data.fps = pkg.channels[i].streams[n].fps;
+                            }
                         }
                     }
                 }
@@ -151,9 +155,9 @@
 
                 var seconds = Math.floor($scope.data.totalFrames / $scope.data.fps);
                 var minutes = Math.floor(seconds / 60);
-                $scope.data.timeString = ('0' + minutes).substr(-2, 2) + ':'
-                    + ('0' + (seconds - minutes * 60)).substr(-2, 2) + ':'
-                    + ('0' + ($scope.data.totalFrames - (seconds * $scope.data.fps))).substr(-2, 2);
+                $scope.data.timeString = ('0' + minutes).substr(-2, 2) + ':' +
+                    ('0' + (seconds - minutes * 60)).substr(-2, 2) + ':' +
+                    ('0' + ($scope.data.totalFrames - (seconds * $scope.data.fps))).substr(-2, 2);
 
                 $scope.$apply();
 
@@ -186,9 +190,9 @@
                         document.getElementById('frameCount').innerText = ('000000000000' + $scope.data.frame).substr(framesPadding*-1, framesPadding);
                         var seconds = Math.floor($scope.data.frame / $scope.data.fps);
                         var minutes = Math.floor(seconds / 60);
-                        document.getElementById('timeCode').innerText = ('0' + minutes).substr(-2,2) + ':'
-                                + ('0' + (seconds - minutes * 60)).substr(-2,2) + ':'
-                                + ('0' + ($scope.data.frame - (seconds * $scope.data.fps))).substr(-2,2);
+                        document.getElementById('timeCode').innerText = ('0' + minutes).substr(-2,2) + ':' +
+                            ('0' + (seconds - minutes * 60)).substr(-2,2) + ':' +
+                            ('0' + ($scope.data.frame - (seconds * $scope.data.fps))).substr(-2,2);
                         if (Math.round($scope.data.frame / $scope.data.totalFrames * 1000) !== $scope.playprogress) {
                             $scope.playprogress = Math.round($scope.data.frame / $scope.data.totalFrames * 1000);
                             $scope.$apply();
@@ -202,22 +206,26 @@
                     var addresses = {};
                     var address;
                     for (var i in pkg.channels) {
-                        for (var n in pkg.channels[i].streams) {
-                            address = '/' + pkg.channels[i].title;
-                            address += pkg.channels[i].streams[n].group ? '/' + pkg.channels[i].streams[n].group : '';
-                            if (!addresses[address]) {
-                                addresses[address] = [];
-                            }
-                            if (pkg.channels[i].streams[n].frames[$scope.data.frame]) {
-                                if ($scope.data.streamStatus[pkg.channels[i].streams[n].uuid] === true
-                                    && (!pkg.channels[i].streams[n].group || $scope.data.groupStatus[pkg.channels[i].streams[n].group] === true)) {
-                                    addresses[address].push(pkg.channels[i].streams[n].frames[$scope.data.frame]);
+                        if (typeof pkg.channels[i] === 'object') {
+                            for (var n in pkg.channels[i].streams) {
+                                if (typeof pkg.channels[i].streams[n] === 'object') {
+                                    address = '/' + pkg.channels[i].title;
+                                    address += pkg.channels[i].streams[n].group ? '/' + pkg.channels[i].streams[n].group : '';
+                                    if (!addresses[address]) {
+                                        addresses[address] = [];
+                                    }
+                                    if (pkg.channels[i].streams[n].frames[$scope.data.frame]) {
+                                        if ($scope.data.streamStatus[pkg.channels[i].streams[n].uuid] === true &&
+                                            (!pkg.channels[i].streams[n].group || $scope.data.groupStatus[pkg.channels[i].streams[n].group] === true)) {
+                                            addresses[address].push(pkg.channels[i].streams[n].frames[$scope.data.frame]);
+                                        }
+                                    }
                                 }
                             }
-                        }
-                        for (address in addresses) {
-                            if (addresses[address].length > 0) {
-                                messages.push(osc.createMessage(address, addresses[address]));
+                            for (address in addresses) {
+                                if (addresses[address].length > 0) {
+                                    messages.push(osc.createMessage(address, addresses[address]));
+                                }
                             }
                         }
                     }

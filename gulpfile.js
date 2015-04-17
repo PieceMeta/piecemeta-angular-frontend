@@ -36,7 +36,7 @@ gulp.task('modernizr', function () {
             "matchCommunityTests": false,
             "customTests": []
         }))
-        .pipe(gulp.dest("lib/modernizr"))
+        .pipe(gulp.dest("lib/modernizr"));
 });
 
 gulp.task('js-deps', ['modernizr'], function () {
@@ -67,38 +67,32 @@ gulp.task('js-deps', ['modernizr'], function () {
         .pipe(gulp.dest('./dist/nw/approot/js/'));
 });
 
+function jsPipe(src, destPath) {
+    return src.pipe(concat('piecemeta-angular-frontend.js'))
+        .pipe(header(banner, {pkg: pkg}))
+        .pipe(gulp.dest(destPath))
+        .pipe(rename({
+            extname: ".min.js"
+        }))
+        .pipe(uglify())
+        .pipe(header(banner, {pkg: pkg}))
+        .pipe(gulp.dest(destPath));
+}
+
 gulp.task('js-web', function () {
-    return gulp.src([
+    return jsPipe(gulp.src([
             'configuration.js',
             './src/shared/js/**/*.js',
             './src/web/js/**/*.js'
-        ])
-        .pipe(concat('piecemeta-angular-frontend.js'))
-        .pipe(header(banner, {pkg: pkg}))
-        .pipe(gulp.dest('./dist/web/js/'))
-        .pipe(rename({
-            extname: ".min.js"
-        }))
-        .pipe(uglify())
-        .pipe(header(banner, {pkg: pkg}))
-        .pipe(gulp.dest('./dist/web/js/'));
+        ]), './dist/web/js/');
 });
 
 gulp.task('js-nw', function () {
-    return gulp.src([
+    return jsPipe(gulp.src([
             'configuration.js',
             './src/shared/js/**/*.js',
             './src/nw/js/**/*.js'
-        ])
-        .pipe(concat('piecemeta-angular-frontend.js'))
-        .pipe(header(banner, {pkg: pkg}))
-        .pipe(gulp.dest('./dist/nw/approot/js/'))
-        .pipe(rename({
-            extname: ".min.js"
-        }))
-        .pipe(uglify())
-        .pipe(header(banner, {pkg: pkg}))
-        .pipe(gulp.dest('./dist/nw/approot/js/'));
+        ]), './dist/nw/approot/js/');
 });
 
 
@@ -106,26 +100,22 @@ gulp.task('js-nw', function () {
 //
 // CSS building
 
-gulp.task('css-web', function () {
-    return gulp.src('./src/web/less/site.less')
-        .pipe(less())
+function cssPipe(src, destPath) {
+    return src.pipe(less())
         .pipe(minify())
         .pipe(header(banner, {pkg: pkg}))
         .pipe(rename({
             basename: 'piecemeta-frontend'
         }))
-        .pipe(gulp.dest('./dist/web/css/'));
+        .pipe(gulp.dest(destPath));
+}
+
+gulp.task('css-web', function () {
+    return cssPipe(gulp.src('./src/web/less/site.less'), './dist/web/css/');
 });
 
 gulp.task('css-nw', function () {
-    return gulp.src('./src/nw/less/app.less')
-        .pipe(less())
-        .pipe(minify())
-        .pipe(header(banner, {pkg: pkg}))
-        .pipe(rename({
-            basename: 'piecemeta-frontend'
-        }))
-        .pipe(gulp.dest('./dist/nw/approot/css/'));
+    return cssPipe(gulp.src('./src/nw/less/app.less'), './dist/nw/approot/css/');
 });
 
 
@@ -133,16 +123,18 @@ gulp.task('css-nw', function () {
 //
 // HTML building
 
+function htmlPipe(src, destPath) {
+    return src.pipe(jade())
+        .pipe(gulp.dest(destPath));
+}
+
 gulp.task('html-web', function () {
-    return gulp.src(['./src/shared/jade/**/*.jade', './src/web/jade/**/*.jade'])
-        .pipe(jade())
-        .pipe(gulp.dest('./dist/web/'));
+    return htmlPipe(gulp.src(['./src/shared/jade/**/*.jade', './src/web/jade/**/*.jade']), './dist/web/');
+
 });
 
 gulp.task('html-nw', function () {
-    return gulp.src(['./src/shared/jade/**/*.jade', './src/nw/jade/**/*.jade'])
-        .pipe(jade())
-        .pipe(gulp.dest('./dist/nw/approot/'));
+    return htmlPipe(gulp.src(['./src/shared/jade/**/*.jade', './src/nw/jade/**/*.jade']), './dist/nw/approot/');
 });
 
 

@@ -1,4 +1,4 @@
-/* global angular */
+/* global angular,console */
 (function () {
     'use strict';
     angular.module(

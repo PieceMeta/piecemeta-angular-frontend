@@ -1,4 +1,4 @@
-/* global angular,async,PIECEMETA_API_HOST,BVH */
+/* global angular,async,PIECEMETA_API_HOST,BVH,console */
 
 (function () {
     'use strict';
@@ -178,10 +178,10 @@
                                 }
                             },
                             function (input, cb) {
+                                var key;
                                 if ($routeParams.garbage) {
                                     var maxFrames = 0;
                                     var paddedFrames = {};
-                                    var key;
                                     for (key in input) {
                                         if (typeof input[key] === 'object' && input[key].length > 0) {
                                             if (input[key].length > maxFrames) {
@@ -227,31 +227,33 @@
                                 } else {
                                     var targetMillis = 1000 / 60;
                                     var saneFrames = {};
-                                    for (var key in input) {
+                                    for (key in input) {
                                         if (typeof input[key] === 'object' && input[key].length > 0) {
                                             var lastMillis = input[key][0].m * 1000 + input[key][0].s;
                                             saneFrames[key] = [];
                                             console.log('frames', input[key].length);
                                             for (var index in input[key]) {
-                                                var nowMillis = input[key][index].m * 1000 + input[key][index].s;
-                                                var diff = Math.round((nowMillis - lastMillis) / targetMillis);
-                                                //if (diff > 1) {
-                                                for (var d = 0; d < diff; d += 1) {
-                                                    var milliOffset = d * targetMillis;
-                                                    var newMillis = nowMillis + milliOffset;
-                                                    saneFrames[key].push({
-                                                        a: input[key][index].a,
-                                                        m: Math.floor(newMillis / 1000),
-                                                        s: (newMillis / 1000 - Math.floor(newMillis / 1000)) * 1000
-                                                    });
+                                                if (typeof input[key][index] === 'object') {
+                                                    var nowMillis = input[key][index].m * 1000 + input[key][index].s;
+                                                    var diff = Math.round((nowMillis - lastMillis) / targetMillis);
+                                                    //if (diff > 1) {
+                                                    for (var d = 0; d < diff; d += 1) {
+                                                        var milliOffset = d * targetMillis;
+                                                        var newMillis = nowMillis + milliOffset;
+                                                        saneFrames[key].push({
+                                                            a: input[key][index].a,
+                                                            m: Math.floor(newMillis / 1000),
+                                                            s: (newMillis / 1000 - Math.floor(newMillis / 1000)) * 1000
+                                                        });
+                                                    }
+                                                    //console.log('diff', (nowMillis - lastMillis) / targetMillis);
+                                                    /*
+                                                     } else {
+                                                     saneFrames[key].push(input[key][index]);
+                                                     }
+                                                     */
+                                                    lastMillis = nowMillis;
                                                 }
-                                                //console.log('diff', (nowMillis - lastMillis) / targetMillis);
-                                                /*
-                                                 } else {
-                                                 saneFrames[key].push(input[key][index]);
-                                                 }
-                                                 */
-                                                lastMillis = nowMillis;
                                             }
                                         }
                                     }
@@ -277,15 +279,17 @@
                                             filteredFrames[key] = [];
                                             console.log('frames', input[key].length);
                                             for (var index in input[key]) {
-                                                var nowMillis = input[key][index].m * 1000 + input[key][index].s;
-                                                var diff = Math.round((nowMillis - lastMillis) / targetMillis);
-                                                if (diff !== 1) {
-                                                    faults += 1;
-                                                    console.log('dropped faulty frame with diff != 1at', diff, index);
-                                                } else {
-                                                    filteredFrames[key].push(input[key][index]);
+                                                if (typeof input[key][index] === 'object') {
+                                                    var nowMillis = input[key][index].m * 1000 + input[key][index].s;
+                                                    var diff = Math.round((nowMillis - lastMillis) / targetMillis);
+                                                    if (diff !== 1) {
+                                                        faults += 1;
+                                                        console.log('dropped faulty frame with diff != 1at', diff, index);
+                                                    } else {
+                                                        filteredFrames[key].push(input[key][index]);
+                                                    }
+                                                    lastMillis = nowMillis;
                                                 }
-                                                lastMillis = nowMillis;
                                             }
                                             console.log('total faults', faults);
                                         }
@@ -304,13 +308,15 @@
                                             var lastMillis = input[key][0].m * 1000 + input[key][0].s;
                                             console.log('cleaned frames for index', key, input[key].length);
                                             for (var index in input[key]) {
-                                                var nowMillis = input[key][index].m * 1000 + input[key][index].s;
-                                                var diff = Math.round((nowMillis - lastMillis) / targetMillis);
-                                                if (diff !== 1) {
-                                                    faults += 1;
-                                                    //console.log('faulty frame with diff != 1 at', diff, index);
+                                                if (typeof input[key][index] === 'object') {
+                                                    var nowMillis = input[key][index].m * 1000 + input[key][index].s;
+                                                    var diff = Math.round((nowMillis - lastMillis) / targetMillis);
+                                                    if (diff !== 1) {
+                                                        faults += 1;
+                                                        //console.log('faulty frame with diff != 1 at', diff, index);
+                                                    }
+                                                    lastMillis = nowMillis;
                                                 }
-                                                lastMillis = nowMillis;
                                             }
                                             console.log('total faults', faults);
                                         }
@@ -352,8 +358,10 @@
                                             });
                                         }
                                         for (var index in input[key]) {
-                                            for (var p = 0; p < paramLength; p += 1) {
-                                                dataChannel.streams[p].frames.push(input[key][index].a[p]);
+                                            if (typeof input[key][index] === 'object') {
+                                                for (var p = 0; p < paramLength; p += 1) {
+                                                    dataChannel.streams[p].frames.push(input[key][index].a[p]);
+                                                }
                                             }
                                         }
                                         $scope.dataChannels.push(dataChannel);
@@ -541,10 +549,11 @@
                 },
                 function (dataChannels, cb) {
                     $scope.data.dataPackage.channels = dataChannels.sort(function (a, b) {
-                        if (a.title < b.title)
+                        if (a.title < b.title) {
                             return -1;
-                        if (a.title > b.title)
+                        } else if (a.title > b.title) {
                             return 1;
+                        }
                         return 0;
                     });
                     cb(null);
@@ -611,10 +620,11 @@
                     return console.log('error getting packages', err);
                 }
                 $scope.data.data_packages = data_packages.sort(function (a, b) {
-                    if (a.title < b.title)
+                    if (a.title < b.title) {
                         return -1;
-                    if (a.title > b.title)
+                    } else if (a.title > b.title) {
                         return 1;
+                    }
                     return 0;
                 });
                 $scope.$apply();
