@@ -1,5 +1,5 @@
 /* global angular,async */
-angular.module('piecemeta-web.services.importers.json', []).
+angular.module('piecemeta-web.services.importers.json', ['piecemeta-web.services.api']).
     factory('jsonImportService', ['apiService', function (apiService) {
         'use strict';
         return {
@@ -100,7 +100,7 @@ angular.module('piecemeta-web.services.importers.json', []).
                     },
                     function (input, cb) {
                         var key;
-                        if ($routeParams.garbage) {
+                        if (cleanupNeeded) {
                             for (key in input) {
                                 if (typeof input[key] === 'object' && input[key].length > 0) {
                                     console.log(key, input[key].length);

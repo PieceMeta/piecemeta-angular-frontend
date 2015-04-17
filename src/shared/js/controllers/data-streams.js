@@ -5,7 +5,9 @@
         'piecemeta-web.controllers.data-streams',
         [
             'angularFileUpload',
-            'piecemeta-web.services.api'
+            'piecemeta-web.services.api',
+            'piecemeta-web.services.importers.text',
+            'piecemeta-web.services.importers.trac'
         ])
         .controller('DataStreams.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
             $scope.data = {
@@ -211,11 +213,12 @@
                 };
             });
         }])
-        .controller('DataStreams.ImportFile', ['$scope', '$q', 'apiService', '$routeParams', '$location', function ($scope, $q, apiService, $routeParams, $location) {
-            var fileData = "",
+        .controller('DataStreams.ImportFile', ['$scope', '$q', '$routeParams', '$location', 'apiService', 'textImportService', function ($scope, $q, $routeParams, $location, apiService, textImportService) {
+            var fileData, fileLines,
                 deferred = $q.defer();
 
             $scope.data = {
+                regex: null,
                 dataPackage: null,
                 selectedChannel: {},
                 startFrame: 1,
@@ -236,13 +239,13 @@
                 ],
                 channelTitle: "",
                 resultLines: [],
-                isComplete: false
+                fileLines: [],
+                isComplete: false,
+                valLength: 0,
+                valLabel: []
             };
 
-            $scope.fileLines = [];
             $scope.frameCount = 0;
-            $scope.valLength = 0;
-            $scope.valLabel = [];
 
             $scope.promiseString = 'Loading...';
             $scope.promise = deferred.promise;
@@ -279,47 +282,20 @@
                 deferred.resolve();
             });
 
-
-            var parseData = function () {
-                if (!$scope.regex) {
-                    return;
-                }
-                $scope.data.resultLines = [];
-                $scope.valLength = 0;
-                $scope.valLabel = [];
-                for (var idx in $scope.fileLines) {
-                    if (typeof $scope.fileLines[idx] === 'string') {
-                        var match = null;
-                        var values = [];
-                        while ((match = $scope.regex.exec($scope.fileLines[idx])) !== null) {
-                            values = match;
-                        }
-                        values.shift();
-                        if ($scope.valLength < values.length) {
-                            $scope.valLength = values.length;
-                        }
-                        $scope.data.resultLines.push(values);
-                    }
-                }
-                for (var i = 0; i < $scope.valLength; i += 1) {
-                    $scope.valLabel.push('');
-                }
-            };
-
-            $scope.parseLines = function () {
-                var lines = fileData.split('\n');
-                $scope.frameCount = lines.length;
-                $scope.fileLines = lines.slice(Math.abs(parseInt($scope.data.startFrame)), 10);
-                parseData();
-            };
-
             $scope.updateRegex = function (regexString) {
                 if (!regexString || regexString === '') {
                     return;
                 }
-                $scope.regex = new RegExp(regexString, 'gm');
-                parseData();
+                $scope.data.regex = new RegExp(regexString, 'gm');
+                var result = textImportService.applyRegex(fileLines, $scope.data.regex);
+                $scope.data.resultLines = result.frames;
+                $scope.data.valLength = result.valLength;
+                $scope.data.valLabel = [];
+                for (var i = 0; i < $scope.data.valLength; i += 1) {
+                    $scope.data.valLabel.push('');
+                }
             };
+
             $scope.onFileSelect = function ($files) {
                 var deferred = $q.defer();
                 $scope.promiseString = 'Reading file...';
@@ -327,12 +303,17 @@
                 var reader = new FileReader();
                 reader.onload = function (onLoadEvent) {
                     fileData = onLoadEvent.target.result;
+                    $scope.data.fileLines = fileData.split('\n').splice(0, 10);
+                    var lineResults = textImportService.parse(fileData, $scope.data.startFrame, 10);
+                    $scope.frameCount = lineResults.frameCount;
+                    fileLines = lineResults.frames;
                     $scope.updateRegex($scope.data.regexString);
-                    $scope.parseLines();
+                    $scope.$apply();
                     deferred.resolve();
                 };
                 reader.readAsText($files[0]);
             };
+
             $scope.submit = function () {
                 var deferred = $q.defer();
                 $scope.promiseString = 'Adding channel...';
@@ -348,65 +329,7 @@
                     deferred.reject();
                     return;
                 }
-
-                var dataStreams = [];
-                var lines = fileData.split('\n');
-
-                async.waterfall([
-                    function (cb) {
-                        for (var i = 0; i < $scope.valLength; i += 1) {
-                            var dataStream = {
-                                channel_uuid: $scope.data.selectedChannel.uuid,
-                                title: $scope.valLabel[i],
-                                fps: $scope.data.fps,
-                                group: $scope.data.valueGroup,
-                                frames: []
-                            };
-                            dataStreams.push(dataStream);
-                        }
-                        cb(null);
-                    },
-                    function (cb) {
-                        for (var l in lines) {
-                            if (typeof lines[l] === 'string') {
-                                var match = null,
-                                    values = [];
-                                while ((match = $scope.regex.exec(lines[l])) !== null) {
-                                    values = match;
-                                }
-                                values.shift();
-                                for (var n in values) {
-                                    if (typeof dataStreams[n] === 'object') {
-                                        dataStreams[n].frames.push(values[n]);
-                                    }
-                                }
-                            }
-                        }
-                        cb(null);
-                    },
-                    function (cb) {
-                        if ($scope.data.selectedChannel.uuid) {
-                            cb(null, null);
-                        } else {
-                            var channel = {
-                                package_uuid: $routeParams.uuid,
-                                title: $scope.data.selectedChannel.title ? $scope.data.selectedChannel.title : $scope.data.channelTitle
-                            };
-                            apiService('channels').actions.create(channel, cb);
-                        }
-                    },
-                    function (channel, cb) {
-                        cb(null, $scope.data.selectedChannel.uuid || channel.uuid);
-                    },
-                    function (channel_uuid, cb) {
-                        async.eachSeries(dataStreams, function (stream, next) {
-                            stream.channel_uuid = channel_uuid;
-                            apiService('streams').actions.create(stream, next);
-                        }, function (err) {
-                            cb(err);
-                        });
-                    }
-                ], function (err) {
+                textImportService.submit(fileData, $scope.data, function (err) {
                     if (err) {
                         $scope.alerts = [
                             {
@@ -429,7 +352,7 @@
                 });
             };
         }])
-        .controller('DataStreams.ImportTrac', ['$scope', '$q', 'apiService', '$routeParams', '$location', function ($scope, $q, apiService, $routeParams, $location) {
+        .controller('DataStreams.ImportTrac', ['$scope', '$q', 'apiService', '$routeParams', '$location', 'tracImportService', function ($scope, $q, apiService, $routeParams, $location, tracImportService) {
             var fileData = "",
                 deferred = $q.defer();
 
@@ -442,13 +365,12 @@
                 startFrame: 1,
                 fps: null,
                 resultLines: [],
+                frameCount: 0,
+                valLength: 0,
+                valLabel: [],
+                fileLines: [],
                 isComplete: false
             };
-
-            $scope.fileLines = [];
-            $scope.frameCount = 0;
-            $scope.valLength = 0;
-            $scope.valLabel = [];
 
             $scope.promiseString = 'Loading...';
             $scope.promise = deferred.promise;
@@ -485,91 +407,6 @@
                 deferred.resolve();
             });
 
-            $scope.parseLines = function (callback) {
-
-                var lines = Papa.parse(fileData).data;
-                var headerLines = lines.splice(0, 5);
-
-                // drop the framenumber
-                var labels = headerLines[3];
-                labels.splice(0, 1);
-                var props = headerLines[4];
-                props.splice(0, 2);
-
-                while (props[props.length - 1] === null || props[props.length - 1] === "") {
-                    props.pop();
-                }
-
-                var propertyCount = props.length + 1;
-
-                // remove empty labels
-                labels = labels.filter(function (v) {
-                    return v !== '';
-                });
-
-                var inconsistencies = 0;
-
-                async.waterfall([
-                    function (cb) {
-                        $scope.data.fps = parseFloat(headerLines[2][0]);
-                        $scope.frameCount = lines.length;
-                        $scope.fileLines = lines.slice(Math.abs(parseInt($scope.data.startFrame)), 10);
-                        cb();
-                    },
-                    function (cb) {
-                        var timeStream = {
-                            channel_uuid: $scope.data.selectedChannel.uuid,
-                            title: labels.shift(),
-                            frames: [],
-                            fps: $scope.data.fps
-                        };
-                        $scope.data.dataStreams.push(timeStream);
-                        cb();
-                    },
-                    function (cb) {
-                        async.eachSeries(labels, function (label, next) {
-                            var xyz = props.splice(0, 3);
-                            async.each(xyz, function (streamlabel, nextStreamLabel) {
-                                var stream = {
-                                    channel_uuid: $scope.data.selectedChannel.uuid,
-                                    title: streamlabel.replace(/[0-9]/g, ''),
-                                    group: label,
-                                    frames: [],
-                                    fps: $scope.data.fps
-                                };
-                                $scope.data.dataStreams.push(stream);
-                                nextStreamLabel();
-                            }, function (err) {
-                                next(err);
-                            });
-                        }, cb);
-                    },
-                    function (cb) {
-                        for (var i in lines) {
-                            if (typeof lines[i] === 'object') {
-                                var values = lines[i];
-                                // drop framenumber
-                                values.splice(0, 1);
-                                if (propertyCount !== values.length) {
-                                    inconsistencies += 1;
-                                }
-                                for (var n = 0; n < propertyCount; n += 1) {
-                                    if (typeof values[n] === 'undefined') {
-                                        $scope.data.dataStreams[n].frames.push(null);
-                                    } else {
-                                        $scope.data.dataStreams[n].frames.push(parseFloat(values[n]));
-                                    }
-                                }
-                            }
-                        }
-                        cb();
-                    }
-                ], function (err) {
-                    //console.log(propertyCount, inconsistencies, $scope.data.dataStreams);
-                    callback(err, inconsistencies);
-                });
-            };
-
             $scope.onFileSelect = function ($files) {
                 var deferred = $q.defer();
                 $scope.promiseString = 'Reading file...';
@@ -577,7 +414,7 @@
                 var reader = new FileReader();
                 reader.onload = function (onLoadEvent) {
                     fileData = onLoadEvent.target.result;
-                    $scope.parseLines(function (err, inconsistencies) {
+                    tracImportService.parse(onLoadEvent.target.result, $scope.data, function (err, inconsistencies) {
                         if (inconsistencies > 0) {
                             $scope.alerts = [
                                 {
@@ -607,31 +444,7 @@
                     deferred.reject();
                     return;
                 }
-
-                async.waterfall([
-                    function (cb) {
-                        if ($scope.data.selectedChannel.uuid) {
-                            cb(null, null);
-                        } else {
-                            var channel = {
-                                package_uuid: $routeParams.uuid,
-                                title: $scope.data.selectedChannel.title ? $scope.data.selectedChannel.title : $scope.data.channelTitle
-                            };
-                            apiService('channels').actions.create(channel, cb);
-                        }
-                    },
-                    function (channel, cb) {
-                        cb(null, $scope.data.selectedChannel.uuid || channel.uuid);
-                    },
-                    function (channel_uuid, cb) {
-                        async.eachSeries($scope.data.dataStreams, function (stream, next) {
-                            stream.channel_uuid = channel_uuid;
-                            apiService('streams').actions.create(stream, next);
-                        }, function (err) {
-                            cb(err);
-                        });
-                    }
-                ], function (err) {
+                tracImportService.submit($scope.data, function (err) {
                     if (err) {
                         $scope.alerts = [
                             {

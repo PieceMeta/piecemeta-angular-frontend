@@ -11,32 +11,7 @@ var PIECEMETA_API_HOST = 'https://api.piecemeta.com';
 // DEV
 PIECEMETA_DEV_API_URL = 'http://localhost:8080';
 PIECEMETA_API_HOST = 'http://localhost:8080';
-angular.module('piecemeta-web.directives.helpers', [
-        'piecemeta-web.services.api',
-        'piecemeta-web.services.auth'
-    ]).
-    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
-        'use strict';
-        return {
-            link: function (scope) {
-                scope.updateUser = function () {
-                    if (authService.access_token) {
-                        apiService('users').actions.find('me', function (err, res) {
-                            if (err) {
-                                console.log('error fetching user', err);
-                                scope.userSession = null;
-                                return;
-                            }
-                            scope.userSession = res;
-                            scope.$apply();
-                        });
-                    }
-                };
-                scope.updateUser();
-            }
-        };
-    }]);
-/* global angular */
+/* global angular,console */
 (function () {
     'use strict';
     angular.module(
@@ -123,7 +98,7 @@ angular.module('piecemeta-web.directives.helpers', [
             });
         }]);
 }());
-/* global angular,async */
+/* global angular,async,console */
 (function () {
     'use strict';
     angular.module(
@@ -346,7 +321,7 @@ angular.module('piecemeta-web.directives.helpers', [
             });
         }]);
 }());
-/* global angular,async,PIECEMETA_API_HOST,BVH */
+/* global angular,async,PIECEMETA_API_HOST,console */
 
 (function () {
     'use strict';
@@ -355,9 +330,11 @@ angular.module('piecemeta-web.directives.helpers', [
         [
             'angularFileUpload',
             'piecemeta-web.services.api',
+            'piecemeta-web.services.importers.json',
+            'piecemeta-web.services.importers.bvh',
             'chartjs'
         ])
-        .controller('DataPackages.ImportBVH', ['$scope', '$q', 'authService', 'apiService', function ($scope, $q, authService, apiService) {
+        .controller('DataPackages.ImportBVH', ['$scope', '$q', 'bvhImportService', function ($scope, $q, bvhImportService) {
             $scope.file = null;
             $scope.onFileSelect = function ($files) {
                 var deferred = $q.defer();
@@ -366,143 +343,23 @@ angular.module('piecemeta-web.directives.helpers', [
 
                 $scope.file = $files[0];
                 $scope.dataPackage = null;
-                $scope.dataChannels = [];
                 var reader = new FileReader();
                 reader.onload = function (onLoadEvent) {
-                    async.waterfall([
-                        function (cb) {
-                            cb(null, BVH.parse(onLoadEvent.target.result));
-                        },
-                        function (motion, cb) {
-                            $scope.motion = motion;
-                            cb(null);
-                        },
-                        function (cb) {
-                            var dataPackage = {
-                                title: $files[0].name
-                            };
-                            apiService('packages').actions.create(dataPackage, function (err, dataPackage) {
-                                cb(err, dataPackage);
-                            });
-                        },
-                        function (dataPackage, cb) {
-                            $scope.dataPackage = dataPackage;
-                            cb(null);
-                        },
-                        function (cb) {
-                            async.eachSeries($scope.motion.nodeList, function (node, nextNode) {
-                                var dataChannel = {
-                                    title: node.id,
-                                    package_uuid: $scope.dataPackage.uuid
-                                };
-                                apiService('channels').create(dataChannel, function (err, dataChannel) {
-                                    if (err) {
-                                        return nextNode(err);
-                                    }
-                                    $scope.dataChannels.push(dataChannel);
-                                    var dataStreams = [
-                                        {
-                                            title: 'x',
-                                            group: 'position',
-                                            value_offset: node.offsetX
-                                        },
-                                        {
-                                            title: 'y',
-                                            group: 'position',
-                                            value_offset: node.offsetY
-                                        },
-                                        {
-                                            title: 'z',
-                                            group: 'position',
-                                            value_offset: node.offsetZ
-                                        },
-                                        {
-                                            title: 'z',
-                                            group: 'rotation'
-                                        },
-                                        {
-                                            title: 'y',
-                                            group: 'rotation'
-                                        },
-                                        {
-                                            title: 'x',
-                                            group: 'rotation'
-                                        }
-                                    ];
-                                    for (var i in dataStreams) {
-                                        if (typeof dataStreams[i] === 'object') {
-                                            dataStreams[i].frames = [];
-                                            dataStreams[i].fps = parseFloat((1.0 / $scope.motion.frameTime).toFixed(2));
-                                        }
-                                    }
-                                    for (var f in node.frames) {
-                                        if (typeof node.frames[f] === 'object') {
-                                            var frameSource = node.frames[f];
-                                            for (var n in frameSource) {
-                                                if (typeof frameSource[n] === 'number') {
-                                                    dataStreams[n].frames.push(frameSource[n]);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    async.eachSeries(dataStreams, function (dataStream, nextStream) {
-                                        dataStream.channel_uuid = dataChannel.uuid;
-                                        apiService('streams').actions.create(
-                                            dataStream,
-                                            function (err) {
-                                                nextStream(err);
-                                            }
-                                        );
-                                    },
-                                    function (err) {
-                                        nextNode(err);
-                                    });
-                                });
-                            },
-                            function (err) {
-                                cb(err);
-                            });
-                        },
-                        function (cb) {
-                            async.eachSeries($scope.dataChannels, function (dataChannel, nextChannel) {
-                                var i = 0,
-                                    nodes = $scope.motion.nodeList;
-                                while (nodes[i].id !== dataChannel.title && i < nodes.length) {
-                                    i += 1;
-                                }
-                                if (nodes[i].parent) {
-                                    var n = 0;
-                                    while ($scope.dataChannels[n].title !== nodes[i].parent.id && n < $scope.dataChannels.length) {
-                                        n += 1;
-                                    }
-                                    dataChannel.parent_channel_uuid = $scope.dataChannels[n].uuid;
-                                    apiService('channels').actions.update(dataChannel.uuid, dataChannel, function (err) {
-                                        nextChannel(err);
-                                    });
-                                } else {
-                                    nextChannel(null);
-                                }
-                            },
-                            function (err) {
-                                cb(err);
-                            });
+                    bvhImportService.parse(onLoadEvent.target.result, $files[0].name, function (err, result) {
+                        if (err) {
+                            console.log('error processing bvh file', err);
+                            deferred.reject(err);
+                            return;
                         }
-                        ],
-                        function (err, result) {
-                            if (err) {
-                                console.log('error processing bvh file', err);
-                                deferred.reject(err);
-                                return;
-                            }
-                            console.log('successfully processed bvh file', result);
-                            deferred.resolve();
-                        }
-                    );
+                        $scope.dataPackage = result;
+                        console.log('successfully processed bvh file', result);
+                        deferred.resolve();
+                    });
                 };
                 reader.readAsText($files[0]);
             };
         }])
-        .controller('DataPackages.ImportOSC', ['$scope', '$q', 'authService', 'apiService', '$routeParams', function ($scope, $q, authService, apiService, $routeParams) {
+        .controller('DataPackages.ImportJSON', ['$scope', '$q', '$routeParams', 'jsonImportService', function ($scope, $q, $routeParams, jsonImportService) {
             $scope.file = null;
             $scope.onFileSelect = function ($files) {
                 var deferred = $q.defer();
@@ -511,241 +368,19 @@ angular.module('piecemeta-web.directives.helpers', [
 
                 $scope.file = $files[0];
                 $scope.dataPackage = null;
-                $scope.dataChannels = [];
                 var reader = new FileReader();
                 reader.onload = function (onLoadEvent) {
                     console.log('onload');
-                    async.waterfall([
-                            function (cb) {
-                                var input;
-                                try {
-                                    input = JSON.parse(onLoadEvent.target.result);
-                                    cb(null, input);
-                                } catch (e) {
-                                    cb(new Error('error parsing json: ' + e.toString()), null);
-                                }
-                            },
-                            function (input, cb) {
-                                if ($routeParams.garbage) {
-                                    var maxFrames = 0;
-                                    var paddedFrames = {};
-                                    var key;
-                                    for (key in input) {
-                                        if (typeof input[key] === 'object' && input[key].length > 0) {
-                                            if (input[key].length > maxFrames) {
-                                                maxFrames = input[key].length;
-                                            }
-                                        }
-                                    }
-                                    console.log('max frame is', maxFrames);
-                                    for (key in input) {
-                                        if (typeof input[key] === 'object' && input[key].length > 0) {
-                                            paddedFrames[key] = [];
-                                            if (input[key].length < maxFrames) {
-                                                var frameDiff = maxFrames - input[key].length;
-                                                var addInterval = Math.ceil(maxFrames / frameDiff);
-                                                var added = 0;
-                                                console.log('extend', input[key].length, frameDiff, addInterval);
-                                                for (var i = 0; i < input[key].length; i += 1) {
-                                                    if (input[key][i]) {
-                                                        //for (var n = 0; n < addInterval; n += 1) {
-                                                            paddedFrames[key].push(input[key][i]);
-                                                        if (added < frameDiff) {
-                                                            paddedFrames[key].push(input[key][i]);
-                                                            added += 1;
-                                                        }
-                                                        //}
-                                                        /*
-                                                        if (i % addInterval === 0) {
-                                                            paddedFrames[key].push(input[key][i]);
-                                                            paddedFrames[key].push(input[key][i]);
-                                                        } else {
-                                                            paddedFrames[key].push(input[key][i]);
-                                                        }
-                                                        */
-                                                    }
-                                                }
-                                                while (paddedFrames[key].length < maxFrames) {
-                                                    paddedFrames[key].push(input[key][input[key].length-1]);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    cb(null, paddedFrames);
-                                } else {
-                                    var targetMillis = 1000 / 60;
-                                    var saneFrames = {};
-                                    for (var key in input) {
-                                        if (typeof input[key] === 'object' && input[key].length > 0) {
-                                            var lastMillis = input[key][0].m * 1000 + input[key][0].s;
-                                            saneFrames[key] = [];
-                                            console.log('frames', input[key].length);
-                                            for (var index in input[key]) {
-                                                var nowMillis = input[key][index].m * 1000 + input[key][index].s;
-                                                var diff = Math.round((nowMillis - lastMillis) / targetMillis);
-                                                //if (diff > 1) {
-                                                for (var d = 0; d < diff; d += 1) {
-                                                    var milliOffset = d * targetMillis;
-                                                    var newMillis = nowMillis + milliOffset;
-                                                    saneFrames[key].push({
-                                                        a: input[key][index].a,
-                                                        m: Math.floor(newMillis / 1000),
-                                                        s: (newMillis / 1000 - Math.floor(newMillis / 1000)) * 1000
-                                                    });
-                                                }
-                                                //console.log('diff', (nowMillis - lastMillis) / targetMillis);
-                                                /*
-                                                 } else {
-                                                 saneFrames[key].push(input[key][index]);
-                                                 }
-                                                 */
-                                                lastMillis = nowMillis;
-                                            }
-                                        }
-                                    }
-                                    cb(null, saneFrames);
-                                }
-                            },
-                            function (input, cb) {
-                                var key;
-                                if ($routeParams.garbage) {
-                                    for (key in input) {
-                                        if (typeof input[key] === 'object' && input[key].length > 0) {
-                                            console.log(key, input[key].length);
-                                        }
-                                    }
-                                    cb(null, input);
-                                } else {
-                                    var filteredFrames = {};
-                                    var targetMillis = 1000 / 60;
-                                    for (key in input) {
-                                        if (typeof input[key] === 'object' && input[key].length > 0) {
-                                            var faults = 0;
-                                            var lastMillis = input[key][0].m * 1000 + input[key][0].s;
-                                            filteredFrames[key] = [];
-                                            console.log('frames', input[key].length);
-                                            for (var index in input[key]) {
-                                                var nowMillis = input[key][index].m * 1000 + input[key][index].s;
-                                                var diff = Math.round((nowMillis - lastMillis) / targetMillis);
-                                                if (diff !== 1) {
-                                                    faults += 1;
-                                                    console.log('dropped faulty frame with diff != 1at', diff, index);
-                                                } else {
-                                                    filteredFrames[key].push(input[key][index]);
-                                                }
-                                                lastMillis = nowMillis;
-                                            }
-                                            console.log('total faults', faults);
-                                        }
-                                    }
-                                    cb(null, filteredFrames);
-                                }
-                            },
-                            function (input, cb) {
-                                if ($routeParams.garbage) {
-                                    cb(null, input);
-                                } else {
-                                    var targetMillis = 1000 / 60;
-                                    for (var key in input) {
-                                        if (typeof input[key] === 'object' && input[key].length > 0) {
-                                            var faults = 0;
-                                            var lastMillis = input[key][0].m * 1000 + input[key][0].s;
-                                            console.log('cleaned frames for index', key, input[key].length);
-                                            for (var index in input[key]) {
-                                                var nowMillis = input[key][index].m * 1000 + input[key][index].s;
-                                                var diff = Math.round((nowMillis - lastMillis) / targetMillis);
-                                                if (diff !== 1) {
-                                                    faults += 1;
-                                                    //console.log('faulty frame with diff != 1 at', diff, index);
-                                                }
-                                                lastMillis = nowMillis;
-                                            }
-                                            console.log('total faults', faults);
-                                        }
-                                    }
-                                    cb(null, input);
-                                }
-                            },
-                            function (input, cb) {
-                                var dataPackage = {
-                                    title: $files[0].name
-                                };
-                                apiService('packages').actions.create(dataPackage, function (err, newPackage) {
-                                    cb(err, newPackage, input);
-                                });
-                            },
-                            function (dataPackage, input, cb) {
-                                $scope.dataPackage = dataPackage;
-                                console.log($scope.dataPackage);
-                                cb(null, input);
-                            },
-                            function (input, cb) {
-                                for (var key in input) {
-                                    if (typeof input[key] === 'object' && input[key].length > 0) {
-                                        var dataChannel = {
-                                            title: key.substr(1, key.length-1),
-                                            id: null,
-                                            package_uuid: $scope.dataPackage.uuid,
-                                            streams: []
-                                        };
-                                        var paramLength = input[key][0].a.length;
-                                        for (var n = 0; n < paramLength; n+=1) {
-                                            dataChannel.streams.push({
-                                                id: null,
-                                                fps: 60,
-                                                channel_id: null,
-                                                title: 'p' + n.toString(),
-                                                group: paramLength > 1 ? 'grouped' : null,
-                                                frames: []
-                                            });
-                                        }
-                                        for (var index in input[key]) {
-                                            for (var p = 0; p < paramLength; p += 1) {
-                                                dataChannel.streams[p].frames.push(input[key][index].a[p]);
-                                            }
-                                        }
-                                        $scope.dataChannels.push(dataChannel);
-                                    }
-                                }
-                                cb(null);
-                            },
-                            function (cb) {
-                                async.eachSeries($scope.dataChannels, function (channel, nextChannel) {
-                                    channel.package_uuid = $scope.dataPackage.uuid;
-                                    apiService('channels').actions.create(channel, function (err, dataChannel) {
-                                        if (err) {
-                                            return nextChannel(err);
-                                        }
-                                        $scope.dataChannels[$scope.dataChannels.indexOf(channel)].uuid = dataChannel.uuid;
-                                        async.eachSeries($scope.dataChannels[$scope.dataChannels.indexOf(channel)].streams, function (dataStream, nextStream) {
-                                                dataStream.channel_uuid = dataChannel.uuid;
-                                                apiService('streams').actions.create(
-                                                    dataStream,
-                                                    function (err) {
-                                                        nextStream(err);
-                                                    }
-                                                );
-                                            },
-                                            function (err) {
-                                                nextChannel(err);
-                                            });
-                                    });
-                                },
-                                function (err) {
-                                    cb(err);
-                                });
-                            }
-                        ],
-                        function (err, result) {
-                            if (err) {
-                                console.log('error processing json file', err);
-                                deferred.reject(err);
-                                return;
-                            }
-                            console.log('successfully processed json file', result);
-                            deferred.resolve();
+                    jsonImportService.parse(onLoadEvent.target.result, $files[0].name, $routeParams.garbage, function (err, result) {
+                        if (err) {
+                            console.log('error processing json file', err);
+                            deferred.reject(err);
+                            return;
                         }
-                    );
+                        $scope.dataPackage = result;
+                        console.log('successfully processed json file', result);
+                        deferred.resolve();
+                    });
                 };
                 reader.readAsText($files[0]);
             };
@@ -889,10 +524,11 @@ angular.module('piecemeta-web.directives.helpers', [
                 },
                 function (dataChannels, cb) {
                     $scope.data.dataPackage.channels = dataChannels.sort(function (a, b) {
-                        if (a.title < b.title)
+                        if (a.title < b.title) {
                             return -1;
-                        if (a.title > b.title)
+                        } else if (a.title > b.title) {
                             return 1;
+                        }
                         return 0;
                     });
                     cb(null);
@@ -959,10 +595,11 @@ angular.module('piecemeta-web.directives.helpers', [
                     return console.log('error getting packages', err);
                 }
                 $scope.data.data_packages = data_packages.sort(function (a, b) {
-                    if (a.title < b.title)
+                    if (a.title < b.title) {
                         return -1;
-                    if (a.title > b.title)
+                    } else if (a.title > b.title) {
                         return 1;
+                    }
                     return 0;
                 });
                 $scope.$apply();
@@ -1150,14 +787,16 @@ angular.module('piecemeta-web.directives.helpers', [
             });
         }]);
 }());
-/* global angular,async */
+/* global console,angular,async,Papa */
 (function () {
     'use strict';
     angular.module(
         'piecemeta-web.controllers.data-streams',
         [
             'angularFileUpload',
-            'piecemeta-web.services.api'
+            'piecemeta-web.services.api',
+            'piecemeta-web.services.importers.text',
+            'piecemeta-web.services.importers.trac'
         ])
         .controller('DataStreams.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
             $scope.data = {
@@ -1363,11 +1002,12 @@ angular.module('piecemeta-web.directives.helpers', [
                 };
             });
         }])
-        .controller('DataStreams.ImportFile', ['$scope', '$q', 'apiService', '$routeParams', '$location', function ($scope, $q, apiService, $routeParams, $location) {
-            var fileData = "",
+        .controller('DataStreams.ImportFile', ['$scope', '$q', '$routeParams', '$location', 'apiService', 'textImportService', function ($scope, $q, $routeParams, $location, apiService, textImportService) {
+            var fileData, fileLines,
                 deferred = $q.defer();
 
             $scope.data = {
+                regex: null,
                 dataPackage: null,
                 selectedChannel: {},
                 startFrame: 1,
@@ -1388,13 +1028,13 @@ angular.module('piecemeta-web.directives.helpers', [
                 ],
                 channelTitle: "",
                 resultLines: [],
-                isComplete: false
+                fileLines: [],
+                isComplete: false,
+                valLength: 0,
+                valLabel: []
             };
 
-            $scope.fileLines = [];
             $scope.frameCount = 0;
-            $scope.valLength = 0;
-            $scope.valLabel = [];
 
             $scope.promiseString = 'Loading...';
             $scope.promise = deferred.promise;
@@ -1431,45 +1071,20 @@ angular.module('piecemeta-web.directives.helpers', [
                 deferred.resolve();
             });
 
-
-            var parseData = function () {
-                if (!$scope.regex) {
-                    return;
-                }
-                $scope.data.resultLines = [];
-                $scope.valLength = 0;
-                $scope.valLabel = [];
-                for (var idx in $scope.fileLines) {
-                    var match = null;
-                    var values = [];
-                    while ((match = $scope.regex.exec($scope.fileLines[idx])) !== null) {
-                        values = match;
-                    }
-                    values.shift();
-                    if ($scope.valLength < values.length) {
-                        $scope.valLength = values.length;
-                    }
-                    $scope.data.resultLines.push(values);
-                }
-                for (var i = 0; i < $scope.valLength; i += 1) {
-                    $scope.valLabel.push('');
-                }
-            };
-
-            $scope.parseLines = function () {
-                var lines = fileData.split('\n');
-                $scope.frameCount = lines.length;
-                $scope.fileLines = lines.slice(Math.abs(parseInt($scope.data.startFrame)), 10);
-                parseData();
-            };
-
             $scope.updateRegex = function (regexString) {
                 if (!regexString || regexString === '') {
                     return;
                 }
-                $scope.regex = new RegExp(regexString, 'gm');
-                parseData();
+                $scope.data.regex = new RegExp(regexString, 'gm');
+                var result = textImportService.applyRegex(fileLines, $scope.data.regex);
+                $scope.data.resultLines = result.frames;
+                $scope.data.valLength = result.valLength;
+                $scope.data.valLabel = [];
+                for (var i = 0; i < $scope.data.valLength; i += 1) {
+                    $scope.data.valLabel.push('');
+                }
             };
+
             $scope.onFileSelect = function ($files) {
                 var deferred = $q.defer();
                 $scope.promiseString = 'Reading file...';
@@ -1477,12 +1092,17 @@ angular.module('piecemeta-web.directives.helpers', [
                 var reader = new FileReader();
                 reader.onload = function (onLoadEvent) {
                     fileData = onLoadEvent.target.result;
+                    $scope.data.fileLines = fileData.split('\n').splice(0, 10);
+                    var lineResults = textImportService.parse(fileData, $scope.data.startFrame, 10);
+                    $scope.frameCount = lineResults.frameCount;
+                    fileLines = lineResults.frames;
                     $scope.updateRegex($scope.data.regexString);
-                    $scope.parseLines();
+                    $scope.$apply();
                     deferred.resolve();
                 };
                 reader.readAsText($files[0]);
             };
+
             $scope.submit = function () {
                 var deferred = $q.defer();
                 $scope.promiseString = 'Adding channel...';
@@ -1498,63 +1118,7 @@ angular.module('piecemeta-web.directives.helpers', [
                     deferred.reject();
                     return;
                 }
-
-                var dataStreams = [];
-                var lines = fileData.split('\n');
-
-                async.waterfall([
-                    function (cb) {
-                        for (var i = 0; i < $scope.valLength; i += 1) {
-                            var dataStream = {
-                                channel_uuid: $scope.data.selectedChannel.uuid,
-                                title: $scope.valLabel[i],
-                                fps: $scope.data.fps,
-                                group: $scope.data.valueGroup,
-                                frames: []
-                            };
-                            dataStreams.push(dataStream);
-                        }
-                        cb(null);
-                    },
-                    function (cb) {
-                        for (var l in lines) {
-                            var match = null,
-                                values = [];
-                            while ((match = $scope.regex.exec(lines[l])) !== null) {
-                                values = match;
-                            }
-                            values.shift();
-                            for (var n in values) {
-                                if (typeof dataStreams[n] === 'object') {
-                                    dataStreams[n].frames.push(values[n]);
-                                }
-                            }
-                        }
-                        cb(null);
-                    },
-                    function (cb) {
-                        if ($scope.data.selectedChannel.uuid) {
-                            cb(null, null);
-                        } else {
-                            var channel = {
-                                package_uuid: $routeParams.uuid,
-                                title: $scope.data.selectedChannel.title ? $scope.data.selectedChannel.title : $scope.data.channelTitle
-                            };
-                            apiService('channels').actions.create(channel, cb);
-                        }
-                    },
-                    function (channel, cb) {
-                        cb(null, $scope.data.selectedChannel.uuid || channel.uuid);
-                    },
-                    function (channel_uuid, cb) {
-                        async.eachSeries(dataStreams, function (stream, next) {
-                            stream.channel_uuid = channel_uuid;
-                            apiService('streams').actions.create(stream, next);
-                        }, function (err) {
-                            cb(err);
-                        });
-                    }
-                ], function (err) {
+                textImportService.submit(fileData, $scope.data, function (err) {
                     if (err) {
                         $scope.alerts = [
                             {
@@ -1577,7 +1141,7 @@ angular.module('piecemeta-web.directives.helpers', [
                 });
             };
         }])
-        .controller('DataStreams.ImportTrac', ['$scope', '$q', 'apiService', '$routeParams', '$location', function ($scope, $q, apiService, $routeParams, $location) {
+        .controller('DataStreams.ImportTrac', ['$scope', '$q', 'apiService', '$routeParams', '$location', 'tracImportService', function ($scope, $q, apiService, $routeParams, $location, tracImportService) {
             var fileData = "",
                 deferred = $q.defer();
 
@@ -1590,13 +1154,12 @@ angular.module('piecemeta-web.directives.helpers', [
                 startFrame: 1,
                 fps: null,
                 resultLines: [],
+                frameCount: 0,
+                valLength: 0,
+                valLabel: [],
+                fileLines: [],
                 isComplete: false
             };
-
-            $scope.fileLines = [];
-            $scope.frameCount = 0;
-            $scope.valLength = 0;
-            $scope.valLabel = [];
 
             $scope.promiseString = 'Loading...';
             $scope.promise = deferred.promise;
@@ -1633,89 +1196,6 @@ angular.module('piecemeta-web.directives.helpers', [
                 deferred.resolve();
             });
 
-            $scope.parseLines = function (callback) {
-
-                var lines = Papa.parse(fileData).data;
-                var headerLines = lines.splice(0, 5);
-
-                // drop the framenumber
-                var labels = headerLines[3];
-                labels.splice(0, 1);
-                var props = headerLines[4];
-                props.splice(0, 2);
-
-                while (props[props.length - 1] === null || props[props.length - 1] === "") {
-                    props.pop();
-                }
-
-                var propertyCount = props.length + 1;
-
-                // remove empty labels
-                labels = labels.filter(function (v) {
-                    return v !== '';
-                });
-
-                var inconsistencies = 0;
-
-                async.waterfall([
-                    function (cb) {
-                        $scope.data.fps = parseFloat(headerLines[2][0]);
-                        $scope.frameCount = lines.length;
-                        $scope.fileLines = lines.slice(Math.abs(parseInt($scope.data.startFrame)), 10);
-                        cb();
-                    },
-                    function (cb) {
-                        var timeStream = {
-                            channel_uuid: $scope.data.selectedChannel.uuid,
-                            title: labels.shift(),
-                            frames: [],
-                            fps: $scope.data.fps
-                        };
-                        $scope.data.dataStreams.push(timeStream);
-                        cb();
-                    },
-                    function (cb) {
-                        async.eachSeries(labels, function (label, next) {
-                            var xyz = props.splice(0, 3);
-                            async.each(xyz, function (streamlabel, nextStreamLabel) {
-                                var stream = {
-                                    channel_uuid: $scope.data.selectedChannel.uuid,
-                                    title: streamlabel.replace(/[0-9]/g, ''),
-                                    group: label,
-                                    frames: [],
-                                    fps: $scope.data.fps
-                                };
-                                $scope.data.dataStreams.push(stream);
-                                nextStreamLabel();
-                            }, function (err) {
-                                next(err);
-                            });
-                        }, cb);
-                    },
-                    function (cb) {
-                        for (var i in lines) {
-                            var values = lines[i];
-                            // drop framenumber
-                            values.splice(0, 1);
-                            if (propertyCount !== values.length) {
-                                inconsistencies += 1;
-                            }
-                            for (var n = 0; n < propertyCount; n += 1) {
-                                if (typeof values[n] === 'undefined') {
-                                    $scope.data.dataStreams[n].frames.push(null);
-                                } else {
-                                    $scope.data.dataStreams[n].frames.push(parseFloat(values[n]));
-                                }
-                            }
-                        }
-                        cb();
-                    }
-                ], function (err) {
-                    //console.log(propertyCount, inconsistencies, $scope.data.dataStreams);
-                    callback(err, inconsistencies);
-                });
-            };
-
             $scope.onFileSelect = function ($files) {
                 var deferred = $q.defer();
                 $scope.promiseString = 'Reading file...';
@@ -1723,7 +1203,7 @@ angular.module('piecemeta-web.directives.helpers', [
                 var reader = new FileReader();
                 reader.onload = function (onLoadEvent) {
                     fileData = onLoadEvent.target.result;
-                    $scope.parseLines(function (err, inconsistencies) {
+                    tracImportService.parse(onLoadEvent.target.result, $scope.data, function (err, inconsistencies) {
                         if (inconsistencies > 0) {
                             $scope.alerts = [
                                 {
@@ -1753,31 +1233,7 @@ angular.module('piecemeta-web.directives.helpers', [
                     deferred.reject();
                     return;
                 }
-
-                async.waterfall([
-                    function (cb) {
-                        if ($scope.data.selectedChannel.uuid) {
-                            cb(null, null);
-                        } else {
-                            var channel = {
-                                package_uuid: $routeParams.uuid,
-                                title: $scope.data.selectedChannel.title ? $scope.data.selectedChannel.title : $scope.data.channelTitle
-                            };
-                            apiService('channels').actions.create(channel, cb);
-                        }
-                    },
-                    function (channel, cb) {
-                        cb(null, $scope.data.selectedChannel.uuid || channel.uuid);
-                    },
-                    function (channel_uuid, cb) {
-                        async.eachSeries($scope.data.dataStreams, function (stream, next) {
-                            stream.channel_uuid = channel_uuid;
-                            apiService('streams').actions.create(stream, next);
-                        }, function (err) {
-                            cb(err);
-                        });
-                    }
-                ], function (err) {
+                tracImportService.submit($scope.data, function (err) {
                     if (err) {
                         $scope.alerts = [
                             {
@@ -1801,12 +1257,38 @@ angular.module('piecemeta-web.directives.helpers', [
             };
         }]);
 }());
-/* global angular,PIECEMETA_API_HOST */
+/* global console,angular */
+angular.module('piecemeta-web.directives.helpers', [
+        'piecemeta-web.services.api',
+        'piecemeta-web.services.auth'
+    ]).
+    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
+        'use strict';
+        return {
+            link: function (scope) {
+                scope.updateUser = function () {
+                    if (authService.access_token) {
+                        apiService('users').actions.find('me', function (err, res) {
+                            if (err) {
+                                console.log('error fetching user', err);
+                                scope.userSession = null;
+                                return;
+                            }
+                            scope.userSession = res;
+                            scope.$apply();
+                        });
+                    }
+                };
+                scope.updateUser();
+            }
+        };
+    }]);
+/* global angular,PIECEMETA_API_HOST,PMApi */
 angular.module('piecemeta-web.services.api', []).
 factory('apiService', ['authService', function (authService) {
     'use strict';
     return function (resourceName, host) {
-        var apiClient = PMApi({
+        var apiClient = new PMApi({
             host: host ? host : PIECEMETA_API_HOST,
             contentType: 'application/json',
             api_key: authService.api_key,
@@ -1900,7 +1382,592 @@ factory('apiService', ['authService', function (authService) {
             return auth;
         }]);
 }());
-/* global angular */
+/* global angular,async,BVH */
+angular.module('piecemeta-web.services.importers.bvh', ['piecemeta-web.services.api']).
+    factory('bvhImportService', ['apiService', function (apiService) {
+        'use strict';
+        return {
+            parse: function (fileData, title, callback) {
+                var dataPackageResult;
+                var motionData;
+                async.waterfall([
+                    function (cb) {
+                        cb(null, BVH.parse(fileData));
+                    },
+                    function (motion, cb) {
+                        motionData = motion;
+                        cb(null);
+                    },
+                    function (cb) {
+                        var dataPackage = {
+                            title: title
+                        };
+                        apiService('packages').actions.create(dataPackage, function (err, dataPackage) {
+                            cb(err, dataPackage);
+                        });
+                    },
+                    function (dataPackage, cb) {
+                        dataPackageResult = dataPackage;
+                        dataPackageResult.channels = [];
+                        cb(null);
+                    },
+                    function (cb) {
+                        async.eachSeries(motionData.nodeList, function (node, nextNode) {
+                                var dataChannel = {
+                                    title: node.id,
+                                    package_uuid: dataPackageResult.uuid
+                                };
+                                apiService('channels').create(dataChannel, function (err, dataChannel) {
+                                    if (err) {
+                                        return nextNode(err);
+                                    }
+                                    dataPackageResult.channels.push(dataChannel);
+                                    var dataStreams = [
+                                        {
+                                            title: 'x',
+                                            group: 'position',
+                                            value_offset: node.offsetX
+                                        },
+                                        {
+                                            title: 'y',
+                                            group: 'position',
+                                            value_offset: node.offsetY
+                                        },
+                                        {
+                                            title: 'z',
+                                            group: 'position',
+                                            value_offset: node.offsetZ
+                                        },
+                                        {
+                                            title: 'z',
+                                            group: 'rotation'
+                                        },
+                                        {
+                                            title: 'y',
+                                            group: 'rotation'
+                                        },
+                                        {
+                                            title: 'x',
+                                            group: 'rotation'
+                                        }
+                                    ];
+                                    for (var i in dataStreams) {
+                                        if (typeof dataStreams[i] === 'object') {
+                                            dataStreams[i].frames = [];
+                                            dataStreams[i].fps = parseFloat((1.0 / motionData.frameTime).toFixed(2));
+                                        }
+                                    }
+                                    for (var f in node.frames) {
+                                        if (typeof node.frames[f] === 'object') {
+                                            var frameSource = node.frames[f];
+                                            for (var n in frameSource) {
+                                                if (typeof frameSource[n] === 'number') {
+                                                    dataStreams[n].frames.push(frameSource[n]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    async.eachSeries(dataStreams, function (dataStream, nextStream) {
+                                            dataStream.channel_uuid = dataChannel.uuid;
+                                            apiService('streams').actions.create(
+                                                dataStream,
+                                                function (err) {
+                                                    nextStream(err);
+                                                }
+                                            );
+                                        },
+                                        function (err) {
+                                            nextNode(err);
+                                        });
+                                });
+                            },
+                            function (err) {
+                                cb(err);
+                            });
+                    },
+                    function (cb) {
+                        async.eachSeries(dataPackageResult.channels, function (dataChannel, nextChannel) {
+                                var i = 0,
+                                    nodes = motionData.nodeList;
+                                while (nodes[i].id !== dataChannel.title && i < nodes.length) {
+                                    i += 1;
+                                }
+                                if (nodes[i].parent) {
+                                    var n = 0;
+                                    while (dataPackageResult.channels[n].title !== nodes[i].parent.id && n < dataPackageResult.channels.length) {
+                                        n += 1;
+                                    }
+                                    dataChannel.parent_channel_uuid = dataPackageResult.channels[n].uuid;
+                                    apiService('channels').actions.update(dataChannel.uuid, dataChannel, function (err) {
+                                        nextChannel(err);
+                                    });
+                                } else {
+                                    nextChannel(null);
+                                }
+                            },
+                            function (err) {
+                                cb(err);
+                            });
+                    }
+                ], callback);
+            }
+        };
+    }]);
+/* global angular,async */
+angular.module('piecemeta-web.services.importers.json', ['piecemeta-web.services.api']).
+    factory('jsonImportService', ['apiService', function (apiService) {
+        'use strict';
+        return {
+            parse: function (fileData, title, cleanupNeeded, callback) {
+                var dataPackageResult;
+                async.waterfall([
+                    function (cb) {
+                        var input;
+                        try {
+                            input = JSON.parse(fileData);
+                            cb(null, input);
+                        } catch (e) {
+                            cb(new Error('error parsing json: ' + e.toString()), null);
+                        }
+                    },
+                    function (input, cb) {
+                        var key;
+                        if (cleanupNeeded) {
+                            var maxFrames = 0;
+                            var paddedFrames = {};
+                            for (key in input) {
+                                if (typeof input[key] === 'object' && input[key].length > 0) {
+                                    if (input[key].length > maxFrames) {
+                                        maxFrames = input[key].length;
+                                    }
+                                }
+                            }
+                            console.log('max frame is', maxFrames);
+                            for (key in input) {
+                                if (typeof input[key] === 'object' && input[key].length > 0) {
+                                    paddedFrames[key] = [];
+                                    if (input[key].length < maxFrames) {
+                                        var frameDiff = maxFrames - input[key].length;
+                                        var addInterval = Math.ceil(maxFrames / frameDiff);
+                                        var added = 0;
+                                        console.log('extend', input[key].length, frameDiff, addInterval);
+                                        for (var i = 0; i < input[key].length; i += 1) {
+                                            if (input[key][i]) {
+                                                //for (var n = 0; n < addInterval; n += 1) {
+                                                paddedFrames[key].push(input[key][i]);
+                                                if (added < frameDiff) {
+                                                    paddedFrames[key].push(input[key][i]);
+                                                    added += 1;
+                                                }
+                                                //}
+                                                /*
+                                                 if (i % addInterval === 0) {
+                                                 paddedFrames[key].push(input[key][i]);
+                                                 paddedFrames[key].push(input[key][i]);
+                                                 } else {
+                                                 paddedFrames[key].push(input[key][i]);
+                                                 }
+                                                 */
+                                            }
+                                        }
+                                        while (paddedFrames[key].length < maxFrames) {
+                                            paddedFrames[key].push(input[key][input[key].length - 1]);
+                                        }
+                                    }
+                                }
+                            }
+                            cb(null, paddedFrames);
+                        } else {
+                            var targetMillis = 1000 / 60;
+                            var saneFrames = {};
+                            for (key in input) {
+                                if (typeof input[key] === 'object' && input[key].length > 0) {
+                                    var lastMillis = input[key][0].m * 1000 + input[key][0].s;
+                                    saneFrames[key] = [];
+                                    console.log('frames', input[key].length);
+                                    for (var index in input[key]) {
+                                        if (typeof input[key][index] === 'object') {
+                                            var nowMillis = input[key][index].m * 1000 + input[key][index].s;
+                                            var diff = Math.round((nowMillis - lastMillis) / targetMillis);
+                                            //if (diff > 1) {
+                                            for (var d = 0; d < diff; d += 1) {
+                                                var milliOffset = d * targetMillis;
+                                                var newMillis = nowMillis + milliOffset;
+                                                saneFrames[key].push({
+                                                    a: input[key][index].a,
+                                                    m: Math.floor(newMillis / 1000),
+                                                    s: (newMillis / 1000 - Math.floor(newMillis / 1000)) * 1000
+                                                });
+                                            }
+                                            //console.log('diff', (nowMillis - lastMillis) / targetMillis);
+                                            /*
+                                             } else {
+                                             saneFrames[key].push(input[key][index]);
+                                             }
+                                             */
+                                            lastMillis = nowMillis;
+                                        }
+                                    }
+                                }
+                            }
+                            cb(null, saneFrames);
+                        }
+                    },
+                    function (input, cb) {
+                        var key;
+                        if (cleanupNeeded) {
+                            for (key in input) {
+                                if (typeof input[key] === 'object' && input[key].length > 0) {
+                                    console.log(key, input[key].length);
+                                }
+                            }
+                            cb(null, input);
+                        } else {
+                            var filteredFrames = {};
+                            var targetMillis = 1000 / 60;
+                            for (key in input) {
+                                if (typeof input[key] === 'object' && input[key].length > 0) {
+                                    var faults = 0;
+                                    var lastMillis = input[key][0].m * 1000 + input[key][0].s;
+                                    filteredFrames[key] = [];
+                                    console.log('frames', input[key].length);
+                                    for (var index in input[key]) {
+                                        if (typeof input[key][index] === 'object') {
+                                            var nowMillis = input[key][index].m * 1000 + input[key][index].s;
+                                            var diff = Math.round((nowMillis - lastMillis) / targetMillis);
+                                            if (diff !== 1) {
+                                                faults += 1;
+                                                console.log('dropped faulty frame with diff != 1at', diff, index);
+                                            } else {
+                                                filteredFrames[key].push(input[key][index]);
+                                            }
+                                            lastMillis = nowMillis;
+                                        }
+                                    }
+                                    console.log('total faults', faults);
+                                }
+                            }
+                            cb(null, filteredFrames);
+                        }
+                    },
+                    function (input, cb) {
+                        if (cleanupNeeded) {
+                            cb(null, input);
+                        } else {
+                            var targetMillis = 1000 / 60;
+                            for (var key in input) {
+                                if (typeof input[key] === 'object' && input[key].length > 0) {
+                                    var faults = 0;
+                                    var lastMillis = input[key][0].m * 1000 + input[key][0].s;
+                                    console.log('cleaned frames for index', key, input[key].length);
+                                    for (var index in input[key]) {
+                                        if (typeof input[key][index] === 'object') {
+                                            var nowMillis = input[key][index].m * 1000 + input[key][index].s;
+                                            var diff = Math.round((nowMillis - lastMillis) / targetMillis);
+                                            if (diff !== 1) {
+                                                faults += 1;
+                                                //console.log('faulty frame with diff != 1 at', diff, index);
+                                            }
+                                            lastMillis = nowMillis;
+                                        }
+                                    }
+                                    console.log('total faults', faults);
+                                }
+                            }
+                            cb(null, input);
+                        }
+                    },
+                    function (input, cb) {
+                        var dataPackage = {
+                            title: title
+                        };
+                        apiService('packages').actions.create(dataPackage, function (err, newPackage) {
+                            cb(err, newPackage, input);
+                        });
+                    },
+                    function (dataPackage, input, cb) {
+                        dataPackageResult = dataPackage;
+                        dataPackageResult.channels = [];
+                        cb(null, input);
+                    },
+                    function (input, cb) {
+                        for (var key in input) {
+                            if (typeof input[key] === 'object' && input[key].length > 0) {
+                                var dataChannel = {
+                                    title: key.substr(1, key.length - 1),
+                                    id: null,
+                                    package_uuid: dataPackageResult.uuid,
+                                    streams: []
+                                };
+                                var paramLength = input[key][0].a.length;
+                                for (var n = 0; n < paramLength; n += 1) {
+                                    dataChannel.streams.push({
+                                        id: null,
+                                        fps: 60,
+                                        channel_id: null,
+                                        title: 'p' + n.toString(),
+                                        group: paramLength > 1 ? 'grouped' : null,
+                                        frames: []
+                                    });
+                                }
+                                for (var index in input[key]) {
+                                    if (typeof input[key][index] === 'object') {
+                                        for (var p = 0; p < paramLength; p += 1) {
+                                            dataChannel.streams[p].frames.push(input[key][index].a[p]);
+                                        }
+                                    }
+                                }
+                                dataPackageResult.channels.push(dataChannel);
+                            }
+                        }
+                        cb(null);
+                    },
+                    function (cb) {
+                        async.eachSeries(dataPackageResult.channels, function (channel, nextChannel) {
+                                channel.package_uuid = dataPackageResult.uuid;
+                                apiService('channels').actions.create(channel, function (err, dataChannel) {
+                                    if (err) {
+                                        return nextChannel(err);
+                                    }
+                                    dataPackageResult.channels[dataPackageResult.channels.indexOf(channel)].uuid = dataChannel.uuid;
+                                    async.eachSeries(dataPackageResult.channels[dataPackageResult.channels.indexOf(channel)].streams, function (dataStream, nextStream) {
+                                            dataStream.channel_uuid = dataChannel.uuid;
+                                            apiService('streams').actions.create(
+                                                dataStream,
+                                                function (err) {
+                                                    nextStream(err);
+                                                }
+                                            );
+                                        },
+                                        function (err) {
+                                            nextChannel(err);
+                                        });
+                                });
+                            },
+                            function (err) {
+                                cb(err);
+                            });
+                    }
+                ], callback);
+            }
+        };
+    }]);
+/* global angular,async */
+angular.module('piecemeta-web.services.importers.text', ['piecemeta-web.services.api']).
+    factory('textImportService', ['apiService', function (apiService) {
+        'use strict';
+        return {
+            parse: function (fileData, startFrame, numFrames) {
+                var lines = fileData.split('\n');
+                var frameCount = lines.length;
+                var fileLines = lines.slice(Math.abs(parseInt(startFrame)), numFrames);
+                return {
+                    frames: fileLines,
+                    frameCount: frameCount
+                };
+            },
+            applyRegex: function (lines, regex) {
+                if (!regex) {
+                    return;
+                }
+                var resultLines = [];
+                var valLength = 0;
+                for (var idx in lines) {
+                    if (typeof lines[idx] === 'string') {
+                        var match = null;
+                        var values = [];
+                        while ((match = regex.exec(lines[idx])) !== null) {
+                            values = match;
+                        }
+                        values.shift();
+                        if (valLength < values.length) {
+                            valLength = values.length;
+                        }
+                        resultLines.push(values);
+                    }
+                }
+                return {
+                    frames: resultLines,
+                    valLength: valLength
+                };
+            },
+            submit: function (fileData, meta, callback) {
+                var dataStreams = [];
+                var lines = fileData.split('\n');
+                async.waterfall([
+                    function (cb) {
+                        for (var i = 0; i < meta.valLength; i += 1) {
+                            var dataStream = {
+                                channel_uuid: meta.selectedChannel.uuid,
+                                title: meta.valLabel[i],
+                                fps: meta.fps,
+                                group: meta.valueGroup,
+                                frames: []
+                            };
+                            dataStreams.push(dataStream);
+                        }
+                        cb(null);
+                    },
+                    function (cb) {
+                        for (var l in lines) {
+                            if (typeof lines[l] === 'string') {
+                                var match = null,
+                                    values = [];
+                                while ((match = meta.regex.exec(lines[l])) !== null) {
+                                    values = match;
+                                }
+                                values.shift();
+                                for (var n in values) {
+                                    if (typeof dataStreams[n] === 'object') {
+                                        dataStreams[n].frames.push(values[n]);
+                                    }
+                                }
+                            }
+                        }
+                        cb(null);
+                    },
+                    function (cb) {
+                        if (meta.selectedChannel.uuid) {
+                            cb(null, null);
+                        } else {
+                            var channel = {
+                                package_uuid: meta.dataPackage.uuid,
+                                title: meta.selectedChannel.title ? meta.selectedChannel.title : meta.channelTitle
+                            };
+                            apiService('channels').actions.create(channel, cb);
+                        }
+                    },
+                    function (channel, cb) {
+                        cb(null, meta.selectedChannel.uuid || channel.uuid);
+                    },
+                    function (channel_uuid, cb) {
+                        async.eachSeries(dataStreams, function (stream, next) {
+                            stream.channel_uuid = channel_uuid;
+                            apiService('streams').actions.create(stream, next);
+                        }, function (err) {
+                            cb(err);
+                        });
+                    }
+                ], callback);
+            }
+        };
+    }]);
+/* global angular,Papa,async */
+angular.module('piecemeta-web.services.importers.trac', ['piecemeta-web.services.api']).
+    factory('tracImportService', ['apiService', function (apiService) {
+        'use strict';
+        return {
+            parse: function (fileData, meta, callback) {
+                var lines = Papa.parse(fileData).data;
+                var headerLines = lines.splice(0, 5);
+
+                // drop the framenumber
+                var labels = headerLines[3];
+                labels.splice(0, 1);
+                var props = headerLines[4];
+                props.splice(0, 2);
+
+                while (props[props.length - 1] === null || props[props.length - 1] === "") {
+                    props.pop();
+                }
+
+                var propertyCount = props.length + 1;
+
+                // remove empty labels
+                labels = labels.filter(function (v) {
+                    return v !== '';
+                });
+
+                var inconsistencies = 0;
+
+                async.waterfall([
+                    function (cb) {
+                        meta.fps = parseFloat(headerLines[2][0]);
+                        meta.frameCount = lines.length;
+                        meta.fileLines = lines.slice(Math.abs(parseInt(meta.startFrame)), 10);
+                        cb();
+                    },
+                    function (cb) {
+                        var timeStream = {
+                            channel_uuid: meta.selectedChannel.uuid,
+                            title: labels.shift(),
+                            frames: [],
+                            fps: meta.fps
+                        };
+                        meta.dataStreams.push(timeStream);
+                        cb();
+                    },
+                    function (cb) {
+                        async.eachSeries(labels, function (label, next) {
+                            var xyz = props.splice(0, 3);
+                            async.each(xyz, function (streamlabel, nextStreamLabel) {
+                                var stream = {
+                                    channel_uuid: meta.selectedChannel.uuid,
+                                    title: streamlabel.replace(/[0-9]/g, ''),
+                                    group: label,
+                                    frames: [],
+                                    fps: meta.fps
+                                };
+                                meta.dataStreams.push(stream);
+                                nextStreamLabel();
+                            }, function (err) {
+                                next(err);
+                            });
+                        }, cb);
+                    },
+                    function (cb) {
+                        for (var i in lines) {
+                            if (typeof lines[i] === 'object') {
+                                var values = lines[i];
+                                // drop framenumber
+                                values.splice(0, 1);
+                                if (propertyCount !== values.length) {
+                                    inconsistencies += 1;
+                                }
+                                for (var n = 0; n < propertyCount; n += 1) {
+                                    if (typeof values[n] === 'undefined') {
+                                        meta.dataStreams[n].frames.push(null);
+                                    } else {
+                                        meta.dataStreams[n].frames.push(parseFloat(values[n]));
+                                    }
+                                }
+                            }
+                        }
+                        cb();
+                    }
+                ], function (err) {
+                    callback(err, inconsistencies);
+                });
+            },
+            submit: function (meta, callback) {
+                async.waterfall([
+                    function (cb) {
+                        if (meta.selectedChannel.uuid) {
+                            cb(null, null);
+                        } else {
+                            var channel = {
+                                package_uuid: meta.dataPackage.uuid,
+                                title: meta.selectedChannel.title ? meta.selectedChannel.title : meta.channelTitle
+                            };
+                            apiService('channels').actions.create(channel, cb);
+                        }
+                    },
+                    function (channel, cb) {
+                        cb(null, meta.selectedChannel.uuid || channel.uuid);
+                    },
+                    function (channel_uuid, cb) {
+                        async.eachSeries(meta.dataStreams, function (stream, next) {
+                            stream.channel_uuid = channel_uuid;
+                            apiService('streams').actions.create(stream, next);
+                        }, function (err) {
+                            cb(err);
+                        });
+                    }
+                ], callback);
+            }
+        };
+    }]);
+/* global angular,Modernizr */
 (function () {
     'use strict';
     angular.module('piecemeta-frontend', [
@@ -1942,7 +2009,7 @@ factory('apiService', ['authService', function (authService) {
                 controller: 'DataStreams.ImportTrac'
             });
         $routeProvider.when('/packages/upload', {templateUrl: partialsPath + 'packages_upload.html', controller: 'DataPackages.ImportBVH'});
-        $routeProvider.when('/packages/uploadosc', {templateUrl: partialsPath + 'packages_upload_osc.html', controller: 'DataPackages.ImportOSC'});
+        $routeProvider.when('/packages/uploadjson', {templateUrl: partialsPath + 'packages_upload_json.html', controller: 'DataPackages.ImportJSON'});
         $routeProvider.when('/packages/create', {templateUrl: partialsPath + 'packages_edit.html', controller: 'DataPackages.Create'});
         $routeProvider.when('/packages/:uuid/edit', {templateUrl: partialsPath + 'packages_edit.html', controller: 'DataPackages.Edit'});
         $routeProvider.when('/packages/:uuid/show', {templateUrl: partialsPath + 'packages_show.html', controller: 'DataPackages.Show'});
@@ -2249,7 +2316,7 @@ factory('apiService', ['authService', function (authService) {
                 }
             });
         }])
-        .controller('Users.Confirm', ['$scope', '$q', '$location', '$routeParams', 'apiService', 'authService', function ($scope, $q, $location, $routeParams, apiService, authService) {
+        .controller('Users.Confirm', ['$scope', '$q', '$location', '$routeParams', 'apiService', function ($scope, $q, $location, $routeParams, apiService) {
             var deferred = $q.defer();
             $scope.promiseString = 'Confirming user...';
             $scope.promise = deferred.promise;

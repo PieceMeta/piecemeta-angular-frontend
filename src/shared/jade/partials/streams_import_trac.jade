@@ -17,7 +17,7 @@ form(name='tracImportForm', role='form', ng-submit='submit()')
                     .form-group(ng-if='data.selectedChannel.title || data.channelTitle')
                         .well.well-lg.col-sm-12(role='button', ng-file-select='onFileSelect($files)', data-multiple='false') {{file ? file.name : 'Click to select text file containing your data to add to Channel "' + (data.selectedChannel.title || data.channelTitle) + '"'}}
 
-            .row(ng-if="fileLines.length > 0")
+            .row(ng-if="data.fileLines.length > 0")
                 .col-sm-12.table-responsive
                     h3 Parsed data
                     table.table.table-striped.table-bordered

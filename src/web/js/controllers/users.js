@@ -157,7 +157,7 @@
                 }
             });
         }])
-        .controller('Users.Confirm', ['$scope', '$q', '$location', '$routeParams', 'apiService', 'authService', function ($scope, $q, $location, $routeParams, apiService, authService) {
+        .controller('Users.Confirm', ['$scope', '$q', '$location', '$routeParams', 'apiService', function ($scope, $q, $location, $routeParams, apiService) {
             var deferred = $q.defer();
             $scope.promiseString = 'Confirming user...';
             $scope.promise = deferred.promise;

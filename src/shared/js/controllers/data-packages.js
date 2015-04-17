@@ -1,4 +1,4 @@
-/* global angular,async,PIECEMETA_API_HOST,BVH,console */
+/* global angular,async,PIECEMETA_API_HOST,console */
 
 (function () {
     'use strict';
@@ -36,7 +36,7 @@
                 reader.readAsText($files[0]);
             };
         }])
-        .controller('DataPackages.ImportOSC', ['$scope', '$q', 'authService', 'apiService', '$routeParams', function ($scope, $q, authService, apiService, $routeParams) {
+        .controller('DataPackages.ImportJSON', ['$scope', '$q', '$routeParams', 'jsonImportService', function ($scope, $q, $routeParams, jsonImportService) {
             $scope.file = null;
             $scope.onFileSelect = function ($files) {
                 var deferred = $q.defer();

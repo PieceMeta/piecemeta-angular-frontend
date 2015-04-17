@@ -16,7 +16,7 @@ form(name='channelImportForm', role='form', ng-submit='submit()')
                     .form-group(ng-if='data.selectedChannel.title || data.channelTitle')
                         .well.well-lg.col-sm-12(role='button', ng-file-select='onFileSelect($files)', data-multiple='false') {{file ? file.name : 'Click to select text file containing your data to add to Channel "' + (data.selectedChannel.title || data.channelTitle) + '"'}}
 
-            .row(ng-if="fileLines.length > 0")
+            .row(ng-if="data.fileLines.length > 0")
                 .col-sm-12
                     h3 Configure data format
                     p
@@ -30,16 +30,16 @@ form(name='channelImportForm', role='form', ng-submit='submit()')
                         label.control-label Regular expression
                         input.form-control(ng-model='data.regexString', ng-change='updateRegex(data.regexString)', placeholder='Enter a valid regular expression with numbered captures (without the slashes and modifiers)')
 
-            .row(ng-if="fileLines.length > 0")
+            .row(ng-if="data.fileLines.length > 0")
                 .col-sm-8.table-responsive
                     h3 Parsed data
                     table.table.table-striped.table-bordered
                         tbody
                             tr
-                                td(ng-repeat="(i, title) in valLabel track by i")
-                                    input.form-control(ng-model="valLabel[i]", placeholder="Value title", required)
+                                td(ng-repeat="(i, title) in data.valLabel track by i")
+                                    input.form-control(ng-model="data.valLabel[i]", placeholder="Value title", required)
                             tr
-                                td(ng-repeat="(i, title) in valLabel track by i")
+                                td(ng-repeat="(i, title) in data.valLabel track by i")
 
                             tr(ng-repeat="(idx, parts) in data.resultLines track by idx")
                                 td(ng-repeat="(vIdx, num) in parts track by vIdx")
@@ -48,11 +48,11 @@ form(name='channelImportForm', role='form', ng-submit='submit()')
                 .col-sm-4
                     h3 Raw data
                     p
-                        strong Total frames: {{ frameCount }}
+                        strong Total frames: {{ data.frameCount }}
                     p Showing a sample of 10 frames.
                     pre
                         code
-                            span(ng-repeat="(idx, line) in fileLines track by idx")
+                            span(ng-repeat="(idx, line) in data.fileLines track by idx")
                                 | {{ line }}
                                 br
                     .row
@@ -63,8 +63,8 @@ form(name='channelImportForm', role='form', ng-submit='submit()')
                         .form-group(ng-if="!data.selectedChannel.title")
                             label.control-label Frames per second
                             input.form-control(ng-model="data.fps", required)
-                        .form-group(ng-if="valLength > 1")
+                        .form-group(ng-if="data.valLength > 1")
                             label.control-label Value group (for multi-value Channels, e.g. Position, Rotation, Frequencies...)
                             input.form-control(ng-model="data.valueGroup")
-                        .form-group(ng-if="valLength > 0")
+                        .form-group(ng-if="data.valLength > 0")
                             input.btn.btn-primary.btn-lg(type='submit', value='Add channel')

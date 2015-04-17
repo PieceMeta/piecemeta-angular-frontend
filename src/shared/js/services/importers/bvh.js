@@ -1,5 +1,5 @@
 /* global angular,async,BVH */
-angular.module('piecemeta-web.services.importers.bvh', []).
+angular.module('piecemeta-web.services.importers.bvh', ['piecemeta-web.services.api']).
     factory('bvhImportService', ['apiService', function (apiService) {
         'use strict';
         return {
