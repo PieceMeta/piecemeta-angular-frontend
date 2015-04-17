@@ -1,3 +1,5 @@
+/* global angular,async,PIECEMETA_API_HOST,BVH */
+
 (function () {
     'use strict';
     angular.module(
@@ -99,7 +101,7 @@
                                         dataStream.channel_uuid = dataChannel.uuid;
                                         apiService('streams').actions.create(
                                             dataStream,
-                                            function (err, dataStream) {
+                                            function (err) {
                                                 nextStream(err);
                                             }
                                         );
@@ -179,7 +181,8 @@
                                 if ($routeParams.garbage) {
                                     var maxFrames = 0;
                                     var paddedFrames = {};
-                                    for (var key in input) {
+                                    var key;
+                                    for (key in input) {
                                         if (typeof input[key] === 'object' && input[key].length > 0) {
                                             if (input[key].length > maxFrames) {
                                                 maxFrames = input[key].length;
@@ -187,7 +190,7 @@
                                         }
                                     }
                                     console.log('max frame is', maxFrames);
-                                    for (var key in input) {
+                                    for (key in input) {
                                         if (typeof input[key] === 'object' && input[key].length > 0) {
                                             paddedFrames[key] = [];
                                             if (input[key].length < maxFrames) {
@@ -256,8 +259,9 @@
                                 }
                             },
                             function (input, cb) {
+                                var key;
                                 if ($routeParams.garbage) {
-                                    for (var key in input) {
+                                    for (key in input) {
                                         if (typeof input[key] === 'object' && input[key].length > 0) {
                                             console.log(key, input[key].length);
                                         }
@@ -266,7 +270,7 @@
                                 } else {
                                     var filteredFrames = {};
                                     var targetMillis = 1000 / 60;
-                                    for (var key in input) {
+                                    for (key in input) {
                                         if (typeof input[key] === 'object' && input[key].length > 0) {
                                             var faults = 0;
                                             var lastMillis = input[key][0].m * 1000 + input[key][0].s;
@@ -369,7 +373,7 @@
                                                 dataStream.channel_uuid = dataChannel.uuid;
                                                 apiService('streams').actions.create(
                                                     dataStream,
-                                                    function (err, dataStream) {
+                                                    function (err) {
                                                         nextStream(err);
                                                     }
                                                 );
@@ -579,11 +583,11 @@
                     cb(null);
                 },
                 function (cb) {
-                    $scope.$watch('data.currentChannel', function (newVal, oldVal) {
+                    $scope.$watch('data.currentChannel', function () {
                         $scope.data.currentGroup = null;
                         $scope.updateChart();
                     }, true);
-                    $scope.$watch('data.currentGroup', function (newVal, oldVal) {
+                    $scope.$watch('data.currentGroup', function () {
                         $scope.updateChart();
                     }, true);
                     cb(null);
@@ -736,7 +740,7 @@
                 var deferred = $q.defer();
                 $scope.promiseString = 'Saving...';
                 $scope.promise = deferred.promise;
-                apiService('packages').actions.update($routeParams.uuid, $scope.dataPackage, function (err, data_package) {
+                apiService('packages').actions.update($routeParams.uuid, $scope.dataPackage, function (err) {
                     if (err) {
                         console.log(err);
                         $scope.alerts = [
@@ -784,10 +788,11 @@
                     }
                     if (data_channels.length > 0) {
                         $scope.dataChannels = data_channels.sort(function (a, b) {
-                            if (a.title < b.title)
+                            if (a.title < b.title) {
                                 return -1;
-                            if (a.title > b.title)
+                            } else if (a.title > b.title) {
                                 return 1;
+                            }
                             return 0;
                         });
                     }

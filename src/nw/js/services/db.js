@@ -1,3 +1,4 @@
+/* global angular */
 angular.module('piecemeta-nw.services.db', []).
     factory('dbService', function () {
         'use strict';

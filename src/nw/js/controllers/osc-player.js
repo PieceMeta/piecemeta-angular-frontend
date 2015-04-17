@@ -1,3 +1,4 @@
+/* global angular,async,Tock */
 (function () {
     'use strict';
     angular.module(
@@ -76,10 +77,11 @@
                 },
                 function (dataChannels, cb) {
                     $scope.data.dataPackage.channels = dataChannels.sort(function (a, b) {
-                        if (a.title < b.title)
+                        if (a.title < b.title) {
                             return -1;
-                        if (a.title > b.title)
+                        } else if (a.title > b.title) {
                             return 1;
+                        }
                         return 0;
                     });
                     cb(null);
@@ -198,9 +200,10 @@
                 var tick = function() {
                     var messages = [];
                     var addresses = {};
+                    var address;
                     for (var i in pkg.channels) {
                         for (var n in pkg.channels[i].streams) {
-                            var address = '/' + pkg.channels[i].title;
+                            address = '/' + pkg.channels[i].title;
                             address += pkg.channels[i].streams[n].group ? '/' + pkg.channels[i].streams[n].group : '';
                             if (!addresses[address]) {
                                 addresses[address] = [];
@@ -212,7 +215,7 @@
                                 }
                             }
                         }
-                        for (var address in addresses) {
+                        for (address in addresses) {
                             if (addresses[address].length > 0) {
                                 messages.push(osc.createMessage(address, addresses[address]));
                             }
@@ -235,7 +238,7 @@
                     interval: Math.round(1000 / $scope.data.fps),
                     callback: tick
                 });
-                $scope.play = function ($event) {
+                $scope.play = function () {
                     if ($scope.playing) {
                         timer.pause();
                         $scope.playing = false;
@@ -245,7 +248,7 @@
                     }
                     interfaceTimer.start();
                 };
-                $scope.rewind = function ($event) {
+                $scope.rewind = function () {
                     $scope.data.frame = 0;
                     $scope.playprogress = 0;
                     tickStart = window.performance.now();
@@ -268,7 +271,7 @@
                     controlport: parseInt(localStorage.getItem('osc-controlport'))
                 }
             };
-            $scope.submit = function ($event) {
+            $scope.submit = function () {
                 // TODO: proper validation!
                 if (!$scope.settings.osc.datahost ||
                     !$scope.settings.osc.dataport ||

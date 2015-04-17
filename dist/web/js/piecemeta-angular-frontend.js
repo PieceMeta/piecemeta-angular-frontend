@@ -4,13 +4,39 @@
  * @link http://www.piecemeta.com
  * @license MIT
  */
-// DEV
-// PIECEMETA_DEV_API_URL = 'http://localhost:8080';
-// PIECEMETA_API_HOST = 'http://localhost:8080';
-
 // PRODUCTION
-PIECEMETA_DEV_API_URL = 'https://api.piecemeta.com';
-PIECEMETA_API_HOST = 'https://api.piecemeta.com';
+var PIECEMETA_DEV_API_URL = 'https://api.piecemeta.com';
+var PIECEMETA_API_HOST = 'https://api.piecemeta.com';
+
+// DEV
+PIECEMETA_DEV_API_URL = 'http://localhost:8080';
+PIECEMETA_API_HOST = 'http://localhost:8080';
+angular.module('piecemeta-web.directives.helpers', [
+        'piecemeta-web.services.api',
+        'piecemeta-web.services.auth'
+    ]).
+    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
+        'use strict';
+        return {
+            link: function (scope) {
+                scope.updateUser = function () {
+                    if (authService.access_token) {
+                        apiService('users').actions.find('me', function (err, res) {
+                            if (err) {
+                                console.log('error fetching user', err);
+                                scope.userSession = null;
+                                return;
+                            }
+                            scope.userSession = res;
+                            scope.$apply();
+                        });
+                    }
+                };
+                scope.updateUser();
+            }
+        };
+    }]);
+/* global angular */
 (function () {
     'use strict';
     angular.module(
@@ -18,7 +44,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
         [
             'piecemeta-web.services.api'
         ])
-        .controller('Collections.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
+        .controller('Collections.Create', ['$scope', 'apiService', '$q', '$location', function ($scope, apiService, $q, $location) {
             $scope.dataCollection = {
                 title: null,
                 description: null
@@ -73,7 +99,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('collections').actions.update($routeParams.uuid, $scope.dataCollection, function (err, data_collection) {
+                    apiService('collections').actions.update($routeParams.uuid, $scope.dataCollection, function (err) {
                         if (err) {
                             console.log(err);
                             $scope.alerts = [
@@ -97,6 +123,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
             });
         }]);
 }());
+/* global angular,async */
 (function () {
     'use strict';
     angular.module(
@@ -206,10 +233,11 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                 function (dataStreams, cb) {
                     if (dataStreams.length > 0) {
                         $scope.data.dataStreams = dataStreams.sort(function (a, b) {
-                            if (a.group < b.group)
+                            if (a.group < b.group) {
                                 return -1;
-                            if (a.group > b.group)
+                            } else if (a.group > b.group) {
                                 return 1;
+                            }
                             return 0;
                         });
                     }
@@ -293,7 +321,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('channels').actions.update($routeParams.uuid, $scope.data.dataChannel, function (err, data_channel) {
+                    apiService('channels').actions.update($routeParams.uuid, $scope.data.dataChannel, function (err) {
 
                         if (err) {
                             console.log(err);
@@ -318,6 +346,8 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
             });
         }]);
 }());
+/* global angular,async,PIECEMETA_API_HOST,BVH */
+
 (function () {
     'use strict';
     angular.module(
@@ -419,7 +449,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                                         dataStream.channel_uuid = dataChannel.uuid;
                                         apiService('streams').actions.create(
                                             dataStream,
-                                            function (err, dataStream) {
+                                            function (err) {
                                                 nextStream(err);
                                             }
                                         );
@@ -499,7 +529,8 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                                 if ($routeParams.garbage) {
                                     var maxFrames = 0;
                                     var paddedFrames = {};
-                                    for (var key in input) {
+                                    var key;
+                                    for (key in input) {
                                         if (typeof input[key] === 'object' && input[key].length > 0) {
                                             if (input[key].length > maxFrames) {
                                                 maxFrames = input[key].length;
@@ -507,7 +538,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                                         }
                                     }
                                     console.log('max frame is', maxFrames);
-                                    for (var key in input) {
+                                    for (key in input) {
                                         if (typeof input[key] === 'object' && input[key].length > 0) {
                                             paddedFrames[key] = [];
                                             if (input[key].length < maxFrames) {
@@ -576,8 +607,9 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                                 }
                             },
                             function (input, cb) {
+                                var key;
                                 if ($routeParams.garbage) {
-                                    for (var key in input) {
+                                    for (key in input) {
                                         if (typeof input[key] === 'object' && input[key].length > 0) {
                                             console.log(key, input[key].length);
                                         }
@@ -586,7 +618,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                                 } else {
                                     var filteredFrames = {};
                                     var targetMillis = 1000 / 60;
-                                    for (var key in input) {
+                                    for (key in input) {
                                         if (typeof input[key] === 'object' && input[key].length > 0) {
                                             var faults = 0;
                                             var lastMillis = input[key][0].m * 1000 + input[key][0].s;
@@ -689,7 +721,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                                                 dataStream.channel_uuid = dataChannel.uuid;
                                                 apiService('streams').actions.create(
                                                     dataStream,
-                                                    function (err, dataStream) {
+                                                    function (err) {
                                                         nextStream(err);
                                                     }
                                                 );
@@ -899,11 +931,11 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                     cb(null);
                 },
                 function (cb) {
-                    $scope.$watch('data.currentChannel', function (newVal, oldVal) {
+                    $scope.$watch('data.currentChannel', function () {
                         $scope.data.currentGroup = null;
                         $scope.updateChart();
                     }, true);
-                    $scope.$watch('data.currentGroup', function (newVal, oldVal) {
+                    $scope.$watch('data.currentGroup', function () {
                         $scope.updateChart();
                     }, true);
                     cb(null);
@@ -1056,7 +1088,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                 var deferred = $q.defer();
                 $scope.promiseString = 'Saving...';
                 $scope.promise = deferred.promise;
-                apiService('packages').actions.update($routeParams.uuid, $scope.dataPackage, function (err, data_package) {
+                apiService('packages').actions.update($routeParams.uuid, $scope.dataPackage, function (err) {
                     if (err) {
                         console.log(err);
                         $scope.alerts = [
@@ -1104,10 +1136,11 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                     }
                     if (data_channels.length > 0) {
                         $scope.dataChannels = data_channels.sort(function (a, b) {
-                            if (a.title < b.title)
+                            if (a.title < b.title) {
                                 return -1;
-                            if (a.title > b.title)
+                            } else if (a.title > b.title) {
                                 return 1;
+                            }
                             return 0;
                         });
                     }
@@ -1117,6 +1150,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
             });
         }]);
 }());
+/* global angular,async */
 (function () {
     'use strict';
     angular.module(
@@ -1256,7 +1290,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('streams').actions.update($routeParams.uuid, $scope.data.dataStream, function (err, data_stream) {
+                    apiService('streams').actions.update($routeParams.uuid, $scope.data.dataStream, function (err) {
                         if (err) {
                             console.log(err);
                             $scope.alerts = [
@@ -1399,7 +1433,9 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
 
 
             var parseData = function () {
-                if (!$scope.regex) return;
+                if (!$scope.regex) {
+                    return;
+                }
                 $scope.data.resultLines = [];
                 $scope.valLength = 0;
                 $scope.valLabel = [];
@@ -1428,7 +1464,9 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
             };
 
             $scope.updateRegex = function (regexString) {
-                if (!regexString || regexString === '') return;
+                if (!regexString || regexString === '') {
+                    return;
+                }
                 $scope.regex = new RegExp(regexString, 'gm');
                 parseData();
             };
@@ -1614,7 +1652,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
 
                 // remove empty labels
                 labels = labels.filter(function (v) {
-                    return v != '';
+                    return v !== '';
                 });
 
                 var inconsistencies = 0;
@@ -1763,31 +1801,7 @@ PIECEMETA_API_HOST = 'https://api.piecemeta.com';
             };
         }]);
 }());
-angular.module('piecemeta-web.directives.helpers', [
-        'piecemeta-web.services.api',
-        'piecemeta-web.services.auth'
-    ]).
-    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
-        'use strict';
-        return {
-            link: function (scope) {
-                scope.updateUser = function () {
-                    if (authService.access_token) {
-                        apiService('users').actions.find('me', function (err, res) {
-                            if (err) {
-                                console.log('error fetching user', err);
-                                scope.userSession = null;
-                                return;
-                            }
-                            scope.userSession = res;
-                            scope.$apply();
-                        });
-                    }
-                };
-                scope.updateUser();
-            }
-        };
-    }]);
+/* global angular,PIECEMETA_API_HOST */
 angular.module('piecemeta-web.services.api', []).
 factory('apiService', ['authService', function (authService) {
     'use strict';
@@ -1859,6 +1873,7 @@ factory('apiService', ['authService', function (authService) {
 }]);
 
 
+/* global angular */
 (function () {
     'use strict';
     angular.module('piecemeta-web.services.auth', []).
@@ -1885,162 +1900,7 @@ factory('apiService', ['authService', function (authService) {
             return auth;
         }]);
 }());
-/*
-var generateCSV = function (req, res, next) {
-    var mongoose = require('mongoose'),
-        async = require('async'),
-        restify = require('restify'),
-        Baby = require('babyparse');
-    async.waterfall([
-        function (cb) {
-            mongoose.model('DataChannelModel').find({ data_package_id: req.params.id }, cb);
-        },
-        function (dataChannels, cb) {
-            var result = {};
-            async.eachSeries(dataChannels, function (channel, nextChannel) {
-                async.waterfall([
-                    function (cb) {
-                        mongoose.model('DataStreamModel').find({ data_channel_id: channel.id }, cb);
-                    },
-                    function (streams, cb) {
-                        async.eachSeries(streams, function (stream, nextStream) {
-                            var streamTitle = channel.title + "/" + stream.title + "/" + streams.indexOf(stream);
-                            result[streamTitle] = stream.data_frames;
-                            nextStream(null);
-                        }, function (err) {
-                            cb(err);
-                        });
-                    }
-                ], function (err) {
-                    nextChannel(err);
-                });
-            }, function (err) {
-                cb(err, result);
-            });
-        }
-    ], function (err, result) {
-        if (err) {
-            console.log(err);
-            res.send(new restify.InternalError());
-            return next();
-        }
-        var csv = '';
-        var count = 0;
-        var max = Object.keys(result).length;
-        var maxFrames = 0;
-        for (var key in result) {
-            if (typeof result[key] === 'object') {
-                if (maxFrames < result[key].length) {
-                    maxFrames = result[key].length;
-                }
-                csv += key;
-                if (count < max - 1) {
-                    csv += ',';
-                } else {
-                    csv += "\r\n";
-                }
-                count += 1;
-            }
-        }
-        for (var i = 0; i < maxFrames; i += 1) {
-            count = 0;
-            for (var item in result) {
-                if (typeof result[item] === 'object') {
-                    csv += result[item][i];
-                    if (count < max - 1) {
-                        csv += ',';
-                    } else {
-                        csv += "\r\n";
-                    }
-                    count += 1;
-                }
-            }
-        }
-        console.log(csv, max);
-        var fs = require('fs');
-        fs.writeFile('/Users/anton/brain.txt', csv, function (err) {
-            if (err) {
-                console.log(err);
-            }
-            res.send(200, 'ok');
-            next();
-        });
-    });
-};
-    */
-angular.module('piecemeta-web.services.spatial-viewer', []).
-    factory('spatialViewer', [function () {
-        'use strict';
-        var viewer = {
-            scene : new THREE.Scene(),
-            renderer: new THREE.CanvasRenderer(),
-            hierarchy: new THREE.Object3D(),
-            camera : null,
-            meshes : {},
-            dataSequence : null,
-            frameIndex: 0,
-            frameCount: 0,
-            init : function (dataPackage, targetSelector, callback) {
-                var width = document.querySelector(targetSelector).offsetWidth,
-                    height = document.querySelector(targetSelector).offsetHeight;
-
-                if (height === 0) {
-                    height = 320;
-                }
-
-                viewer.dataPackage = dataPackage;
-                viewer.camera = new THREE.PerspectiveCamera(75, width / height, 1, 10000);
-                viewer.camera.position.z = 1000;
-                viewer.renderer.setSize(width, height);
-
-                for (var i in dataPackage.data_channels) {
-                    if (typeof dataPackage.data_channels[i] === 'object') {
-                        var geometry = new THREE.BoxGeometry(10, 10, 10),
-                            material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true }),
-                            mesh = new THREE.Mesh(geometry, material);
-                        viewer.meshes[dataPackage.data_channels[i].id] = mesh;
-                        for (var s in dataPackage.data_channels[i].data_streams) {
-                            if (typeof dataPackage.data_channels[i].data_streams[s] === 'object') {
-                                var stream = dataPackage.data_channels[i].data_streams[s];
-                                if (stream.data_frames.length > viewer.frameCount) {
-                                    viewer.frameCount = stream.data_frames.length;
-                                }
-                                if (typeof stream.data_frames[viewer.frameIndex] === 'number') {
-                                    viewer.meshes[dataPackage.data_channels[i].id][stream.group][stream.title] = (stream.value_offset + stream.data_frames[viewer.frameIndex])*10;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                for (var n in dataPackage.data_channels) {
-                    if (typeof dataPackage.data_channels[n] === 'object') {
-                        var channel = dataPackage.data_channels[n];
-                        if (channel.parent_data_channel_id) {
-                            viewer.meshes[channel.parent_data_channel_id].add(viewer.meshes[channel.id]);
-                        } else {
-                            viewer.hierarchy.add(viewer.meshes[channel.id]);
-                        }
-                    }
-                }
-
-                viewer.scene.add(viewer.hierarchy);
-                document.querySelector(targetSelector).appendChild(viewer.renderer.domElement);
-                viewer.animate();
-                if (typeof callback === 'function') {
-                    callback();
-                }
-            },
-            animate : function () {
-                window.requestAnimationFrame(viewer.animate);
-
-
-
-                viewer.renderer.render(viewer.scene, viewer.camera);
-            }
-        };
-        return viewer;
-    }]);
+/* global angular */
 (function () {
     'use strict';
     angular.module('piecemeta-frontend', [
@@ -2107,18 +1967,19 @@ angular.module('piecemeta-web.services.spatial-viewer', []).
             window.alert("Your browser is too old or not compatible with this website. It may still work, but most likely won't.");
         }
 
-        $rootScope.$on('$routeChangeStart', function (e, curr, prev) {
+        $rootScope.$on('$routeChangeStart', function () {
             $rootScope.pageDefer = $q.defer();
             $rootScope.pagePromise = $rootScope.pageDefer.promise;
         });
-        $rootScope.$on('$routeChangeSuccess', function (e, curr, prev) {
+        $rootScope.$on('$routeChangeSuccess', function () {
             $rootScope.pageDefer.resolve();
         });
-        $rootScope.$on('$routeChangeError', function (e, curr, prev) {
+        $rootScope.$on('$routeChangeError', function () {
             $rootScope.pageDefer.reject();
         });
     }]);
 }());
+/* global angular */
 (function () {
     'use strict';
     angular.module('piecemeta-web.controllers.site', [])
@@ -2132,6 +1993,7 @@ angular.module('piecemeta-web.services.spatial-viewer', []).
             $scope.$parent.status = 'ready';
         }]);
 }());
+/* global angular */
 (function () {
     'use strict';
     angular.module(
@@ -2139,7 +2001,7 @@ angular.module('piecemeta-web.services.spatial-viewer', []).
         [
             'piecemeta-web.services.api'
         ])
-        .controller('Trackers.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
+        .controller('Trackers.Create', ['$scope', 'apiService', '$q', '$location', function ($scope, apiService, $q, $location) {
             $scope.tracker = {
                 title: null,
                 description: null
@@ -2194,7 +2056,7 @@ angular.module('piecemeta-web.services.spatial-viewer', []).
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('trackers').actions.update($routeParams.id, $scope.tracker, function (err, tracker) {
+                    apiService('trackers').actions.update($routeParams.id, $scope.tracker, function (err) {
                         if (err) {
                             console.log(err);
                             $scope.alerts = [
@@ -2228,6 +2090,7 @@ angular.module('piecemeta-web.services.spatial-viewer', []).
             });
         }]);
 }());
+/* global angular */
 (function () {
     'use strict';
     angular.module(

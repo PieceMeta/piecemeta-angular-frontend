@@ -1,3 +1,4 @@
+/* global angular,async */
 (function () {
     'use strict';
     angular.module(
@@ -137,7 +138,7 @@
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('streams').actions.update($routeParams.uuid, $scope.data.dataStream, function (err, data_stream) {
+                    apiService('streams').actions.update($routeParams.uuid, $scope.data.dataStream, function (err) {
                         if (err) {
                             console.log(err);
                             $scope.alerts = [
@@ -280,7 +281,9 @@
 
 
             var parseData = function () {
-                if (!$scope.regex) return;
+                if (!$scope.regex) {
+                    return;
+                }
                 $scope.data.resultLines = [];
                 $scope.valLength = 0;
                 $scope.valLabel = [];
@@ -309,7 +312,9 @@
             };
 
             $scope.updateRegex = function (regexString) {
-                if (!regexString || regexString === '') return;
+                if (!regexString || regexString === '') {
+                    return;
+                }
                 $scope.regex = new RegExp(regexString, 'gm');
                 parseData();
             };
@@ -495,7 +500,7 @@
 
                 // remove empty labels
                 labels = labels.filter(function (v) {
-                    return v != '';
+                    return v !== '';
                 });
 
                 var inconsistencies = 0;

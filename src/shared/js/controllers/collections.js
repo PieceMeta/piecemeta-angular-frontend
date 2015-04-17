@@ -1,3 +1,4 @@
+/* global angular */
 (function () {
     'use strict';
     angular.module(
@@ -5,7 +6,7 @@
         [
             'piecemeta-web.services.api'
         ])
-        .controller('Collections.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
+        .controller('Collections.Create', ['$scope', 'apiService', '$q', '$location', function ($scope, apiService, $q, $location) {
             $scope.dataCollection = {
                 title: null,
                 description: null
@@ -60,7 +61,7 @@
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('collections').actions.update($routeParams.uuid, $scope.dataCollection, function (err, data_collection) {
+                    apiService('collections').actions.update($routeParams.uuid, $scope.dataCollection, function (err) {
                         if (err) {
                             console.log(err);
                             $scope.alerts = [

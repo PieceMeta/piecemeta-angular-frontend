@@ -1,3 +1,4 @@
+/* global angular */
 (function () {
     'use strict';
     angular.module(
@@ -5,7 +6,7 @@
         [
             'piecemeta-web.services.api'
         ])
-        .controller('Trackers.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
+        .controller('Trackers.Create', ['$scope', 'apiService', '$q', '$location', function ($scope, apiService, $q, $location) {
             $scope.tracker = {
                 title: null,
                 description: null
@@ -60,7 +61,7 @@
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('trackers').actions.update($routeParams.id, $scope.tracker, function (err, tracker) {
+                    apiService('trackers').actions.update($routeParams.id, $scope.tracker, function (err) {
                         if (err) {
                             console.log(err);
                             $scope.alerts = [

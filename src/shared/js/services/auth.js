@@ -1,3 +1,4 @@
+/* global angular */
 (function () {
     'use strict';
     angular.module('piecemeta-web.services.auth', []).

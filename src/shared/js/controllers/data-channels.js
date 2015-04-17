@@ -1,3 +1,4 @@
+/* global angular,async */
 (function () {
     'use strict';
     angular.module(
@@ -107,10 +108,11 @@
                 function (dataStreams, cb) {
                     if (dataStreams.length > 0) {
                         $scope.data.dataStreams = dataStreams.sort(function (a, b) {
-                            if (a.group < b.group)
+                            if (a.group < b.group) {
                                 return -1;
-                            if (a.group > b.group)
+                            } else if (a.group > b.group) {
                                 return 1;
+                            }
                             return 0;
                         });
                     }
@@ -194,7 +196,7 @@
                     var deferred = $q.defer();
                     $scope.promiseString = 'Saving...';
                     $scope.promise = deferred.promise;
-                    apiService('channels').actions.update($routeParams.uuid, $scope.data.dataChannel, function (err, data_channel) {
+                    apiService('channels').actions.update($routeParams.uuid, $scope.data.dataChannel, function (err) {
 
                         if (err) {
                             console.log(err);
