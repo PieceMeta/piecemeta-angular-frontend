@@ -8,11 +8,9 @@
         'btford.markdown',
         'piecemeta-web.controllers.site',
         'piecemeta-web.controllers.users',
-        'piecemeta-web.controllers.collections',
         'piecemeta-web.controllers.packages',
         'piecemeta-web.controllers.channels',
         'piecemeta-web.controllers.streams',
-        'piecemeta-web.controllers.trackers',
         'piecemeta-web.directives.helpers'
     ])
     .config(['$routeProvider', '$locationProvider', '$logProvider', function ($routeProvider, $locationProvider, $logProvider) {
