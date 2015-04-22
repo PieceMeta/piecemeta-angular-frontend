@@ -21,10 +21,15 @@ html(ng-app='piecemeta-frontend')
                             span.icon-bar
                         .navbar-brand PieceMetaOSC
                     .collapse.navbar-collapse(collapse='isCollapsed')
-                        ul.nav.navbar-nav
+                        ul.nav.navbar-nav(ng-if='$root.platform !== "win32"')
                             li
-                                a(href='packages/browse') Packages
+                                a(href='oscplayer/load') Packages
                             li
                                 a(href='oscplayer/settings') Settings
+                        ul.nav.navbar-nav(ng-if='$root.platform === "win32"')
+                            li
+                                a(href='#/oscplayer/load') Packages
+                            li
+                                a(href='#/oscplayer/settings') Settings
             .container-fluid
                 .main-content(ng-view,cg-busy="{promise:promise,message:promiseString,templateUrl:'./partials/busy.html'}")

@@ -9,14 +9,12 @@
         ])
         .controller('OscPlayer.Load', ['$scope', '$location', function ($scope, $location) {
             $scope.loadPackage = function () {
-                console.log("called!", $scope.dataURL);
                 if ($scope.dataURL) {
                     var urlparts = $scope.dataURL.split('/'),
-                        path = '/oscplayer/' + urlparts.pop();
+                        path = '/oscplayer/' + urlparts.pop() + '/play';
                     urlparts.pop();
-                    path += '/play?host=' + urlparts.join('/');
-                    console.log(path);
-                    $location.url(path);
+                    var search = 'host=' + encodeURIComponent(urlparts.join('/'));
+                    $location.path(path).search(search);
                 } else {
                     $scope.alerts = [
                         {

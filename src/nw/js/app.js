@@ -14,7 +14,13 @@
 
             $logProvider.debugEnabled(true);
 
-            $locationProvider.html5Mode(true).hashPrefix('!');
+            var os = require('os');
+
+
+            if (os.platform() !== 'win32') {
+                console.log('html5 mode active', os.platform());
+                $locationProvider.html5Mode(true).hashPrefix('!');
+            }
 
             var partialsPath = 'partials/';
 
@@ -27,13 +33,15 @@
         }]).run(['$rootScope', '$q', function ($rootScope, $q) {
 
             var gui = require('nw.gui');
+            var os = require('os');
             var win = gui.Window.get();
             var nativeMenuBar = new gui.Menu({ type: 'menubar' });
-            try {
+
+            $rootScope.platform = os.platform();
+
+            if (os.platform() === 'darwin') {
                 nativeMenuBar.createMacBuiltin('PieceMetaOSC');
                 win.menu = nativeMenuBar;
-            } catch (e) {
-                console.log('failed to setup native menubar', e.message);
             }
 
             // TODO: write a proper settings service
