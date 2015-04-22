@@ -1,8 +1,8 @@
-# PieceMeta Angular Frontends #
+# PieceMeta Angular Frontend #
 
 [![Code Climate](https://codeclimate.com/github/PieceMeta/piecemeta-angular-frontend/badges/gpa.svg)](https://codeclimate.com/github/PieceMeta/piecemeta-angular-frontend) [![devDependency Status](https://david-dm.org/PieceMeta/piecemeta-angular-frontend/dev-status.svg)](https://david-dm.org/PieceMeta/piecemeta-angular-frontend#info=devDependencies)
 
-The Web and NodeWebkit frontends based on [AngularJS](https://angularjs.org/) for the [PieceMeta](http://www.piecemeta.com) service.
+The Web and NodeWebkit frontend based on [AngularJS](https://angularjs.org/) for the [PieceMeta](http://www.piecemeta.com) service.
 
 ## Stability
 
@@ -58,3 +58,11 @@ Finally, you can build your Node-Webkit app with:
 gulp build-webkit-app
 ```
 
+**Note:** If you are building for Windows, you need to flatten ``dist/nw/node_modules`` before building the app. This is due to the 256 character path length limit in Windows.
+
+Install [flatten-packages](https://github.com/arifsetiawan/flatten) and then run
+
+```shell
+cd dist/nw/
+flatten-packages
+```
