@@ -63,8 +63,8 @@
             };
         }])
         .controller('Packages.Show', ['$scope', '$q', '$routeParams', 'apiService', function ($scope, $q, $routeParams, apiService) {
+            var streamData = {};
             $scope.data = {
-                dataChannels: [],
                 streamGroups: [],
                 dataPackage: null,
                 currentGroup: null,
@@ -115,16 +115,17 @@
                 }
 
                 var colorOffset = Math.floor(Math.random() * 8);
-                for (var i in channel.streams) {
-                    if (channel.streams[i].frames.length > 0) {
+                for (var i=0; i < channel.streams.length; i+=1) {
+                    if (typeof streamData[channel.streams[i].uuid] === 'object' && streamData[channel.streams[i].uuid].length > 0) {
+                        var frameData = streamData[channel.streams[i].uuid];
                         var frames = [];
-                        if (channel.streams[i].frames.length > 500 * 2) {
-                            var quantize = Math.floor(channel.streams[i].frames.length / 500);
-                            for (var q = 0; q < channel.streams[i].frames.length; q += quantize) {
-                                frames.push(channel.streams[i].frames[q]);
+                        if (frameData.length > 500 * 2) {
+                            var quantize = Math.floor(frameData.length / 500);
+                            for (var q = 0; q < frameData.length; q += quantize) {
+                                frames.push(frameData[q]);
                             }
                         } else {
-                            frames = channel.streams[i].frames;
+                            frames = frameData;
                         }
                         if (typeof channel.streams[i] === 'object') {
                             var dataPath = (channel.streams[i].group ? channel.streams[i].group + '/' : '') + channel.streams[i].title;
@@ -181,6 +182,26 @@
                 $scope.data.chartSetup.graphDataSet = dataSetChart;
             };
 
+            function loadStreamData(callback) {
+                if (typeof $scope.data.currentChannel === 'object') {
+                    streamData = {};
+                    async.each($scope.data.currentChannel.streams, function (stream, next) {
+                        apiService('streams/' + stream.uuid + '/frames').actions.all(function (err, frameData) {
+                            streamData[stream.uuid] = frameData.frames;
+                            next(err);
+                        });
+                    }, function (err) {
+                        if (typeof callback === 'function') {
+                            callback(err);
+                        }
+                    });
+                } else {
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                }
+            }
+
             async.waterfall([
                 function (cb) {
                     apiService('packages').actions.find($routeParams.uuid, cb);
@@ -224,29 +245,16 @@
                     });
                 },
                 function (cb) {
-                    for (var idx in $scope.data.dataPackage.channels) {
-                        if (typeof $scope.data.dataPackage.channels[idx] === 'object') {
-                            if ($scope.data.dataPackage.channels[idx].streams.length > 0) {
-                                $scope.data.dataChannels.push($scope.data.dataPackage.channels[idx]);
-                            }
-                        }
-                    }
-                    cb(null);
-                },
-                function (cb) {
-                    if ($scope.data.dataChannels.length > 0) {
-                        $scope.data.currentChannel = $scope.data.dataChannels[0];
-                    }
-                    cb(null);
-                },
-                function (cb) {
-                    $scope.updateChart();
-                    cb(null);
-                },
-                function (cb) {
                     $scope.$watch('data.currentChannel', function () {
-                        $scope.data.currentGroup = null;
-                        $scope.updateChart();
+                        var deferred = $q.defer();
+                        $scope.chartPromise = deferred.promise;
+                        loadStreamData(function (err) {
+                            if (err) {
+                                console.log('error getting stream data', err);
+                            }
+                            $scope.updateChart();
+                            deferred.resolve();
+                        });
                     }, true);
                     $scope.$watch('data.currentGroup', function () {
                         $scope.updateChart();

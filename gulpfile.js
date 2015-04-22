@@ -172,7 +172,7 @@ gulp.task('watch-web', function () {
     watch('src/web/less/**/*.less', function () {
         gulp.start('css-web');
     });
-    watch(['src/web/jade/**/*.jade', 'src/shared/jade/**/*.js'], function () {
+    watch(['src/web/jade/**/*.jade', 'src/shared/jade/**/*.jade'], function () {
         gulp.start('html-web');
     });
 });
