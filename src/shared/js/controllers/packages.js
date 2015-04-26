@@ -117,7 +117,8 @@
                 var colorOffset = Math.floor(Math.random() * 8);
                 for (var i=0; i < channel.streams.length; i+=1) {
                     if (typeof streamData[channel.streams[i].uuid] === 'object' && streamData[channel.streams[i].uuid].length > 0) {
-                        var frameData = streamData[channel.streams[i].uuid];
+                        var frames = streamData[channel.streams[i].uuid];
+                        /*
                         var frames = [];
                         if (frameData.length > 500 * 2) {
                             var quantize = Math.floor(frameData.length / 500);
@@ -127,6 +128,8 @@
                         } else {
                             frames = frameData;
                         }
+                        frames = frameData;
+                        */
                         if (typeof channel.streams[i] === 'object') {
                             var dataPath = (channel.streams[i].group ? channel.streams[i].group + '/' : '') + channel.streams[i].title;
                             var randomColValues = [];
@@ -186,7 +189,11 @@
                 if (typeof $scope.data.currentChannel === 'object') {
                     streamData = {};
                     async.each($scope.data.currentChannel.streams, function (stream, next) {
-                        apiService('streams/' + stream.uuid + '/frames').actions.all(function (err, frameData) {
+                        var skipVal;
+                        if (stream.frameCount > 100) {
+                            skipVal = { skip: Math.floor(stream.frameCount / 100) };
+                        }
+                        apiService('streams', null, skipVal).actions.find(stream.uuid, function (err, frameData) {
                             streamData[stream.uuid] = frameData.frames;
                             next(err);
                         });

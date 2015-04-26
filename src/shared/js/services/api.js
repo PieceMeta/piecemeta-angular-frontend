@@ -2,7 +2,7 @@
 angular.module('piecemeta-web.services.api', []).
 factory('apiService', ['authService', function (authService) {
     'use strict';
-    return function (resourceName, host) {
+    return function (resourceName, host, query) {
         var apiClient = new PMApi({
             host: host ? host : PIECEMETA_API_HOST,
             contentType: 'application/json',
@@ -13,10 +13,10 @@ factory('apiService', ['authService', function (authService) {
             client: apiClient,
             actions: {
                 all: function (callback, progress) {
-                    apiClient.resource(resourceName).action('get', null, callback, progress);
+                    apiClient.resource(resourceName, query).action('get', null, callback, progress);
                 },
                 find: function (uuid, callback, progress) {
-                    apiClient.resource(resourceName).action('get', uuid, callback, progress);
+                    apiClient.resource(resourceName, query).action('get', uuid, callback, progress);
                 },
                 create: function (data, callback, progress) {
                     apiClient.resource(resourceName).action('post', data, callback, progress);

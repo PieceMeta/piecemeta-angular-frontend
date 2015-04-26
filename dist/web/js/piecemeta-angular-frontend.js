@@ -9,133 +9,8 @@ var PIECEMETA_DEV_API_URL = 'https://api.piecemeta.com';
 var PIECEMETA_API_HOST = 'https://api.piecemeta.com';
 
 // DEV
-// PIECEMETA_DEV_API_URL = 'http://localhost:8080';
-// PIECEMETA_API_HOST = 'http://localhost:8080';
-/* global console,angular */
-angular.module('piecemeta-web.directives.helpers', [
-        'piecemeta-web.services.api',
-        'piecemeta-web.services.auth'
-    ]).
-    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
-        'use strict';
-        return {
-            link: function (scope) {
-                scope.updateUser = function () {
-                    if (authService.access_token) {
-                        apiService('users').actions.find('me', function (err, res) {
-                            if (err) {
-                                console.log('error fetching user', err);
-                                scope.userSession = null;
-                                return;
-                            }
-                            scope.userSession = res;
-                            scope.$apply();
-                        });
-                    }
-                };
-                scope.updateUser();
-            }
-        };
-    }]);
-/* global angular,PIECEMETA_API_HOST,PMApi */
-angular.module('piecemeta-web.services.api', []).
-factory('apiService', ['authService', function (authService) {
-    'use strict';
-    return function (resourceName, host) {
-        var apiClient = new PMApi({
-            host: host ? host : PIECEMETA_API_HOST,
-            contentType: 'application/json',
-            api_key: authService.api_key,
-            access_token: authService.access_token
-        });
-        return {
-            client: apiClient,
-            actions: {
-                all: function (callback, progress) {
-                    apiClient.resource(resourceName).action('get', null, callback, progress);
-                },
-                find: function (uuid, callback, progress) {
-                    apiClient.resource(resourceName).action('get', uuid, callback, progress);
-                },
-                create: function (data, callback, progress) {
-                    apiClient.resource(resourceName).action('post', data, callback, progress);
-                },
-                update: function (uuid, data, callback, progress) {
-                    data.uuid = uuid;
-                    apiClient.resource(resourceName).action('put', data, callback, progress);
-                },
-                remove: function (uuid, callback, progress) {
-                    apiClient.resource(resourceName).action('delete', uuid, callback, progress);
-                }
-            },
-            getCredentials: function (access_token, callback) {
-                apiClient.setToken(access_token);
-                apiClient.getCredentials(function (err, credentials) {
-                    if (err) {
-                        return callback(err);
-                    }
-                    if (typeof credentials === 'object') {
-                        authService.setCredentials(credentials, access_token);
-                        callback(null);
-                    } else {
-                        callback(new Error('Failed to get credentials'));
-                    }
-                });
-            },
-            authenticate: function (login, password, callback) {
-                apiClient.getToken({ email: login, password: password }, function (err, token) {
-                    if (err) {
-                        return callback(err);
-                    }
-                    if (typeof token === 'object') {
-                        apiClient.getCredentials(function (err, credentials) {
-                            if (err) {
-                                return callback(err);
-                            }
-                            if (typeof credentials === 'object') {
-                                authService.setCredentials(credentials, token);
-                                callback(null);
-                            } else {
-                                callback(new Error('Failed to get credentials'));
-                            }
-                        });
-                    } else {
-                        callback(new Error('Failed to get token'));
-                    }
-                });
-            }
-        };
-    };
-}]);
-
-
-/* global angular */
-(function () {
-    'use strict';
-    angular.module('piecemeta-web.services.auth', []).
-        factory('authService', ['$http', function () {
-            var auth = {
-                api_key : null,
-                access_token : null,
-                getCredentials : function () {
-                    auth.api_key = typeof localStorage.api_key === 'string' ? JSON.parse(localStorage.api_key) : null;
-                    auth.access_token = typeof localStorage.access_token === 'string' ? JSON.parse(localStorage.access_token) : null;
-                },
-                setCredentials : function (api_key, access_token) {
-                    localStorage.api_key = JSON.stringify(api_key);
-                    localStorage.access_token = JSON.stringify(access_token);
-                    auth.getCredentials();
-                },
-                clearCredentials : function () {
-                    localStorage.removeItem('api_key');
-                    localStorage.removeItem('access_token');
-                    auth.getCredentials();
-                }
-            };
-            auth.getCredentials();
-            return auth;
-        }]);
-}());
+PIECEMETA_DEV_API_URL = 'http://localhost:8080';
+PIECEMETA_API_HOST = 'http://localhost:8080';
 /* global angular,console */
 (function () {
     'use strict';
@@ -564,7 +439,8 @@ factory('apiService', ['authService', function (authService) {
                 var colorOffset = Math.floor(Math.random() * 8);
                 for (var i=0; i < channel.streams.length; i+=1) {
                     if (typeof streamData[channel.streams[i].uuid] === 'object' && streamData[channel.streams[i].uuid].length > 0) {
-                        var frameData = streamData[channel.streams[i].uuid];
+                        var frames = streamData[channel.streams[i].uuid];
+                        /*
                         var frames = [];
                         if (frameData.length > 500 * 2) {
                             var quantize = Math.floor(frameData.length / 500);
@@ -574,6 +450,8 @@ factory('apiService', ['authService', function (authService) {
                         } else {
                             frames = frameData;
                         }
+                        frames = frameData;
+                        */
                         if (typeof channel.streams[i] === 'object') {
                             var dataPath = (channel.streams[i].group ? channel.streams[i].group + '/' : '') + channel.streams[i].title;
                             var randomColValues = [];
@@ -633,7 +511,11 @@ factory('apiService', ['authService', function (authService) {
                 if (typeof $scope.data.currentChannel === 'object') {
                     streamData = {};
                     async.each($scope.data.currentChannel.streams, function (stream, next) {
-                        apiService('streams/' + stream.uuid + '/frames').actions.all(function (err, frameData) {
+                        var skipVal;
+                        if (stream.frameCount > 100) {
+                            skipVal = { skip: Math.floor(stream.frameCount / 100) };
+                        }
+                        apiService('streams', null, skipVal).actions.find(stream.uuid, function (err, frameData) {
                             streamData[stream.uuid] = frameData.frames;
                             next(err);
                         });
@@ -1024,7 +906,7 @@ factory('apiService', ['authService', function (authService) {
                     cb(null);
                 },
                 function (cb) {
-                    apiService('channels').actions.find($scope.data.dataStream.channel_uuid, cb);
+                    apiService('streams/' + $scope.data.dataStream.channel_uuid + '/frames').actions.all(cb);
                 },
                 function (dataChannel, cb) {
                     if (!dataChannel) {
@@ -1387,6 +1269,131 @@ factory('apiService', ['authService', function (authService) {
                     deferred.resolve();
                 });
             };
+        }]);
+}());
+/* global console,angular */
+angular.module('piecemeta-web.directives.helpers', [
+        'piecemeta-web.services.api',
+        'piecemeta-web.services.auth'
+    ]).
+    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
+        'use strict';
+        return {
+            link: function (scope) {
+                scope.updateUser = function () {
+                    if (authService.access_token) {
+                        apiService('users').actions.find('me', function (err, res) {
+                            if (err) {
+                                console.log('error fetching user', err);
+                                scope.userSession = null;
+                                return;
+                            }
+                            scope.userSession = res;
+                            scope.$apply();
+                        });
+                    }
+                };
+                scope.updateUser();
+            }
+        };
+    }]);
+/* global angular,PIECEMETA_API_HOST,PMApi */
+angular.module('piecemeta-web.services.api', []).
+factory('apiService', ['authService', function (authService) {
+    'use strict';
+    return function (resourceName, host, query) {
+        var apiClient = new PMApi({
+            host: host ? host : PIECEMETA_API_HOST,
+            contentType: 'application/json',
+            api_key: authService.api_key,
+            access_token: authService.access_token
+        });
+        return {
+            client: apiClient,
+            actions: {
+                all: function (callback, progress) {
+                    apiClient.resource(resourceName, query).action('get', null, callback, progress);
+                },
+                find: function (uuid, callback, progress) {
+                    apiClient.resource(resourceName, query).action('get', uuid, callback, progress);
+                },
+                create: function (data, callback, progress) {
+                    apiClient.resource(resourceName).action('post', data, callback, progress);
+                },
+                update: function (uuid, data, callback, progress) {
+                    data.uuid = uuid;
+                    apiClient.resource(resourceName).action('put', data, callback, progress);
+                },
+                remove: function (uuid, callback, progress) {
+                    apiClient.resource(resourceName).action('delete', uuid, callback, progress);
+                }
+            },
+            getCredentials: function (access_token, callback) {
+                apiClient.setToken(access_token);
+                apiClient.getCredentials(function (err, credentials) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    if (typeof credentials === 'object') {
+                        authService.setCredentials(credentials, access_token);
+                        callback(null);
+                    } else {
+                        callback(new Error('Failed to get credentials'));
+                    }
+                });
+            },
+            authenticate: function (login, password, callback) {
+                apiClient.getToken({ email: login, password: password }, function (err, token) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    if (typeof token === 'object') {
+                        apiClient.getCredentials(function (err, credentials) {
+                            if (err) {
+                                return callback(err);
+                            }
+                            if (typeof credentials === 'object') {
+                                authService.setCredentials(credentials, token);
+                                callback(null);
+                            } else {
+                                callback(new Error('Failed to get credentials'));
+                            }
+                        });
+                    } else {
+                        callback(new Error('Failed to get token'));
+                    }
+                });
+            }
+        };
+    };
+}]);
+
+
+/* global angular */
+(function () {
+    'use strict';
+    angular.module('piecemeta-web.services.auth', []).
+        factory('authService', ['$http', function () {
+            var auth = {
+                api_key : null,
+                access_token : null,
+                getCredentials : function () {
+                    auth.api_key = typeof localStorage.api_key === 'string' ? JSON.parse(localStorage.api_key) : null;
+                    auth.access_token = typeof localStorage.access_token === 'string' ? JSON.parse(localStorage.access_token) : null;
+                },
+                setCredentials : function (api_key, access_token) {
+                    localStorage.api_key = JSON.stringify(api_key);
+                    localStorage.access_token = JSON.stringify(access_token);
+                    auth.getCredentials();
+                },
+                clearCredentials : function () {
+                    localStorage.removeItem('api_key');
+                    localStorage.removeItem('access_token');
+                    auth.getCredentials();
+                }
+            };
+            auth.getCredentials();
+            return auth;
         }]);
 }());
 /* global angular,async,BVH */

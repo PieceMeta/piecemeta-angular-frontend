@@ -30,7 +30,7 @@
     "angular-seo": "https://github.com/steeve/angular-seo.git",
     "ng-chartjs": "https://github.com/dasantonym/angular-chartjs.git#ee5bada25379ca541b2793d7fc1f7fd32a38ef65",
     "bootstrap": "~3.3.1",
-    "piecemeta-apiclient": "~1.0.3",
+    "piecemeta-apiclient": "~1.0.4",
     "tock": "https://github.com/mrchimp/tock.git#~1.0.4",
     "topcoat": "~0.8.0"
   },
