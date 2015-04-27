@@ -189,14 +189,21 @@
                 if (typeof $scope.data.currentChannel === 'object') {
                     streamData = {};
                     async.each($scope.data.currentChannel.streams, function (stream, next) {
-                        var skipVal;
-                        if (stream.frameCount > 100) {
-                            skipVal = { skip: Math.floor(stream.frameCount / 100) };
+                        console.log($scope.data.currentGroup, stream.group);
+                        if (!$scope.data.currentGroup || ($scope.data.currentGroup && $scope.data.currentGroup === stream.group)) {
+                            var skipVal;
+                            if (stream.frameCount > 100) {
+                                skipVal = {skip: Math.floor(stream.frameCount / 100)};
+                            }
+                            apiService('streams', null, skipVal).actions.find(stream.uuid, function (err, frameData) {
+                                streamData[stream.uuid] = frameData.frames;
+                                window.setTimeout(function () {
+                                    next(err);
+                                }, 0);
+                            });
+                        } else {
+                            next();
                         }
-                        apiService('streams', null, skipVal).actions.find(stream.uuid, function (err, frameData) {
-                            streamData[stream.uuid] = frameData.frames;
-                            next(err);
-                        });
                     }, function (err) {
                         if (typeof callback === 'function') {
                             callback(err);
@@ -265,6 +272,7 @@
                     }, true);
                     $scope.$watch('data.currentGroup', function () {
                         $scope.updateChart();
+                        deferred.resolve();
                     }, true);
                     cb(null);
                 }

@@ -11,6 +11,32 @@ var PIECEMETA_API_HOST = 'https://api.piecemeta.com';
 // DEV
 PIECEMETA_DEV_API_URL = 'http://localhost:8080';
 PIECEMETA_API_HOST = 'http://localhost:8080';
+/* global console,angular */
+angular.module('piecemeta-web.directives.helpers', [
+        'piecemeta-web.services.api',
+        'piecemeta-web.services.auth'
+    ]).
+    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
+        'use strict';
+        return {
+            link: function (scope) {
+                scope.updateUser = function () {
+                    if (authService.access_token) {
+                        apiService('users').actions.find('me', function (err, res) {
+                            if (err) {
+                                console.log('error fetching user', err);
+                                scope.userSession = null;
+                                return;
+                            }
+                            scope.userSession = res;
+                            scope.$apply();
+                        });
+                    }
+                };
+                scope.updateUser();
+            }
+        };
+    }]);
 /* global angular,console */
 (function () {
     'use strict';
@@ -511,14 +537,21 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                 if (typeof $scope.data.currentChannel === 'object') {
                     streamData = {};
                     async.each($scope.data.currentChannel.streams, function (stream, next) {
-                        var skipVal;
-                        if (stream.frameCount > 100) {
-                            skipVal = { skip: Math.floor(stream.frameCount / 100) };
+                        console.log($scope.data.currentGroup, stream.group);
+                        if (!$scope.data.currentGroup || ($scope.data.currentGroup && $scope.data.currentGroup === stream.group)) {
+                            var skipVal;
+                            if (stream.frameCount > 100) {
+                                skipVal = {skip: Math.floor(stream.frameCount / 100)};
+                            }
+                            apiService('streams', null, skipVal).actions.find(stream.uuid, function (err, frameData) {
+                                streamData[stream.uuid] = frameData.frames;
+                                window.setTimeout(function () {
+                                    next(err);
+                                }, 0);
+                            });
+                        } else {
+                            next();
                         }
-                        apiService('streams', null, skipVal).actions.find(stream.uuid, function (err, frameData) {
-                            streamData[stream.uuid] = frameData.frames;
-                            next(err);
-                        });
                     }, function (err) {
                         if (typeof callback === 'function') {
                             callback(err);
@@ -587,6 +620,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                     }, true);
                     $scope.$watch('data.currentGroup', function () {
                         $scope.updateChart();
+                        deferred.resolve();
                     }, true);
                     cb(null);
                 }
@@ -906,7 +940,7 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
                     cb(null);
                 },
                 function (cb) {
-                    apiService('streams/' + $scope.data.dataStream.channel_uuid + '/frames').actions.all(cb);
+                    apiService('channels').actions.find($scope.data.dataStream.channel_uuid, cb);
                 },
                 function (dataChannel, cb) {
                     if (!dataChannel) {
@@ -1271,32 +1305,6 @@ PIECEMETA_API_HOST = 'http://localhost:8080';
             };
         }]);
 }());
-/* global console,angular */
-angular.module('piecemeta-web.directives.helpers', [
-        'piecemeta-web.services.api',
-        'piecemeta-web.services.auth'
-    ]).
-    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
-        'use strict';
-        return {
-            link: function (scope) {
-                scope.updateUser = function () {
-                    if (authService.access_token) {
-                        apiService('users').actions.find('me', function (err, res) {
-                            if (err) {
-                                console.log('error fetching user', err);
-                                scope.userSession = null;
-                                return;
-                            }
-                            scope.userSession = res;
-                            scope.$apply();
-                        });
-                    }
-                };
-                scope.updateUser();
-            }
-        };
-    }]);
 /* global angular,PIECEMETA_API_HOST,PMApi */
 angular.module('piecemeta-web.services.api', []).
 factory('apiService', ['authService', function (authService) {

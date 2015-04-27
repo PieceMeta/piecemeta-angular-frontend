@@ -103,7 +103,7 @@
                     cb(null);
                 },
                 function (cb) {
-                    apiService('streams/' + $scope.data.dataStream.channel_uuid + '/frames').actions.all(cb);
+                    apiService('channels').actions.find($scope.data.dataStream.channel_uuid, cb);
                 },
                 function (dataChannel, cb) {
                     if (!dataChannel) {
