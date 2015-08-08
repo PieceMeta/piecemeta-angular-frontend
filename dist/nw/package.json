@@ -5,7 +5,7 @@
   "chromium-args": "--js-flags=--harmony",
   "window": {
     "title": "PieceMeta OSC",
-    "toolbar": false,
+    "toolbar": true,
     "frame": true,
     "fullscreen": false,
     "kiosk": false,
@@ -18,6 +18,7 @@
   "dependencies": {
     "async": "^0.9.0",
     "nedb": "^1.0.2",
-    "osc": "^1.1.0"
+    "osc": "^1.1.0",
+    "webworker-threads": "^0.5.5"
   }
 }

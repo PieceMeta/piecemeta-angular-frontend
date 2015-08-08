@@ -7,7 +7,6 @@
         'cgBusy',
         'btford.markdown',
         'piecemeta-nw.controllers.osc-player',
-        'piecemeta-web.services.api',
         'piecemeta-web.directives.helpers'
     ])
         .config(['$routeProvider', '$locationProvider', '$logProvider', function ($routeProvider, $locationProvider, $logProvider) {
@@ -17,8 +16,9 @@
             var os = require('os');
 
 
+            // TODO: check if there is a proper workaround for this
             if (os.platform() !== 'win32') {
-                console.log('html5 mode active', os.platform());
+                console.log('not on win32, html5 mode active', os.platform());
                 $locationProvider.html5Mode(true).hashPrefix('!');
             }
 

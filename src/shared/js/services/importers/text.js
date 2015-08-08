@@ -42,20 +42,36 @@ angular.module('piecemeta-web.services.importers.text', ['piecemeta-web.services
                 var lines = fileData.split('\n');
                 async.waterfall([
                     function (cb) {
+                        var dataStream = {
+                            channel_uuid: meta.selectedChannel.uuid,
+                            package_uuid: meta.dataPackage.uuid,
+                            fps: meta.fps,
+                            labels: [],
+                            frames: []
+                        };
                         for (var i = 0; i < meta.valLength; i += 1) {
-                            var dataStream = {
-                                channel_uuid: meta.selectedChannel.uuid,
-                                title: meta.valLabel[i],
-                                fps: meta.fps,
-                                group: meta.valueGroup,
-                                frames: []
-                            };
+                            if (!meta.valueGroup) {
+                                dataStream = {
+                                    channel_uuid: meta.selectedChannel.uuid,
+                                    package_uuid: meta.dataPackage.uuid,
+                                    fps: meta.fps,
+                                    labels: [],
+                                    frames: []
+                                };
+                            }
+                            dataStream.title = meta.valueGroup || meta.valLabel[i];
+                            dataStream.labels.push(meta.valLabel[i]);
+                            if (!meta.valueGroup) {
+                                dataStreams.push(dataStream);
+                            }
+                        }
+                        if (meta.valueGroup) {
                             dataStreams.push(dataStream);
                         }
                         cb(null);
                     },
                     function (cb) {
-                        for (var l in lines) {
+                        for (var l = 0; l < lines.length; l += 1) {
                             if (typeof lines[l] === 'string') {
                                 var match = null,
                                     values = [];
@@ -63,10 +79,18 @@ angular.module('piecemeta-web.services.importers.text', ['piecemeta-web.services
                                     values = match;
                                 }
                                 values.shift();
-                                for (var n in values) {
-                                    if (typeof dataStreams[n] === 'object') {
-                                        dataStreams[n].frames.push(values[n]);
+                                var frame = [];
+                                for (var n = 0; n < values.length; n += 1) {
+                                    if (typeof values[n] !== 'undefined') {
+                                        frame.push(parseFloat(values[n]));
+                                    } else {
+                                        frame.push(null);
                                     }
+                                }
+                                if (meta.valueGroup) {
+                                    dataStreams[0].frames.push(frame);
+                                } else {
+                                    dataStreams[n].frames.push(frame);
                                 }
                             }
                         }

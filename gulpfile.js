@@ -111,11 +111,11 @@ function cssPipe(src, destPath) {
 }
 
 gulp.task('css-web', function () {
-    return cssPipe(gulp.src('./src/web/less/site.less'), './dist/web/css/');
+    return cssPipe(gulp.src('./src/shared/less/main.less'), './dist/web/css/');
 });
 
 gulp.task('css-nw', function () {
-    return cssPipe(gulp.src('./src/nw/less/app.less'), './dist/nw/approot/css/');
+    return cssPipe(gulp.src('./src/shared/less/main.less'), './dist/nw/approot/css/');
 });
 
 

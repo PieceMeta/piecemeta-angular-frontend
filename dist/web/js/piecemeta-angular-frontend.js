@@ -1,6 +1,6 @@
 /**
  * piecemeta-angular-frontend - Angular-based web frontend for PieceMeta service
- * @version v0.9.3
+ * @version v0.10.0
  * @link http://www.piecemeta.com
  * @license MIT
  */
@@ -11,32 +11,6 @@ var PIECEMETA_API_HOST = 'https://api.piecemeta.com';
 // DEV
 PIECEMETA_DEV_API_URL = 'http://localhost:8080';
 PIECEMETA_API_HOST = 'http://localhost:8080';
-/* global console,angular */
-angular.module('piecemeta-web.directives.helpers', [
-        'piecemeta-web.services.api',
-        'piecemeta-web.services.auth'
-    ]).
-    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
-        'use strict';
-        return {
-            link: function (scope) {
-                scope.updateUser = function () {
-                    if (authService.access_token) {
-                        apiService('users').actions.find('me', function (err, res) {
-                            if (err) {
-                                console.log('error fetching user', err);
-                                scope.userSession = null;
-                                return;
-                            }
-                            scope.userSession = res;
-                            scope.$apply();
-                        });
-                    }
-                };
-                scope.updateUser();
-            }
-        };
-    }]);
 /* global angular,console */
 (function () {
     'use strict';
@@ -537,7 +511,6 @@ angular.module('piecemeta-web.directives.helpers', [
                 if (typeof $scope.data.currentChannel === 'object') {
                     streamData = {};
                     async.each($scope.data.currentChannel.streams, function (stream, next) {
-                        console.log($scope.data.currentGroup, stream.group);
                         if (!$scope.data.currentGroup || ($scope.data.currentGroup && $scope.data.currentGroup === stream.group)) {
                             var skipVal;
                             if (stream.frameCount > 100) {
@@ -1305,6 +1278,32 @@ angular.module('piecemeta-web.directives.helpers', [
             };
         }]);
 }());
+/* global console,angular */
+angular.module('piecemeta-web.directives.helpers', [
+        'piecemeta-web.services.api',
+        'piecemeta-web.services.auth'
+    ]).
+    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
+        'use strict';
+        return {
+            link: function (scope) {
+                scope.updateUser = function () {
+                    if (authService.access_token) {
+                        apiService('users').actions.find('me', function (err, res) {
+                            if (err) {
+                                console.log('error fetching user', err);
+                                scope.userSession = null;
+                                return;
+                            }
+                            scope.userSession = res;
+                            scope.$apply();
+                        });
+                    }
+                };
+                scope.updateUser();
+            }
+        };
+    }]);
 /* global angular,PIECEMETA_API_HOST,PMApi */
 angular.module('piecemeta-web.services.api', []).
 factory('apiService', ['authService', function (authService) {
@@ -1818,20 +1817,36 @@ angular.module('piecemeta-web.services.importers.text', ['piecemeta-web.services
                 var lines = fileData.split('\n');
                 async.waterfall([
                     function (cb) {
+                        var dataStream = {
+                            channel_uuid: meta.selectedChannel.uuid,
+                            package_uuid: meta.dataPackage.uuid,
+                            fps: meta.fps,
+                            labels: [],
+                            frames: []
+                        };
                         for (var i = 0; i < meta.valLength; i += 1) {
-                            var dataStream = {
-                                channel_uuid: meta.selectedChannel.uuid,
-                                title: meta.valLabel[i],
-                                fps: meta.fps,
-                                group: meta.valueGroup,
-                                frames: []
-                            };
+                            if (!meta.valueGroup) {
+                                dataStream = {
+                                    channel_uuid: meta.selectedChannel.uuid,
+                                    package_uuid: meta.dataPackage.uuid,
+                                    fps: meta.fps,
+                                    labels: [],
+                                    frames: []
+                                };
+                            }
+                            dataStream.title = meta.valueGroup || meta.valLabel[i];
+                            dataStream.labels.push(meta.valLabel[i]);
+                            if (!meta.valueGroup) {
+                                dataStreams.push(dataStream);
+                            }
+                        }
+                        if (meta.valueGroup) {
                             dataStreams.push(dataStream);
                         }
                         cb(null);
                     },
                     function (cb) {
-                        for (var l in lines) {
+                        for (var l = 0; l < lines.length; l += 1) {
                             if (typeof lines[l] === 'string') {
                                 var match = null,
                                     values = [];
@@ -1839,10 +1854,18 @@ angular.module('piecemeta-web.services.importers.text', ['piecemeta-web.services
                                     values = match;
                                 }
                                 values.shift();
-                                for (var n in values) {
-                                    if (typeof dataStreams[n] === 'object') {
-                                        dataStreams[n].frames.push(values[n]);
+                                var frame = [];
+                                for (var n = 0; n < values.length; n += 1) {
+                                    if (typeof values[n] !== 'undefined') {
+                                        frame.push(parseFloat(values[n]));
+                                    } else {
+                                        frame.push(null);
                                     }
+                                }
+                                if (meta.valueGroup) {
+                                    dataStreams[0].frames.push(frame);
+                                } else {
+                                    dataStreams[n].frames.push(frame);
                                 }
                             }
                         }

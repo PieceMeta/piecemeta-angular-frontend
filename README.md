@@ -1,6 +1,6 @@
 # PieceMeta Angular Frontend #
 
-[![Code Climate](https://codeclimate.com/github/PieceMeta/piecemeta-angular-frontend/badges/gpa.svg)](https://codeclimate.com/github/PieceMeta/piecemeta-angular-frontend) [![devDependency Status](https://david-dm.org/PieceMeta/piecemeta-angular-frontend/dev-status.svg)](https://david-dm.org/PieceMeta/piecemeta-angular-frontend#info=devDependencies)
+[![Code Climate](https://codeclimate.com/github/PieceMeta/piecemeta-angular-frontend/badges/gpa.svg)](https://codeclimate.com/github/PieceMeta/piecemeta-angular-frontend) [![Dependency Status](https://gemnasium.com/PieceMeta/piecemeta-angular-frontend.svg)](https://gemnasium.com/PieceMeta/piecemeta-angular-frontend)
 
 The Web and NodeWebkit frontend based on [AngularJS](https://angularjs.org/) for the [PieceMeta](http://www.piecemeta.com) service.
 
@@ -42,7 +42,10 @@ gulp node-webkit
 After the basic build you need to perform these steps to rebuild the native modules for your architecture. You only need to do this one time, the binaries are reused each time you run the grunt task.
 
 ```shell
-cd dist/nw/node_modules/osc/node_modules/serialport
+cd dist/nw/node_modules/webworker-threads/
+nw-gyp configure --target=0.12.1
+nw-gyp build
+cd ../osc/node_modules/serialport
 node-pre-gyp rebuild --target=0.12.1 --runtime=node-webkit
 cd ../ws/node_modules/bufferutil
 nw-gyp configure --target=0.12.1

@@ -9,7 +9,7 @@
         ])
         .controller('OscPlayer.Load', ['$scope', '$location', function ($scope, $location) {
             $scope.loadPackage = function () {
-                if ($scope.dataURL) {
+                if ($scope.dataURL && /^(https?):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i.test($scope.dataURL)) {
                     var urlparts = $scope.dataURL.split('/'),
                         path = '/oscplayer/' + urlparts.pop() + '/play';
                     urlparts.pop();
@@ -26,7 +26,8 @@
                 }
             };
         }])
-        .controller('OscPlayer.Play', ['$scope', '$q', '$routeParams', 'apiService', function ($scope, $q, $routeParams, apiService) {
+        .controller('OscPlayer.Play', ['$scope', '$q', '$routeParams', 'apiService', 'filecacheService', function ($scope, $q, $routeParams, apiService, filecacheService) {
+            var streamData = {};
             $scope.data = {
                 dataChannels: [],
                 dataPackage: null,
@@ -41,7 +42,6 @@
                 targetHost: '127.0.0.1',
                 targetPort: 8000
             };
-            console.log($scope.data);
             $scope.playprogress = 0;
             $scope.updateTimeout = null;
             var deferred = $q.defer();
@@ -54,6 +54,12 @@
                 $event.target.select();
                 console.log($event.target.value);
             };
+
+
+
+            function fetchRemotePackage(uuid, callback) {
+
+            }
 
             async.waterfall([
                 function (cb) {
@@ -74,14 +80,7 @@
                     apiService('packages/' + $scope.data.dataPackage.uuid + '/channels', $scope.data.baseUrl).actions.all(cb);
                 },
                 function (dataChannels, cb) {
-                    $scope.data.dataPackage.channels = dataChannels.sort(function (a, b) {
-                        if (a.title < b.title) {
-                            return -1;
-                        } else if (a.title > b.title) {
-                            return 1;
-                        }
-                        return 0;
-                    });
+
                     cb(null);
                 },
                 function (cb) {
@@ -104,27 +103,6 @@
                     }, function (err) {
                         cb(err);
                     });
-                },
-                function (cb) {
-                    for (var idx in $scope.data.dataPackage.channels) {
-                        if (typeof $scope.data.dataPackage.channels[idx] === 'object') {
-                            if ($scope.data.dataPackage.channels[idx].streams.length > 0 &&
-                                $scope.data.dataPackage.channels[idx].streams.length > 0 &&
-                                $scope.data.dataPackage.channels[idx].streams[0].frames.length > 0) {
-                                $scope.data.dataChannels.push({
-                                    title: $scope.data.dataPackage.channels[idx].title,
-                                    id: $scope.data.dataPackage.channels[idx].uuid
-                                });
-                            }
-                        }
-                    }
-                    cb(null);
-                },
-                function (cb) {
-                    if ($scope.data.dataChannels.length > 0) {
-                        $scope.data.currentChannel = $scope.data.dataChannels[0].uuid;
-                    }
-                    cb(null);
                 }
             ], function (err) {
                 if (err) {
@@ -159,29 +137,6 @@
 
                 $scope.$apply();
 
-                var osc = require('piecemeta-oscplayer');
-                osc.openPort('0.0.0.0', parseInt(localStorage.getItem('osc-controlport')));
-                osc.registerControls(function (err, command, args) {
-                    switch (command) {
-                        case 'toggle':
-                            $scope.play(null);
-                            break;
-                        case 'rewind':
-                            $scope.rewind(null);
-                            break;
-                        case 'frame':
-                            if (args && args.length > 0) {
-                                var targetFrame = parseInt(args[0]);
-                                if (targetFrame < $scope.data.totalFrames) {
-                                    $scope.data.frame = parseInt(args[0]);
-                                    $scope.playprogress = Math.round($scope.data.frame / $scope.data.totalFrames * 1000);
-                                    $scope.$apply();
-                                }
-                            }
-                            break;
-                    }
-                });
-
                 var interfaceTimer = new Tock({
                     interval: 100,
                     callback: function () {
@@ -198,58 +153,11 @@
                     }
                 });
 
-                var tickStart;
-                var tick = function() {
-                    var messages = [];
-                    var addresses = {};
-                    var address;
-                    for (var i in pkg.channels) {
-                        if (typeof pkg.channels[i] === 'object') {
-                            for (var n in pkg.channels[i].streams) {
-                                if (typeof pkg.channels[i].streams[n] === 'object') {
-                                    address = '/' + pkg.channels[i].title;
-                                    address += pkg.channels[i].streams[n].group ? '/' + pkg.channels[i].streams[n].group : '';
-                                    if (!addresses[address]) {
-                                        addresses[address] = [];
-                                    }
-                                    if (pkg.channels[i].streams[n].frames[$scope.data.frame]) {
-                                        if ($scope.data.streamStatus[pkg.channels[i].streams[n].uuid] === true &&
-                                            (!pkg.channels[i].streams[n].group || $scope.data.groupStatus[pkg.channels[i].streams[n].group] === true)) {
-                                            addresses[address].push(pkg.channels[i].streams[n].frames[$scope.data.frame]);
-                                        }
-                                    }
-                                }
-                            }
-                            for (address in addresses) {
-                                if (addresses[address].length > 0) {
-                                    messages.push(osc.createMessage(address, addresses[address]));
-                                }
-                            }
-                        }
-                    }
-                    osc.send(localStorage.getItem('osc-datahost'), parseInt(localStorage.getItem('osc-dataport')), osc.createBundle(messages), function (err) {
-                        if (err) {
-                            console.log('send error', err);
-                        }
-                    });
-                    $scope.data.frame += 1;
-                    if ($scope.data.frame >= $scope.data.totalFrames) {
-                        console.log('play took', window.performance.now() - tickStart);
-                        $scope.data.frame = 0;
-                        tickStart = window.performance.now();
-                    }
-                };
 
-                var timer = new Tock({
-                    interval: Math.round(1000 / $scope.data.fps),
-                    callback: tick
-                });
                 $scope.play = function () {
                     if ($scope.playing) {
-                        timer.pause();
                         $scope.playing = false;
                     } else {
-                        timer.start();
                         $scope.playing = true;
                     }
                     interfaceTimer.start();
@@ -257,12 +165,11 @@
                 $scope.rewind = function () {
                     $scope.data.frame = 0;
                     $scope.playprogress = 0;
-                    tickStart = window.performance.now();
                 };
 
                 $scope.$on('$routeChangeStart', function (next, current) {
                     if (next !== current) {
-                        timer.pause();
+                        //timer.pause();
                         interfaceTimer.pause();
                         osc.closePort();
                     }

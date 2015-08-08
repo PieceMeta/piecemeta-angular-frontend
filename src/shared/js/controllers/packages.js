@@ -189,7 +189,6 @@
                 if (typeof $scope.data.currentChannel === 'object') {
                     streamData = {};
                     async.each($scope.data.currentChannel.streams, function (stream, next) {
-                        console.log($scope.data.currentGroup, stream.group);
                         if (!$scope.data.currentGroup || ($scope.data.currentGroup && $scope.data.currentGroup === stream.group)) {
                             var skipVal;
                             if (stream.frameCount > 100) {
