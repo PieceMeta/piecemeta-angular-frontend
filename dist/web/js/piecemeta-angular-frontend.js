@@ -1,6 +1,6 @@
 /**
  * piecemeta-angular-frontend - Angular-based web frontend for PieceMeta service
- * @version v0.10.0
+ * @version v0.10.1
  * @link http://www.piecemeta.com
  * @license MIT
  */
