@@ -1,7 +1,7 @@
 {
   "name": "PieceMetaOSC",
   "main": "approot/index.html",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "chromium-args": "--js-flags=--harmony",
   "window": {
     "title": "PieceMeta OSC",
@@ -16,8 +16,8 @@
     "min_height": 360
   },
   "dependencies": {
-    "async": "^0.9.0",
-    "nedb": "^1.0.2",
-    "osc": "^1.1.0"
+    "async": "^1.4.2",
+    "nedb": "^1.2.1",
+    "osc": "^2.0.0"
   }
 }

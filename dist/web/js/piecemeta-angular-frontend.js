@@ -1,6 +1,6 @@
 /**
  * piecemeta-angular-frontend - Angular-based web frontend for PieceMeta service
- * @version v0.9.3
+ * @version v0.9.4
  * @link http://www.piecemeta.com
  * @license MIT
  */
@@ -9,34 +9,8 @@ var PIECEMETA_DEV_API_URL = 'https://api.piecemeta.com';
 var PIECEMETA_API_HOST = 'https://api.piecemeta.com';
 
 // DEV
-PIECEMETA_DEV_API_URL = 'http://localhost:8080';
-PIECEMETA_API_HOST = 'http://localhost:8080';
-/* global console,angular */
-angular.module('piecemeta-web.directives.helpers', [
-        'piecemeta-web.services.api',
-        'piecemeta-web.services.auth'
-    ]).
-    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
-        'use strict';
-        return {
-            link: function (scope) {
-                scope.updateUser = function () {
-                    if (authService.access_token) {
-                        apiService('users').actions.find('me', function (err, res) {
-                            if (err) {
-                                console.log('error fetching user', err);
-                                scope.userSession = null;
-                                return;
-                            }
-                            scope.userSession = res;
-                            scope.$apply();
-                        });
-                    }
-                };
-                scope.updateUser();
-            }
-        };
-    }]);
+// PIECEMETA_DEV_API_URL = 'http://localhost:8080';
+// PIECEMETA_API_HOST = 'http://localhost:8080';
 /* global angular,console */
 (function () {
     'use strict';
@@ -1305,6 +1279,32 @@ angular.module('piecemeta-web.directives.helpers', [
             };
         }]);
 }());
+/* global console,angular */
+angular.module('piecemeta-web.directives.helpers', [
+        'piecemeta-web.services.api',
+        'piecemeta-web.services.auth'
+    ]).
+    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
+        'use strict';
+        return {
+            link: function (scope) {
+                scope.updateUser = function () {
+                    if (authService.access_token) {
+                        apiService('users').actions.find('me', function (err, res) {
+                            if (err) {
+                                console.log('error fetching user', err);
+                                scope.userSession = null;
+                                return;
+                            }
+                            scope.userSession = res;
+                            scope.$apply();
+                        });
+                    }
+                };
+                scope.updateUser();
+            }
+        };
+    }]);
 /* global angular,PIECEMETA_API_HOST,PMApi */
 angular.module('piecemeta-web.services.api', []).
 factory('apiService', ['authService', function (authService) {
