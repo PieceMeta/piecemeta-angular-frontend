@@ -1,9 +1,0 @@
-h2 Registered trackers
-.table-responsive
-    table.table.table-striped
-        tbody
-            tr(ng-repeat='tracker in data.trackers')
-                td
-                    a(ng-href='trackers/{{tracker.id}}/edit') {{tracker.host + ':' + tracker.port}}
-                td
-                    a.btn-sm.btn-success.pull-right(ng-href='trackers/{{tracker.id}}/edit') Edit

@@ -22,8 +22,6 @@
         var partialsPath = 'partials/';
 
         $routeProvider.when('/', {templateUrl: partialsPath + 'welcome.html', controller: 'Site.Welcome'});
-        $routeProvider.when('/about', {templateUrl: partialsPath + 'about.html', controller: 'Site.About'});
-        $routeProvider.when('/software', {templateUrl: partialsPath + 'software.html', controller: 'Site.Software'});
 
         $routeProvider.when('/signup', {templateUrl: partialsPath + 'signup.html', controller: 'Users.Create'});
         $routeProvider.when('/me/account', {templateUrl: partialsPath + 'account.html', controller: 'Users.Edit'});
@@ -48,10 +46,6 @@
 
         $routeProvider.when('/packages/:package_uuid/channels/create', {templateUrl: partialsPath + 'channels_edit.html', controller: 'Channels.Create'});
         $routeProvider.when('/channels/:uuid/edit', {templateUrl: partialsPath + 'channels_edit.html', controller: 'Channels.Edit'});
-
-        $routeProvider.when('/trackers', {templateUrl: partialsPath + 'trackers_list.html', controller: 'Trackers.List'});
-        $routeProvider.when('/trackers/create', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'BasicResource.Create'});
-        $routeProvider.when('/trackers/:uuid/edit', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'BasicResource.Edit'});
 
         $routeProvider.otherwise({redirectTo: '/'});
     }]).run(['$rootScope', '$q', function ($rootScope, $q) {
