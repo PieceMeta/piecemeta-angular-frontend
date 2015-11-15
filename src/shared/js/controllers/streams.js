@@ -4,7 +4,7 @@
     angular.module(
         'piecemeta-web.controllers.streams',
         [
-            'angularFileUpload',
+            'ngFileUpload',
             'piecemeta-web.services.api',
             'piecemeta-web.services.importers.text',
             'piecemeta-web.services.importers.trac'

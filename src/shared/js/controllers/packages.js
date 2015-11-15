@@ -5,7 +5,7 @@
     angular.module(
         'piecemeta-web.controllers.packages',
         [
-            'angularFileUpload',
+            'ngFileUpload',
             'piecemeta-web.services.api',
             'piecemeta-web.services.importers.json',
             'piecemeta-web.services.importers.bvh',

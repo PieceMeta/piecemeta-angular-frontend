@@ -41,7 +41,7 @@ gulp.task('modernizr', function () {
 
 gulp.task('js-deps', ['modernizr'], function () {
     return gulp.src([
-            'bower_components/ng-file-upload/angular-file-upload-html5-shim.min.js',
+            'bower_components/ng-file-upload/ng-file-upload-shim.min.js',
             'lib/modernizr/modernizr-custom.min.js',
             'bower_components/angular/angular.min.js',
             'bower_components/angular-sanitize/angular-sanitize.min.js',
@@ -51,7 +51,7 @@ gulp.task('js-deps', ['modernizr'], function () {
             'bower_components/angular-route/angular-route.min.js',
             'bower_components/angular-animate/angular-animate.min.js',
             'bower_components/angular-busy/angular-busy.js',
-            'bower_components/ng-file-upload/angular-file-upload.min.js',
+            'bower_components/ng-file-upload/ng-file-upload.min.js',
             'bower_components/Chart.js/Chart.min.js',
             'bower_components/ng-chartjs/src/js/main.js',
             'bower_components/angular-markdown-directive/markdown.js',

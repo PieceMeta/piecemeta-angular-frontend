@@ -103,7 +103,7 @@ var PIECEMETA_API_HOST = 'https://api.piecemeta.com';
     angular.module(
         'piecemeta-web.controllers.channels',
         [
-            'angularFileUpload',
+            'ngFileUpload',
             'piecemeta-web.services.api'
         ])
         .controller('Channels.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
@@ -327,7 +327,7 @@ var PIECEMETA_API_HOST = 'https://api.piecemeta.com';
     angular.module(
         'piecemeta-web.controllers.packages',
         [
-            'angularFileUpload',
+            'ngFileUpload',
             'piecemeta-web.services.api',
             'piecemeta-web.services.importers.json',
             'piecemeta-web.services.importers.bvh',
@@ -815,7 +815,7 @@ var PIECEMETA_API_HOST = 'https://api.piecemeta.com';
     angular.module(
         'piecemeta-web.controllers.streams',
         [
-            'angularFileUpload',
+            'ngFileUpload',
             'piecemeta-web.services.api',
             'piecemeta-web.services.importers.text',
             'piecemeta-web.services.importers.trac'
@@ -1279,32 +1279,6 @@ var PIECEMETA_API_HOST = 'https://api.piecemeta.com';
             };
         }]);
 }());
-/* global console,angular */
-angular.module('piecemeta-web.directives.helpers', [
-        'piecemeta-web.services.api',
-        'piecemeta-web.services.auth'
-    ]).
-    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
-        'use strict';
-        return {
-            link: function (scope) {
-                scope.updateUser = function () {
-                    if (authService.access_token) {
-                        apiService('users').actions.find('me', function (err, res) {
-                            if (err) {
-                                console.log('error fetching user', err);
-                                scope.userSession = null;
-                                return;
-                            }
-                            scope.userSession = res;
-                            scope.$apply();
-                        });
-                    }
-                };
-                scope.updateUser();
-            }
-        };
-    }]);
 /* global angular,PIECEMETA_API_HOST,PMApi */
 angular.module('piecemeta-web.services.api', []).
 factory('apiService', ['authService', function (authService) {
@@ -1404,6 +1378,32 @@ factory('apiService', ['authService', function (authService) {
             return auth;
         }]);
 }());
+/* global console,angular */
+angular.module('piecemeta-web.directives.helpers', [
+        'piecemeta-web.services.api',
+        'piecemeta-web.services.auth'
+    ]).
+    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
+        'use strict';
+        return {
+            link: function (scope) {
+                scope.updateUser = function () {
+                    if (authService.access_token) {
+                        apiService('users').actions.find('me', function (err, res) {
+                            if (err) {
+                                console.log('error fetching user', err);
+                                scope.userSession = null;
+                                return;
+                            }
+                            scope.userSession = res;
+                            scope.$apply();
+                        });
+                    }
+                };
+                scope.updateUser();
+            }
+        };
+    }]);
 /* global angular,async,BVH */
 angular.module('piecemeta-web.services.importers.bvh', ['piecemeta-web.services.api']).
     factory('bvhImportService', ['apiService', function (apiService) {
@@ -2013,8 +2013,6 @@ angular.module('piecemeta-web.services.importers.trac', ['piecemeta-web.services
         var partialsPath = 'partials/';
 
         $routeProvider.when('/', {templateUrl: partialsPath + 'welcome.html', controller: 'Site.Welcome'});
-        $routeProvider.when('/about', {templateUrl: partialsPath + 'about.html', controller: 'Site.About'});
-        $routeProvider.when('/software', {templateUrl: partialsPath + 'software.html', controller: 'Site.Software'});
 
         $routeProvider.when('/signup', {templateUrl: partialsPath + 'signup.html', controller: 'Users.Create'});
         $routeProvider.when('/me/account', {templateUrl: partialsPath + 'account.html', controller: 'Users.Edit'});
@@ -2039,10 +2037,6 @@ angular.module('piecemeta-web.services.importers.trac', ['piecemeta-web.services
 
         $routeProvider.when('/packages/:package_uuid/channels/create', {templateUrl: partialsPath + 'channels_edit.html', controller: 'Channels.Create'});
         $routeProvider.when('/channels/:uuid/edit', {templateUrl: partialsPath + 'channels_edit.html', controller: 'Channels.Edit'});
-
-        $routeProvider.when('/trackers', {templateUrl: partialsPath + 'trackers_list.html', controller: 'Trackers.List'});
-        $routeProvider.when('/trackers/create', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'BasicResource.Create'});
-        $routeProvider.when('/trackers/:uuid/edit', {templateUrl: partialsPath + 'trackers_edit.html', controller: 'BasicResource.Edit'});
 
         $routeProvider.otherwise({redirectTo: '/'});
     }]).run(['$rootScope', '$q', function ($rootScope, $q) {

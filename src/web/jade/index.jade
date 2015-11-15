@@ -24,11 +24,11 @@ html(ng-app='piecemeta-frontend')
                       ul.nav.navbar-nav
                           li.active
                               a(href='/') Home
-                          li.dropdown
-                              a.dropdown-toggle(data-toggle="dropdown")
+                          li.dropdown(dropdown)
+                              a.dropdown-toggle(dropdown-toggle, data-toggle="dropdown")
                                   | About
                                   span.caret
-                              ul.dropdown-menu(role="menu")
+                              ul.dropdown-menu(dropdown-menu, role="menu")
                                   li
                                       a(href="http://doc.piecemeta.com", target="_blank") API Reference
                                   li
@@ -36,27 +36,27 @@ html(ng-app='piecemeta-frontend')
                       ul.nav.navbar-nav.navbar-right
                           li
                               a(href='/packages/browse') Browse data
-                          li.dropdown(ng-if="userSession")
-                              a.dropdown-toggle(data-toggle="dropdown")
+                          li.dropdown(dropdown, ng-if="userSession")
+                              a.dropdown-toggle(dropdown-toggle, data-toggle="dropdown")
                                 | Add Data
                                 span.caret
-                              ul.dropdown-menu(role="menu")
+                              ul.dropdown-menu(dropdown-menu, role="menu")
                                 li
                                   a(href="/packages/create") Create Package
-                          li.dropdown(ng-if="!userSession")
-                              a.dropdown-toggle(data-toggle="dropdown")
+                          li.dropdown(dropdown, ng-if="!userSession")
+                              a.dropdown-toggle(dropdown-toggle, data-toggle="dropdown")
                                 | Account
                                 span.caret
-                              ul.dropdown-menu(role="menu")
+                              ul.dropdown-menu(dropdown-menu, role="menu")
                                   li
                                     a(href="/login") Login
                                   li
                                     a(href="/signup") Create account
-                          li.dropdown(ng-if="userSession")
-                              a.dropdown-toggle.clearfix.media(data-toggle="dropdown")
+                          li.dropdown(dropdown, ng-if="userSession")
+                              a.dropdown-toggle.clearfix.media(dropdown-toggle, data-toggle="dropdown")
                                   | {{userSession.name}}
                                   span.caret
-                              ul.dropdown-menu(role="menu")
+                              ul.dropdown-menu(dropdown-menu, role="menu")
                                   li
                                       a(href="/me/account") Update account
                                   li

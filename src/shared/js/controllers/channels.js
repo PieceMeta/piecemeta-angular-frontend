@@ -4,7 +4,7 @@
     angular.module(
         'piecemeta-web.controllers.channels',
         [
-            'angularFileUpload',
+            'ngFileUpload',
             'piecemeta-web.services.api'
         ])
         .controller('Channels.Create', ['$scope', 'apiService', '$q', '$location', '$routeParams', function ($scope, apiService, $q, $location, $routeParams) {
