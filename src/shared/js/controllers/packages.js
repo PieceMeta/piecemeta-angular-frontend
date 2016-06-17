@@ -1,8 +1,13 @@
-/* global angular,async,PIECEMETA_API_HOST,console */
+/* global angular,async,PIECEMETA_API_HOST,console,define */
 
-(function () {
-    'use strict';
-    angular.module(
+'use strict';
+
+define([
+    'services_api',
+    'services_importers_json',
+    'services_importers_bvh'
+], function () {
+    return angular.module(
         'piecemeta-web.controllers.packages',
         [
             'ngFileUpload',
@@ -222,7 +227,10 @@
                 },
                 function (dataPackage, cb) {
                     apiService('users').actions.find(dataPackage.user_uuid, function (err, user) {
-                        cb(err, dataPackage, user);
+                        if (err) {
+                            console.log('error loading package author: ' + err.message);
+                        }
+                        cb(null, dataPackage, user);
                     });
                 },
                 function (dataPackage, user, cb) {
@@ -486,4 +494,4 @@
                 });
             });
         }]);
-}());
+});

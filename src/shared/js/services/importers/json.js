@@ -1,7 +1,10 @@
-/* global angular,async */
-angular.module('piecemeta-web.services.importers.json', ['piecemeta-web.services.api']).
-    factory('jsonImportService', ['apiService', function (apiService) {
-        'use strict';
+/* global angular,async,define */
+'use strict';
+
+define([
+    'services_api'
+], function () {
+    return angular.module('piecemeta-web.services.importers.json', ['piecemeta-web.services.api']).factory('jsonImportService', ['apiService', function (apiService) {
         return {
             parse: function (fileData, title, cleanupNeeded, callback) {
                 var dataPackageResult;
@@ -237,3 +240,4 @@ angular.module('piecemeta-web.services.importers.json', ['piecemeta-web.services
             }
         };
     }]);
+});

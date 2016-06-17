@@ -1,7 +1,10 @@
-/* global angular,console */
-(function () {
-    'use strict';
-    angular.module(
+/* global angular,console,define */
+'use strict';
+
+define([
+    'services_api'
+], function () {
+    return angular.module(
         'piecemeta-web.controllers.basic-resource',
         [
             'piecemeta-web.services.api'
@@ -83,4 +86,4 @@
                 };
             });
         }]);
-}());
+});

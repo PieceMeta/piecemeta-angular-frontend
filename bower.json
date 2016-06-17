@@ -36,5 +36,8 @@
   },
   "resolutions": {
     "angular": "~1.4.7"
+  },
+  "dependencies": {
+    "requirejs": "^2.2.0"
   }
 }

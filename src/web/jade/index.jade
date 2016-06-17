@@ -1,13 +1,11 @@
 doctype HTML5
-html(ng-app='piecemeta-frontend')
+html
   head
     base(href='/')
     meta(charset='utf8')
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1')
     title= title
-    script(src='js/piecemeta-angular-dependencies.min.js')
-    script(src='js/piecemeta-angular-frontend.min.js')
     link(rel='stylesheet', href='css/piecemeta-frontend.css')
   body(data-status="{{ status }}")
       .container-fluid(cg-busy="{promise:pagePromise,message:'Loading page...',templateUrl:'partials/busy.html',minDuration:100}")
@@ -66,3 +64,8 @@ html(ng-app='piecemeta-frontend')
 
           .container-fluid
               .main-content(ng-view,cg-busy="{promise:promise,message:promiseString,templateUrl:'partials/busy.html'}")
+
+      scripts
+          script(src='/js/piecemeta-angular-dependencies.min.js?build=16061701')
+          //script(src='js/piecemeta-angular-frontend.min.js')
+          script(data-main="/src/web/js/rjs-runtime" src='/js/require.js')

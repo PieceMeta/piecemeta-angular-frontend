@@ -1,9 +1,15 @@
-/* global console,angular */
-angular.module('piecemeta-web.directives.helpers', [
+/* global console,angular,define */
+
+'use strict';
+
+define([
+    'services_api',
+    'services_auth'
+], function () {
+    return angular.module('piecemeta-web.directives.helpers', [
         'piecemeta-web.services.api',
         'piecemeta-web.services.auth'
-    ]).
-    directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
+    ]).directive('checkLogin', ['apiService', 'authService', function (apiService, authService) {
         'use strict';
         return {
             link: function (scope) {
@@ -24,3 +30,4 @@ angular.module('piecemeta-web.directives.helpers', [
             }
         };
     }]);
+});

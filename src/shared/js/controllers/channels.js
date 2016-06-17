@@ -1,7 +1,10 @@
-/* global angular,async,console */
-(function () {
-    'use strict';
-    angular.module(
+/* global angular,async,console,define */
+'use strict';
+
+define([
+    'services_api'
+], function () {
+    return angular.module(
         'piecemeta-web.controllers.channels',
         [
             'ngFileUpload',
@@ -220,4 +223,4 @@
                 };
             });
         }]);
-}());
+});

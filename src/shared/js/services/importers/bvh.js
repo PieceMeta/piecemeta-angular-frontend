@@ -1,7 +1,10 @@
-/* global angular,async,BVH */
-angular.module('piecemeta-web.services.importers.bvh', ['piecemeta-web.services.api']).
-    factory('bvhImportService', ['apiService', function (apiService) {
-        'use strict';
+/* global angular,async,BVH,define */
+'use strict';
+
+define([
+    'services_api'
+], function () {
+    return angular.module('piecemeta-web.services.importers.bvh', ['piecemeta-web.services.api']).factory('bvhImportService', ['apiService', function (apiService) {
         return {
             parse: function (fileData, title, callback) {
                 var dataPackageResult;
@@ -129,3 +132,4 @@ angular.module('piecemeta-web.services.importers.bvh', ['piecemeta-web.services.
             }
         };
     }]);
+});

@@ -1,7 +1,8 @@
-/* global angular */
-(function () {
-    'use strict';
-    angular.module('piecemeta-web.services.auth', []).
+/* global angular,define */
+'use strict';
+
+define([], function () {
+    return angular.module('piecemeta-web.services.auth', []).
         factory('authService', ['$http', function () {
             var auth = {
                 api_key : null,
@@ -24,4 +25,4 @@
             auth.getCredentials();
             return auth;
         }]);
-}());
+});

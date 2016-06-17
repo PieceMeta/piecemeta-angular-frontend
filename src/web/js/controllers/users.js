@@ -1,7 +1,12 @@
-/* global angular */
-(function () {
-    'use strict';
-    angular.module(
+/* global angular,define */
+
+'use strict';
+
+define([
+    'services_api',
+    'services_auth'
+], function () {
+    return angular.module(
         'piecemeta-web.controllers.users',
         [
             'piecemeta-web.services.api',
@@ -231,4 +236,4 @@
             authService.clearCredentials();
             window.location = '/';
         }]);
-}());
+});

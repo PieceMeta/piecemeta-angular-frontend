@@ -1,7 +1,10 @@
-/* global angular,async */
-angular.module('piecemeta-web.services.importers.text', ['piecemeta-web.services.api']).
-    factory('textImportService', ['apiService', function (apiService) {
-        'use strict';
+/* global angular,async,define */
+'use strict';
+
+define([
+    'services_api'
+], function () {
+    return angular.module('piecemeta-web.services.importers.text', ['piecemeta-web.services.api']).factory('textImportService', ['apiService', function (apiService) {
         return {
             parse: function (fileData, startFrame, numFrames) {
                 var lines = fileData.split('\n');
@@ -98,3 +101,4 @@ angular.module('piecemeta-web.services.importers.text', ['piecemeta-web.services
             }
         };
     }]);
+});

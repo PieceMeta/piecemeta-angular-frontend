@@ -1,7 +1,17 @@
-/* global angular,Modernizr */
-(function () {
-    'use strict';
-    angular.module('piecemeta-frontend', [
+/* global angular,Modernizr,define */
+
+'use strict';
+
+define([
+    'config',
+    'controllers_site',
+    'controllers_users',
+    'controllers_packages',
+    'controllers_channels',
+    'controllers_streams',
+    'directives_helpers'
+], function () {
+    return angular.module('piecemeta-frontend', [
         'ui.bootstrap',
         'ngRoute',
         'cgBusy',
@@ -65,4 +75,4 @@
             $rootScope.pageDefer.reject();
         });
     }]);
-}());
+});

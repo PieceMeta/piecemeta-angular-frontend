@@ -1,7 +1,9 @@
-/* global angular */
-(function () {
-    'use strict';
-    angular.module(
+/* global angular,define */
+
+'use strict';
+
+define([], function () {
+    return angular.module(
         'piecemeta-web.controllers.trackers',
         [
             'piecemeta-web.services.api'
@@ -16,4 +18,4 @@
                 $scope.$apply();
             });
         }]);
-}());
+});

@@ -1,7 +1,10 @@
-/* global angular,Papa,async */
-angular.module('piecemeta-web.services.importers.trac', ['piecemeta-web.services.api']).
-    factory('tracImportService', ['apiService', function (apiService) {
-        'use strict';
+/* global angular,Papa,async,define */
+'use strict';
+
+define([
+    'services_api'
+], function () {
+    return angular.module('piecemeta-web.services.importers.trac', ['piecemeta-web.services.api']).factory('tracImportService', ['apiService', function (apiService) {
         return {
             parse: function (fileData, meta, callback) {
                 var lines = Papa.parse(fileData).data;
@@ -113,3 +116,4 @@ angular.module('piecemeta-web.services.importers.trac', ['piecemeta-web.services
             }
         };
     }]);
+});

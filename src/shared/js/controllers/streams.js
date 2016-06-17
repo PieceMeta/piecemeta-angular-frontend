@@ -1,7 +1,12 @@
-/* global console,angular,async,Papa */
-(function () {
-    'use strict';
-    angular.module(
+/* global console,angular,async,Papa,define */
+'use strict';
+
+define([
+    'services_api',
+    'services_importers_text',
+    'services_importers_trac'
+], function () {
+    return angular.module(
         'piecemeta-web.controllers.streams',
         [
             'ngFileUpload',
