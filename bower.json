@@ -16,26 +16,31 @@
     "test",
     "tests"
   ],
-  "resolutions": {
-    "angular": "~1.4.7"
-  },
   "dependencies": {
     "requirejs": "^2.2.0",
-    "angular-route": "~1.4.7",
-    "angular-bootstrap": "~1.1.0",
-    "ng-file-upload": "~8.0.1",
-    "angular-busy": "~4.1.3",
+    "angular-route": "^1.5.7",
+    "angular-bootstrap": "^1.3.3",
+    "ng-file-upload": "^12.0.4",
+    "angular-busy": "^4.1.3",
     "bvh": "https://github.com/hitsujiwool/bvh.git",
-    "async": "https://github.com/caolan/async.git#~0.9.0",
+    "async": "^1.5.2",
     "Papa-Parse": "https://github.com/mholt/PapaParse.git#~3.1.2",
-    "modernizr": "~3.1.0",
-    "angular-markdown-directive": "~0.3.1",
-    "angular": "~1.4.7",
-    "angular-seo": "https://github.com/steeve/angular-seo.git",
-    "bootstrap": "~3.3.5",
-    "piecemeta-apiclient": "~1.0.4",
-    "tock": "https://github.com/mrchimp/tock.git#~1.0.4",
-    "topcoat": "~0.8.0",
+    "modernizr": "^3.3.1",
+    "angular-markdown-directive": "^0.3.1",
+    "angular": "^1.5.7",
+    "angular-seo": "*",
+    "bootstrap": "^3.3.6",
+    "piecemeta-apiclient": "^1.0.4",
+    "tock": "^1.0.10",
+    "topcoat": "^0.8.0",
     "angular-chart.js": "^0.10.2"
+  },
+  "resolutions": {
+    "angular": "1.x",
+    "angular-route": "^1.5.7",
+    "angular-bootstrap": "^1.3.3",
+    "ng-file-upload": "^12.0.4",
+    "async": "^1.5.2",
+    "modernizr": "^3.3.1"
   }
 }
