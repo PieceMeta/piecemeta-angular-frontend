@@ -22,19 +22,29 @@ ol.breadcrumb
                         .form-group
                             label API URL for Package (See the #[a(href="http://doc.piecemeta.com") API docs] for more info)
                             input.form-control(ng-model="::data.dataURL", ng-click="onURLClick($event)")
+                        .well
+                            button(ng-click="collapseUrls = !collapseUrls") Show all API URLs
+                            div(uib-collapse="collapseUrls")
+                                ul.list-group
+                                    li.list-group-item {{ data.dataURL }}
 
 h3 View data
 
 .row(cg-busy="{promise:chartPromise,message:'Initializing...',templateUrl:'partials/busy.html'}")
-    .col-md-12
+    .col-md-4
         .form-group
             label.control-label Select channel
             select.form-control(name="channelSelect", ng-model="data.currentChannel", ng-options="channel as channel.title for channel in data.dataPackage.channels")
-        .form-group(ng-if='data.currentChannel')
+        .form-group(ng-if='data.streamGroups.length > 1')
             label.control-label Select value group
             select.form-control(name="groupSelect", ng-model="data.currentGroup", ng-options="group for group in data.streamGroups")
-        .form-group(ng-if='data.currentChannel')
+    .col-md-4
+        .form-group
+            label.control-label Select stream
+            select.form-control(multiple, name="streamSelect", ng-model="data.selectedStreams", ng-options="stream as stream.title for stream in data.currentChannel.streams")
+    .col-md-4
+        .form-group
             label.control-label Select property
             select.form-control(multiple, name="propertySelect", ng-model="data.selectedProperties", ng-options="property for property in data.properties")
-.row(ng-if="data.currentChannel")
+
     canvas.col-md-12#line(class="chart chart-line" chart-data="data.chartSetup.graphDataSet" chart-options="data.chartSetup.options" chart-labels="data.chartSetup.labels" chart-legend="true" chart-series="data.chartSetup.series")

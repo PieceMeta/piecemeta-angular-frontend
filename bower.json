@@ -16,9 +16,13 @@
     "test",
     "tests"
   ],
-  "devDependencies": {
+  "resolutions": {
+    "angular": "~1.4.7"
+  },
+  "dependencies": {
+    "requirejs": "^2.2.0",
     "angular-route": "~1.4.7",
-    "angular-bootstrap": "~0.13.4",
+    "angular-bootstrap": "~1.1.0",
     "ng-file-upload": "~8.0.1",
     "angular-busy": "~4.1.3",
     "bvh": "https://github.com/hitsujiwool/bvh.git",
@@ -33,11 +37,5 @@
     "tock": "https://github.com/mrchimp/tock.git#~1.0.4",
     "topcoat": "~0.8.0",
     "angular-chart.js": "^0.10.2"
-  },
-  "resolutions": {
-    "angular": "~1.4.7"
-  },
-  "dependencies": {
-    "requirejs": "^2.2.0"
   }
 }

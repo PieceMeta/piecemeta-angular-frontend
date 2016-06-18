@@ -30,15 +30,27 @@ define([
             showTooltips: true,
             scaleShowLabels: true,
             animation: false,
-            responsive: true,
+            responsive: false,
             pointDot: false,
             bezierCurve: false,
             scaleShowGridLines: true,
             datasetFill: false,
-            legend: true
+            legend: true,
+            offsetGridLines: false,
+            datasetStrokeWidth: 1,
+            scaleBeginAtZero: false,
+            scaleOverride: true,
+            // TODO: make this configurable
+            // Number - The number of steps in a hard coded scale
+            scaleSteps: 20,
+            // Number - The value jump in the hard coded scale
+            scaleStepWidth: 0.02,
+            // Number - The scale starting value
+            scaleStartValue: -0.2
         });
         ChartJsProvider.setOptions('Line', {
-            datasetFill: false
+            datasetFill: false,
+            datasetStrokeWidth: 1
         });
 
         $logProvider.debugEnabled(true);

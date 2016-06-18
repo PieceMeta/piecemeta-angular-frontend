@@ -84,48 +84,62 @@ define([
             var deferred = $q.defer();
             $scope.promiseString = 'Loading data...';
             $scope.promise = deferred.promise;
+            $scope.collapseUrls = false;
 
             $scope.onURLClick = function ($event) {
                 $event.target.select();
             };
 
             $scope.updateChart = function () {
-                var dataSets = {},
+                if ($scope.chartPromise && $scope.chartPromise.$$state.status === 0) {
+                    return;
+                }
+
+                var deferred = $q.defer(),
+                    dataSets = {},
                     maxFrames = 0,
                     channel;
 
+                $scope.chartPromise = deferred.promise;
                 $scope.data.streamGroups = [];
 
                 channel = $scope.data.currentChannel;
 
-                if (!channel) {
+                if (!channel || !$scope.data.selectedStreams) {
+                    deferred.resolve();
+                    $scope.chartPromise = null;
                     return;
                 }
 
-                var properties = [];
+                var properties = [],
+                    labels = [];
 
                 for (var s = 0; s < channel.streams.length; s += 1) {
-                    for (var p = 0; p < channel.streams[s].labels.length; p += 1) {
-                        if (p !== channel.streams[s].timeAtIndex) {
-                            properties.push(channel.streams[s].labels[p]);
-                        }
-                        if ($scope.data.selectedProperties &&
-                            $scope.data.selectedProperties.indexOf(channel.streams[s].labels[p]) > -1 &&
-                            p !== channel.streams[s].timeAtIndex) {
-                            if (!$scope.data.currentGroup || ($scope.data.currentGroup && $scope.data.currentGroup === channel.streams[s].group)) {
-                                var dataPath = channel.streams[s].labels[p],
-                                    dataSet = {
-                                        label: dataPath
-                                    };
-                                var frames = [];
-                                for (var f = 0; f < streamData[channel.streams[s].uuid].length; f += 1) {
-                                    frames.push(streamData[channel.streams[s].uuid][f][p]);
+                    if ($scope.data.selectedStreams.indexOf(channel.streams[s]) > -1) {
+                        for (var p = 0; p < channel.streams[s].labels.length; p += 1) {
+                            if (p !== channel.streams[s].timeAtIndex) {
+                                properties.push(channel.streams[s].labels[p]);
+                            }
+                            if ($scope.data.selectedProperties && $scope.data.selectedProperties.indexOf(channel.streams[s].labels[p]) > -1) {
+                                if (!$scope.data.currentGroup || ($scope.data.currentGroup && $scope.data.currentGroup === channel.streams[s].group)) {
+                                    var dataPath = channel.streams[s].labels[p],
+                                        dataSet = {
+                                            label: dataPath
+                                        };
+                                    var frames = [],
+                                        frameCount = streamData[channel.streams[s].uuid].length;
+                                    if (frameCount > maxFrames) {
+                                        maxFrames = frameCount;
+                                    }
+                                    for (var f = 0; f < frameCount; f += 1) {
+                                        if (channel.streams[s].timeAtIndex >= 0 && labels.length !== frameCount) {
+                                            labels.push(streamData[channel.streams[s].uuid][f][channel.streams[s].timeAtIndex]);
+                                        }
+                                        frames.push(streamData[channel.streams[s].uuid][f][p]);
+                                    }
+                                    dataSet.data = frames;
+                                    dataSets[dataPath] = dataSet;
                                 }
-                                dataSet.data = frames;
-                                if (dataSet.data.length > maxFrames) {
-                                    maxFrames = dataSet.data.length;
-                                }
-                                dataSets[dataPath] = dataSet;
                             }
                         }
                     }
@@ -136,17 +150,12 @@ define([
                 }
 
                 var finalDataSets = [];
-                var labels = [];
                 var series = [];
                 for (var d in dataSets) {
                     if (typeof dataSets[d] === 'object') {
                         finalDataSets.push(dataSets[d].data);
                         series.push(dataSets[d].label);
                     }
-                }
-
-                for (var n = 0; n < maxFrames; n += 1) {
-                    labels.push('');
                 }
 
                 $scope.data.streamGroups = $scope.data.streamGroups.sort();
@@ -159,6 +168,9 @@ define([
                 $scope.data.chartSetup.labels = labels;
                 $scope.data.chartSetup.series = series;
                 $scope.data.chartSetup.options = {};
+
+                deferred.resolve();
+                $scope.chartPromise = null;
             };
 
             function loadStreamData(callback) {
@@ -245,18 +257,13 @@ define([
                             if (err) {
                                 console.log('error getting stream data', err);
                             }
-                            $scope.updateChart();
                             deferred.resolve();
+                            $scope.updateChart();
                         });
                     }, true);
-                    $scope.$watch('data.currentGroup', function () {
-                        $scope.updateChart();
-                        deferred.resolve();
-                    }, true);
-                    $scope.$watch('data.selectedProperties', function () {
-                        $scope.updateChart();
-                        deferred.resolve();
-                    }, true);
+                    $scope.$watch('data.currentGroup', $scope.updateChart, true);
+                    $scope.$watch('data.selectedStreams', $scope.updateChart, true);
+                    $scope.$watch('data.selectedProperties', $scope.updateChart, true);
                     cb(null);
                 }
             ], function (err) {
