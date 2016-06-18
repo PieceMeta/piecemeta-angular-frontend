@@ -55,14 +55,14 @@ gulp.task('js-deps', ['modernizr'], function () {
             'bower_components/angular-animate/angular-animate.min.js',
             'bower_components/angular-busy/angular-busy.js',
             'bower_components/ng-file-upload/ng-file-upload.min.js',
-            'bower_components/Chart.js/Chart.min.js',
-            'bower_components/ng-chartjs/src/js/main.js',
+            'bower_components/Chart.js/Chart.js',
+            'bower_components/angular-chart.js/dist/angular-chart.js',
             'bower_components/angular-markdown-directive/markdown.js',
             'bower_components/async/lib/async.js',
             'bower_components/bvh/bvh.min.js',
             'bower_components/tock/tock.min.js',
-            'bower_components/Papa-Parse/papaparse.min.js',
-            'bower_components/piecemeta-apiclient/dist/piecemeta-apiclient.web.min.js'
+            'bower_components/Papa-Parse/papaparse.min.js'
+            //'bower_components/piecemeta-apiclient/dist/piecemeta-apiclient.web.min.js'
         ])
         .pipe(concat('piecemeta-angular-dependencies.min.js'))
         .pipe(header(banner, {pkg: pkg}))
@@ -184,6 +184,10 @@ gulp.task('copy-js-config', function () {
     return copyPipe(gulp.src(['./configuration.js']), './dist/web/js/');
 });
 
+gulp.task('copy-apiclient', function () {
+    return copyPipe(gulp.src(['./bower_components/piecemeta-apiclient/dist/piecemeta-apiclient.web.js']), './dist/web/js/', 3);
+});
+
 
 //
 //
@@ -218,6 +222,7 @@ gulp.task('web', [
     'css-web',
     'html-web',
     'copy-requirejs',
+    'copy-apiclient',
     'copy-js-src',
     'copy-js-config'
 ]);

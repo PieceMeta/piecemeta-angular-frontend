@@ -1,6 +1,6 @@
 {
   "name": "piecemeta-angular-frontend",
-  "version": "0.9.4",
+  "version": "1.0.0",
   "authors": [
     "Anton Koch <anton.koch@gmail.com>"
   ],
@@ -28,11 +28,11 @@
     "angular-markdown-directive": "~0.3.1",
     "angular": "~1.4.7",
     "angular-seo": "https://github.com/steeve/angular-seo.git",
-    "ng-chartjs": "https://github.com/dasantonym/angular-chartjs.git#ee5bada25379ca541b2793d7fc1f7fd32a38ef65",
     "bootstrap": "~3.3.5",
     "piecemeta-apiclient": "~1.0.4",
     "tock": "https://github.com/mrchimp/tock.git#~1.0.4",
-    "topcoat": "~0.8.0"
+    "topcoat": "~0.8.0",
+    "angular-chart.js": "^0.10.2"
   },
   "resolutions": {
     "angular": "~1.4.7"

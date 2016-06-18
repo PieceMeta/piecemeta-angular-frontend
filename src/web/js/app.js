@@ -16,6 +16,7 @@ define([
         'ngRoute',
         'cgBusy',
         'btford.markdown',
+        'chart.js',
         'piecemeta-web.controllers.site',
         'piecemeta-web.controllers.users',
         'piecemeta-web.controllers.packages',
@@ -23,7 +24,22 @@ define([
         'piecemeta-web.controllers.streams',
         'piecemeta-web.directives.helpers'
     ])
-    .config(['$routeProvider', '$locationProvider', '$logProvider', function ($routeProvider, $locationProvider, $logProvider) {
+    .config(['$routeProvider', '$locationProvider', '$logProvider', 'ChartJsProvider', function ($routeProvider, $locationProvider, $logProvider, ChartJsProvider) {
+
+        ChartJsProvider.setOptions({
+            showTooltips: true,
+            scaleShowLabels: true,
+            animation: false,
+            responsive: true,
+            pointDot: false,
+            bezierCurve: false,
+            scaleShowGridLines: true,
+            datasetFill: false,
+            legend: true
+        });
+        ChartJsProvider.setOptions('Line', {
+            datasetFill: false
+        });
 
         $logProvider.debugEnabled(true);
 

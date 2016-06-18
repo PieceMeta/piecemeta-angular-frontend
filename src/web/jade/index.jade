@@ -48,8 +48,8 @@ html
                               ul.dropdown-menu(dropdown-menu, role="menu")
                                   li
                                     a(href="/login") Login
-                                  li
-                                    a(href="/signup") Create account
+                                  //li
+                                  //  a(href="/signup") Create account
                           li.dropdown(dropdown, ng-if="userSession")
                               a.dropdown-toggle.clearfix.media(dropdown-toggle, data-toggle="dropdown")
                                   | {{userSession.name}}
@@ -67,5 +67,6 @@ html
 
       scripts
           script(src='/js/piecemeta-angular-dependencies.min.js?build=16061701')
+          script(src='/js/piecemeta-apiclient.web.js?build=16061701')
           //script(src='js/piecemeta-angular-frontend.min.js')
           script(data-main="/src/web/js/rjs-runtime" src='/js/require.js')

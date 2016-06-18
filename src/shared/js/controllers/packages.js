@@ -13,8 +13,7 @@ define([
             'ngFileUpload',
             'piecemeta-web.services.api',
             'piecemeta-web.services.importers.json',
-            'piecemeta-web.services.importers.bvh',
-            'chartjs'
+            'piecemeta-web.services.importers.bvh'
         ])
         .controller('Packages.ImportBVH', ['$scope', '$q', 'bvhImportService', function ($scope, $q, bvhImportService) {
             $scope.file = null;
@@ -74,19 +73,7 @@ define([
                 dataPackage: null,
                 currentGroup: null,
                 channelIndex: 0,
-                chartSetup: {
-                    graphOptions: {
-                        showTooltips: true,
-                        scaleShowLabels: true,
-                        animation: false,
-                        responsive: true,
-                        pointDot: false,
-                        bezierCurve: false,
-                        scaleShowGridLines: false,
-                        datasetFill: false,
-                        legend: true
-                    }
-                },
+                chartSetup: {},
                 exports: {
                     json: PIECEMETA_API_HOST + '/exports/' + $routeParams.uuid + '.json',
                     msgpack: PIECEMETA_API_HOST + '/exports/' + $routeParams.uuid + '.msgpack',
@@ -105,11 +92,7 @@ define([
             $scope.updateChart = function () {
                 var dataSets = {},
                     maxFrames = 0,
-                    channel = null;
-
-                var colors = [
-                    '#ff0000', '#732e00', '#b2a159', '#435946', '#b6def2', '#8660bf', '#ff0088', '#e50000', '#331c0d', '#d6e600', '#40ffa6', '#0066bf', '#a38fbf', '#4c0029', '#d90000', '#ffb380', '#494d13', '#269973', '#80b3ff', '#442d59', '#99003d', '#590000', '#a67453', '#818c69', '#b6f2de', '#434c59', '#33004d', '#bf6086', '#d96c6c', '#ffd9bf', '#81f200', '#005359', '#334166', '#a300cc', '#d9003a', '#332626', '#cc8800', '#448000', '#36ced9', '#263699', '#fbbfff', '#e6acbb', '#7f2d20', '#7f5500', '#d6f2b6', '#698a8c', '#3d3df2', '#cc33ad', '#733941', '#8c7369', '#665533', '#8fcc66', '#002b40', '#140099', '#664d61', '#ff6600', '#ffcc00', '#17330d', '#308fbf', '#120d33', '#802060'
-                ];
+                    channel;
 
                 $scope.data.streamGroups = [];
 
@@ -119,60 +102,50 @@ define([
                     return;
                 }
 
-                var colorOffset = Math.floor(Math.random() * 8);
-                for (var i=0; i < channel.streams.length; i+=1) {
-                    if (typeof streamData[channel.streams[i].uuid] === 'object' && streamData[channel.streams[i].uuid].length > 0) {
-                        var frames = streamData[channel.streams[i].uuid];
-                        /*
-                        var frames = [];
-                        if (frameData.length > 500 * 2) {
-                            var quantize = Math.floor(frameData.length / 500);
-                            for (var q = 0; q < frameData.length; q += quantize) {
-                                frames.push(frameData[q]);
-                            }
-                        } else {
-                            frames = frameData;
+                var properties = [];
+
+                for (var s = 0; s < channel.streams.length; s += 1) {
+                    for (var p = 0; p < channel.streams[s].labels.length; p += 1) {
+                        if (p !== channel.streams[s].timeAtIndex) {
+                            properties.push(channel.streams[s].labels[p]);
                         }
-                        frames = frameData;
-                        */
-                        if (typeof channel.streams[i] === 'object') {
-                            var dataPath = (channel.streams[i].group ? channel.streams[i].group + '/' : '') + channel.streams[i].title;
-                            var randomColValues = [];
-                            for (var c = 0; c < 3; c += 1) {
-                                randomColValues.push(Math.round(Math.random() * 100) + 100);
-                            }
-                            var color = colors.splice(colorOffset, 1);
-                            var dataSet = {
-                                label: dataPath,
-                                strokeColor: color,
-                                highlightStroke: color,
-                                pointColor: color,
-                                data: frames
-                            };
-                            if (dataSet.data.length > maxFrames) {
-                                maxFrames = dataSet.data.length;
-                            }
-                            if (!$scope.data.currentGroup || ($scope.data.currentGroup && $scope.data.currentGroup === channel.streams[i].group)) {
+                        if ($scope.data.selectedProperties &&
+                            $scope.data.selectedProperties.indexOf(channel.streams[s].labels[p]) > -1 &&
+                            p !== channel.streams[s].timeAtIndex) {
+                            if (!$scope.data.currentGroup || ($scope.data.currentGroup && $scope.data.currentGroup === channel.streams[s].group)) {
+                                var dataPath = channel.streams[s].labels[p],
+                                    dataSet = {
+                                        label: dataPath
+                                    };
+                                var frames = [];
+                                for (var f = 0; f < streamData[channel.streams[s].uuid].length; f += 1) {
+                                    frames.push(streamData[channel.streams[s].uuid][f][p]);
+                                }
+                                dataSet.data = frames;
+                                if (dataSet.data.length > maxFrames) {
+                                    maxFrames = dataSet.data.length;
+                                }
                                 dataSets[dataPath] = dataSet;
                             }
-                            if ($scope.data.streamGroups.indexOf(channel.streams[i].group) < 0) {
-                                $scope.data.streamGroups.push(channel.streams[i].group);
-                            }
                         }
-                    } else {
-                        console.log('empty stream');
+                    }
+                    $scope.data.properties = properties;
+                    if ($scope.data.streamGroups.indexOf(channel.streams[s].group) < 0) {
+                        $scope.data.streamGroups.push(channel.streams[s].group);
                     }
                 }
 
                 var finalDataSets = [];
                 var labels = [];
+                var series = [];
                 for (var d in dataSets) {
                     if (typeof dataSets[d] === 'object') {
-                        finalDataSets.push(dataSets[d]);
+                        finalDataSets.push(dataSets[d].data);
+                        series.push(dataSets[d].label);
                     }
                 }
 
-                for (var n = 1; n <= maxFrames; n += 1) {
+                for (var n = 0; n < maxFrames; n += 1) {
                     labels.push('');
                 }
 
@@ -182,12 +155,10 @@ define([
                     $scope.data.currentGroup = $scope.data.streamGroups[0];
                 }
 
-                var dataSetChart = {
-                    labels: labels,
-                    datasets: finalDataSets
-                };
-
-                $scope.data.chartSetup.graphDataSet = dataSetChart;
+                $scope.data.chartSetup.graphDataSet = finalDataSets;
+                $scope.data.chartSetup.labels = labels;
+                $scope.data.chartSetup.series = series;
+                $scope.data.chartSetup.options = {};
             };
 
             function loadStreamData(callback) {
@@ -198,9 +169,9 @@ define([
                         if (!$scope.data.currentGroup || ($scope.data.currentGroup && $scope.data.currentGroup === stream.group)) {
                             var skipVal;
                             if (stream.frameCount > 100) {
-                                skipVal = {skip: Math.floor(stream.frameCount / 100)};
+                                skipVal = {skip: Math.floor(stream.frameCount / 100), from: 0, to: stream.frameCount};
                             }
-                            apiService('streams', null, skipVal).actions.find(stream.uuid, function (err, frameData) {
+                            apiService('streams/' + stream.uuid + '/frames', null, skipVal).actions.all(function (err, frameData) {
                                 streamData[stream.uuid] = frameData.frames;
                                 window.setTimeout(function () {
                                     next(err);
@@ -279,6 +250,10 @@ define([
                         });
                     }, true);
                     $scope.$watch('data.currentGroup', function () {
+                        $scope.updateChart();
+                        deferred.resolve();
+                    }, true);
+                    $scope.$watch('data.selectedProperties', function () {
                         $scope.updateChart();
                         deferred.resolve();
                     }, true);

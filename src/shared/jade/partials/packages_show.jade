@@ -15,20 +15,12 @@ ol.breadcrumb
                         p
                             strong Contributor:
                             br
-                            | {{ ::data.packageAuthor.name }}
+                            | {{ ::data.packageAuthor.name || 'anonymous' }}
                 hr
                 .row
                     .col-sm-12
                         .form-group
-                            label Download complete package (Right click, save as...)
-                            a.btn.btn-lg(ng-href='{{ ::data.exports.json }}') JSON
-                            a.btn.btn-lg(ng-href='{{ ::data.exports.msgpack }}') MsgPack
-                            a.btn.btn-lg(ng-href='{{ ::data.exports.xml }}') XML
-                hr
-                .row
-                    .col-sm-12
-                        .form-group
-                            label API URL (Use this in the #[a(href="/software") OSC Player])
+                            label API URL for Package (See the #[a(href="http://doc.piecemeta.com") API docs] for more info)
                             input.form-control(ng-model="::data.dataURL", ng-click="onURLClick($event)")
 
 h3 View data
@@ -38,9 +30,11 @@ h3 View data
         .form-group
             label.control-label Select channel
             select.form-control(name="channelSelect", ng-model="data.currentChannel", ng-options="channel as channel.title for channel in data.dataPackage.channels")
-        .form-group
+        .form-group(ng-if='data.currentChannel')
             label.control-label Select value group
             select.form-control(name="groupSelect", ng-model="data.currentGroup", ng-options="group for group in data.streamGroups")
-.row
-    cjs-line.col-md-12#graph-viewer-full(ng-if="data.chartSetup.graphDataSet", dataset="::data.chartSetup.graphDataSet", options="::data.chartSetup.graphOptions")
-
+        .form-group(ng-if='data.currentChannel')
+            label.control-label Select property
+            select.form-control(multiple, name="propertySelect", ng-model="data.selectedProperties", ng-options="property for property in data.properties")
+.row(ng-if="data.currentChannel")
+    canvas.col-md-12#line(class="chart chart-line" chart-data="data.chartSetup.graphDataSet" chart-options="data.chartSetup.options" chart-labels="data.chartSetup.labels" chart-legend="true" chart-series="data.chartSetup.series")

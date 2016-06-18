@@ -4,6 +4,8 @@
 
 The Web and NodeWebkit frontend based on [AngularJS](https://angularjs.org/) for the [PieceMeta](http://www.piecemeta.com) service.
 
+**Important: This version of the frontend (1.x.x) is only compatible with the [LMDB branch](https://github.com/PieceMeta/piecemeta-api/tree/lmdb) of the API **
+
 ## Stability
 
 Experimental: Expect the unexpected. Please provide feedback on api and your use-case.

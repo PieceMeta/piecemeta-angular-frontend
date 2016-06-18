@@ -31,7 +31,7 @@
 
     require([
             'piecemeta_frontend'
-        ], function (piecemeta_frontend) {
+        ], function () {
             angular.bootstrap(document, ['piecemeta-frontend']);
         }
     );
