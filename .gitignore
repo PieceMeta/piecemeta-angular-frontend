@@ -4,10 +4,12 @@
 !node_modules/
 node_modules/**/*
 dist/nw/node_modules/**/*
+dist/web/**/*
 bower_components/
 configuration.js
 lib/
 build/
 cache/
 dist/nw/approot/
+!dist/web/.htaccess
 !dist/nw/node_modules/piecemeta-oscplayer.js
