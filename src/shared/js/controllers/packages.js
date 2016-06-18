@@ -74,6 +74,7 @@ define([
                 currentGroup: null,
                 channelIndex: 0,
                 chartSetup: {},
+                apiBaseUrl: PIECEMETA_API_HOST,
                 exports: {
                     json: PIECEMETA_API_HOST + '/exports/' + $routeParams.uuid + '.json',
                     msgpack: PIECEMETA_API_HOST + '/exports/' + $routeParams.uuid + '.msgpack',

@@ -40,6 +40,7 @@ define([
             datasetStrokeWidth: 1,
             scaleBeginAtZero: false,
             scaleOverride: true,
+            maintainAspectRatio: true,
             // TODO: make this configurable
             // Number - The number of steps in a hard coded scale
             scaleSteps: 20,
