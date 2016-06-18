@@ -41,7 +41,7 @@ ol.breadcrumb
                             p
                                 code {{ ::data.apiBaseUrl }}/streams/{{ ::stream.uuid }}.json
                             p
-                                | Frame data (All {{ stream.frameCount }} frames; skip every {{ stream.frameCount / 100 }}th frame)
+                                | Frame data (All {{ stream.frameCount }} frames; retrieve only every {{ stream.frameCount / 100 }}th frame)
                                 br
                                 code {{ ::data.apiBaseUrl }}/streams/{{ ::stream.uuid }}/frames.json?from=0&to={{ stream.frameCount }}&skip={{ stream.frameCount / 100 }}
 
