@@ -1,5 +1,6 @@
 # PieceMeta Angular Frontend #
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a8510f7272624ce6984596467256f8fa)](https://www.codacy.com/app/dasantonym/piecemeta-angular-frontend?utm_source=github.com&utm_medium=referral&utm_content=PieceMeta/piecemeta-angular-frontend&utm_campaign=badger)
 [![Code Climate](https://codeclimate.com/github/PieceMeta/piecemeta-angular-frontend/badges/gpa.svg)](https://codeclimate.com/github/PieceMeta/piecemeta-angular-frontend) [![devDependency Status](https://david-dm.org/PieceMeta/piecemeta-angular-frontend/dev-status.svg)](https://david-dm.org/PieceMeta/piecemeta-angular-frontend#info=devDependencies)
 
 The Web and NodeWebkit frontend based on [AngularJS](https://angularjs.org/) for the [PieceMeta](http://www.piecemeta.com) service.
